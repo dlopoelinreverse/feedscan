@@ -1,0 +1,132 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+enum PlanType {
+  FREE
+  PRO
+  BUSINESS
+}
+
+enum FormStatus {
+  DRAFT
+  ACTIVE
+  ARCHIVED
+}
+
+enum QuestionType {
+  STARS
+  EMOJI
+  CHOICE
+  TEXT
+}
+
+enum FollowUpTrigger {
+  LOW
+  HIGH
+}
+
+enum RateLimitMode {
+  NONE
+  PER_SESSION
+  PER_24H
+  PER_WEEK
+  CUSTOM
+}
+
+model User {
+  id                String   @id @default(uuid())
+  email             String   @unique
+  name              String?
+  businessName      String?
+  businessType      String?
+  plan              PlanType @default(FREE)
+  stripeCustomerId  String?
+  aiGenerationsUsed Int      @default(0)
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+  forms             Form[]
+}
+
+model Form {
+  id             String        @id @default(uuid())
+  userId         String
+  title          String
+  description    String?
+  status         FormStatus    @default(DRAFT)
+  slug           String        @unique
+  rateLimitMode  RateLimitMode @default(PER_24H)
+  rateLimitHours Int?
+  createdAt      DateTime      @default(now())
+  updatedAt      DateTime      @updatedAt
+  user           User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  questions      Question[]
+  qrCodes        QRCode[]
+  responses      Response[]
+}
+
+model Question {
+  id            String          @id @default(uuid())
+  formId        String
+  type          QuestionType
+  label         String
+  options       Json?
+  order         Int
+  required      Boolean         @default(true)
+  hasBranching  Boolean         @default(false)
+  createdAt     DateTime        @default(now())
+  form          Form            @relation(fields: [formId], references: [id], onDelete: Cascade)
+  followUpRules FollowUpRule[]
+}
+
+model FollowUpRule {
+  id              String          @id @default(uuid())
+  questionId      String
+  triggerType     FollowUpTrigger
+  triggerMin      Int
+  triggerMax      Int
+  followUpLabel   String
+  followUpOptions Json
+  allowFreeText   Boolean         @default(true)
+  question        Question        @relation(fields: [questionId], references: [id], onDelete: Cascade)
+}
+
+model QRCode {
+  id         String     @id @default(uuid())
+  formId     String
+  label      String
+  uniqueCode String     @unique
+  scans      Int        @default(0)
+  createdAt  DateTime   @default(now())
+  form       Form       @relation(fields: [formId], references: [id], onDelete: Cascade)
+  responses  Response[]
+}
+
+model Visitor {
+  id              String     @id @default(uuid())
+  cookieId        String?    @unique
+  fingerprintHash String?
+  firstSeenAt     DateTime   @default(now())
+  lastSeenAt      DateTime   @default(now())
+  responseCount   Int        @default(0)
+  responses       Response[]
+}
+
+model Response {
+  id        String   @id @default(uuid())
+  formId    String
+  qrCodeId  String?
+  visitorId String?
+  answers   Json
+  metadata  Json?
+  createdAt DateTime @default(now())
+  form      Form     @relation(fields: [formId], references: [id], onDelete: Cascade)
+  qrCode    QRCode?  @relation(fields: [qrCodeId], references: [id])
+  visitor   Visitor? @relation(fields: [visitorId], references: [id])
+}
