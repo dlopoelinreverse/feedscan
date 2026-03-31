@@ -1,6 +1,23 @@
 import { createServerClient, type CookieOptions } from "@supabase/ssr";
 import { cookies } from "next/headers";
 
+function getCookieDomain(): string | undefined {
+  const rootDomain = process.env.NEXT_PUBLIC_ROOT_DOMAIN;
+  if (!rootDomain || rootDomain.includes("localhost")) return undefined;
+  return `.${rootDomain}`;
+}
+
+function withCookieDomain(options?: CookieOptions): CookieOptions {
+  const domain = getCookieDomain();
+  if (!domain) return options ?? {};
+  return {
+    ...options,
+    domain,
+    secure: true,
+    sameSite: "lax",
+  };
+}
+
 export async function createClient() {
   const cookieStore = await cookies();
 
@@ -15,11 +32,10 @@ export async function createClient() {
         setAll(cookiesToSet: { name: string; value: string; options?: CookieOptions }[]) {
           try {
             cookiesToSet.forEach(({ name, value, options }) =>
-              cookieStore.set(name, value, options)
+              cookieStore.set(name, value, withCookieDomain(options))
             );
           } catch {
-            // The `setAll` method is called from a Server Component.
-            // This can be ignored if you have middleware refreshing user sessions.
+            // Called from a Server Component — safe to ignore.
           }
         },
       },

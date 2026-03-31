@@ -1,6 +1,18 @@
 import { createServerClient, type CookieOptions } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
 
+function getCookieDomain(): string | undefined {
+  const rootDomain = process.env.NEXT_PUBLIC_ROOT_DOMAIN;
+  if (!rootDomain || rootDomain.includes("localhost")) return undefined;
+  return `.${rootDomain}`;
+}
+
+function withCookieDomain(options?: CookieOptions): CookieOptions {
+  const domain = getCookieDomain();
+  if (!domain) return options ?? {};
+  return { ...options, domain, secure: true, sameSite: "lax" };
+}
+
 export async function updateSession(request: NextRequest) {
   let supabaseResponse = NextResponse.next({ request });
 
@@ -18,7 +30,7 @@ export async function updateSession(request: NextRequest) {
           );
           supabaseResponse = NextResponse.next({ request });
           cookiesToSet.forEach(({ name, value, options }) =>
-            supabaseResponse.cookies.set(name, value, options)
+            supabaseResponse.cookies.set(name, value, withCookieDomain(options))
           );
         },
       },
