@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import { type Form } from "@/types";
 
 interface PublicFormProps {
@@ -7,6 +8,8 @@ interface PublicFormProps {
 }
 
 export function PublicForm({ form }: PublicFormProps) {
+  const t = useTranslations("publicForm");
+
   return (
     <div className="space-y-6">
       <div>
@@ -14,6 +17,7 @@ export function PublicForm({ form }: PublicFormProps) {
         {form.description && (
           <p className="text-muted-foreground mt-1">{form.description}</p>
         )}
+        <p className="text-xs text-muted-foreground mt-2">{t("subtitle")}</p>
       </div>
     </div>
   );

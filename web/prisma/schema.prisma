@@ -58,7 +58,11 @@ model Form {
   id             String        @id @default(uuid())
   userId         String
   title          String
+  titleFr        String        @default("")
+  titleEn        String?
   description    String?
+  descriptionFr  String?
+  descriptionEn  String?
   status         FormStatus    @default(DRAFT)
   slug           String        @unique
   rateLimitMode  RateLimitMode @default(PER_24H)
@@ -76,6 +80,8 @@ model Question {
   formId        String
   type          QuestionType
   label         String
+  labelFr       String          @default("")
+  labelEn       String?
   options       Json?
   order         Int
   required      Boolean         @default(true)
@@ -92,7 +98,11 @@ model FollowUpRule {
   triggerMin      Int
   triggerMax      Int
   followUpLabel   String
+  followUpLabelFr String          @default("")
+  followUpLabelEn String?
   followUpOptions Json
+  followUpOptionsFr Json?
+  followUpOptionsEn Json?
   allowFreeText   Boolean         @default(true)
   question        Question        @relation(fields: [questionId], references: [id], onDelete: Cascade)
 }

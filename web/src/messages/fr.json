@@ -1,0 +1,379 @@
+{
+  "common": {
+    "loading": "Chargement...",
+    "save": "Enregistrer",
+    "cancel": "Annuler",
+    "delete": "Supprimer",
+    "edit": "Modifier",
+    "create": "Créer",
+    "back": "Retour",
+    "next": "Suivant",
+    "confirm": "Confirmer",
+    "search": "Rechercher",
+    "noResults": "Aucun résultat",
+    "error": "Une erreur est survenue",
+    "success": "Succès",
+    "required": "Obligatoire",
+    "optional": "Optionnel",
+    "unlimited": "Illimité",
+    "poweredBy": "Propulsé par FeedScan",
+    "or": "ou"
+  },
+  "nav": {
+    "dashboard": "Dashboard",
+    "forms": "Formulaires",
+    "qrCodes": "QR Codes",
+    "settings": "Paramètres",
+    "logout": "Déconnexion",
+    "login": "Connexion",
+    "register": "Inscription",
+    "backToSite": "Retour au site"
+  },
+  "auth": {
+    "loginTitle": "Connexion à FeedScan",
+    "loginSubtitle": "Connectez-vous à votre compte",
+    "registerTitle": "Créez votre compte",
+    "registerSubtitle": "Commencez à collecter du feedback",
+    "email": "Adresse courriel",
+    "emailPlaceholder": "vous@exemple.com",
+    "password": "Mot de passe",
+    "passwordPlaceholder": "8 caractères minimum",
+    "confirmPassword": "Confirmer le mot de passe",
+    "confirmPasswordPlaceholder": "••••••••",
+    "forgotPassword": "Mot de passe oublié ?",
+    "googleLogin": "Se connecter avec Google",
+    "googleRegister": "S'inscrire avec Google",
+    "noAccount": "Pas de compte ?",
+    "hasAccount": "Déjà un compte ?",
+    "signUp": "S'inscrire",
+    "signIn": "Se connecter",
+    "signingIn": "Connexion...",
+    "signingUp": "Création du compte...",
+    "resetPassword": "Réinitialiser le mot de passe",
+    "resetSent": "Un courriel de réinitialisation a été envoyé. Vérifiez votre boîte de réception.",
+    "sendResetLink": "Envoyer le lien",
+    "sendingResetLink": "Envoi...",
+    "backToLogin": "Retour à la connexion",
+    "passwordMinLength": "8 caractères minimum.",
+    "passwordMismatch": "Les mots de passe ne correspondent pas.",
+    "invalidEmail": "Adresse courriel invalide.",
+    "emailRequired": "L'email est requis.",
+    "passwordRequired": "Le mot de passe est requis.",
+    "confirmRequired": "La confirmation est requise.",
+    "sessionExpired": "Session expirée. Veuillez vous reconnecter."
+  },
+  "onboarding": {
+    "welcome": "Bienvenue sur FeedScan !",
+    "subtitle": "Parlez-nous de votre commerce pour personnaliser votre expérience.",
+    "businessName": "Nom du commerce",
+    "businessNamePlaceholder": "Ex : Café Milano",
+    "businessNameRequired": "Le nom du commerce est requis.",
+    "businessType": "Type d'activité",
+    "businessTypeRequired": "Veuillez sélectionner un type d'activité.",
+    "selectPlaceholder": "Sélectionnez...",
+    "types": {
+      "restaurant": "Restaurant",
+      "cafe": "Café",
+      "salon": "Salon de coiffure / beauté",
+      "clinique": "Clinique",
+      "gym": "Gym / Studio",
+      "coworking": "Espace de coworking",
+      "autre": "Autre"
+    },
+    "getStarted": "Commencer",
+    "settingUp": "Configuration..."
+  },
+  "dashboard": {
+    "title": "Dashboard",
+    "welcome": "Bon retour",
+    "period": {
+      "7d": "7 jours",
+      "30d": "30 jours",
+      "90d": "90 jours"
+    },
+    "metrics": {
+      "totalResponses": "Réponses totales",
+      "averageScore": "Score moyen",
+      "activeForms": "Formulaires actifs",
+      "completionRate": "Taux de complétion",
+      "vsLastPeriod": "vs période précédente",
+      "outOf": "sur {count} créés"
+    },
+    "charts": {
+      "responseTrend": "Tendance des réponses",
+      "thisMonth": "Ce mois",
+      "lastMonth": "Mois dernier",
+      "scoresByCategory": "Scores par critère"
+    },
+    "recentResponses": {
+      "title": "Dernières réponses",
+      "source": "Source",
+      "ago": "il y a {time}",
+      "viewDetail": "Voir le détail"
+    },
+    "empty": {
+      "noForms": "Créez votre premier formulaire pour voir vos stats ici",
+      "noResponses": "Pas encore de réponses. Placez vos QR codes pour commencer à collecter du feedback.",
+      "createFirst": "Créer votre premier formulaire"
+    }
+  },
+  "forms": {
+    "title": "Formulaires",
+    "createNew": "Créer un formulaire",
+    "manageForms": "Gérez vos formulaires de feedback",
+    "status": {
+      "draft": "Brouillon",
+      "active": "Actif",
+      "archived": "Archivé"
+    },
+    "responses": "{count} réponses",
+    "createdAt": "Créé le {date}",
+    "builder": {
+      "title": "Titre du formulaire",
+      "titlePlaceholder": "Ex : Satisfaction restaurant",
+      "description": "Description",
+      "descriptionPlaceholder": "Un court message pour vos clients",
+      "publish": "Publier",
+      "saveDraft": "Brouillon",
+      "preview": "Prévisualisation",
+      "edit": "Éditer",
+      "questionCount": "{count}/7 questions",
+      "minQuestions": "Minimum 3 questions requises",
+      "maxQuestions": "Maximum 7 questions atteint",
+      "translationMissing": "Traduction manquante — le texte français sera utilisé",
+      "autoTranslate": "Traduire automatiquement"
+    },
+    "questionTypes": {
+      "stars": "Étoiles",
+      "emoji": "Emoji",
+      "choice": "Choix",
+      "text": "Texte"
+    },
+    "addQuestion": "Ajouter une question",
+    "questionLabel": "Question",
+    "questionLabelPlaceholder": "Ex : Comment évaluez-vous la qualité des plats ?",
+    "options": "Options de réponse",
+    "addOption": "Ajouter une option",
+    "required": "Obligatoire",
+    "duplicate": "Dupliquer",
+    "multipleChoice": "Choix multiples",
+    "singleChoice": "Choix unique",
+    "emojiLevels": "Niveaux d'emoji",
+    "branching": {
+      "toggle": "Suivi conditionnel",
+      "active": "Suivi conditionnel actif",
+      "inactive": "Pas de suivi conditionnel",
+      "lowScore": "Score bas",
+      "highScore": "Score haut",
+      "ifScore": "Si score entre",
+      "and": "et",
+      "followUpQuestion": "Question de suivi",
+      "followUpPlaceholder": "Ex : Qu'est-ce qui n'a pas été à la hauteur ?",
+      "followUpOptions": "Options de réponse",
+      "allowFreeText": "Autoriser un commentaire libre",
+      "neutralNote": "Les scores neutres ne déclenchent pas de suivi."
+    },
+    "ai": {
+      "generate": "Générer avec l'IA",
+      "prompt": "Décrivez votre commerce et ce que vous voulez mesurer",
+      "promptPlaceholder": "Ex : Je suis un restaurant italien dans le Plateau. Je veux savoir si mes clients sont satisfaits de la qualité des plats, du service et de l'ambiance.",
+      "generating": "Génération en cours...",
+      "generated": "Formulaire généré avec succès ! Vous pouvez le modifier avant de publier.",
+      "remaining": "{count}/3 générations restantes",
+      "limitReached": "Vous avez atteint la limite de 3 générations IA. Passez au Pro pour des générations illimitées.",
+      "error": "La génération n'a pas produit un résultat valide. Réessayez avec une description plus détaillée.",
+      "retry": "Réessayer",
+      "minLength": "Minimum 20 caractères"
+    },
+    "rateLimit": {
+      "title": "Limitation des réponses",
+      "frequency": "Fréquence par client",
+      "modes": {
+        "none": "Aucune limite",
+        "per_session": "1 fois par visite",
+        "per_24h": "1 fois par 24h",
+        "per_week": "1 fois par semaine",
+        "custom": "Personnalisé"
+      },
+      "customHours": "Durée en heures",
+      "duplicateMessage": "Message si doublon"
+    },
+    "planLimit": "Passez au Pro pour créer plus de formulaires"
+  },
+  "qrCodes": {
+    "title": "QR Codes",
+    "generate": "Générer un QR Code",
+    "label": "Label",
+    "labelPlaceholder": "Ex : Table 1, Comptoir, Caisse",
+    "scans": "{count} scans",
+    "download": "Télécharger PNG",
+    "copyLink": "Copier le lien",
+    "linkCopied": "Lien copié !",
+    "empty": "Aucun QR code. Générez-en un pour commencer.",
+    "planLimit": "Passez au Pro pour créer plus de QR codes"
+  },
+  "publicForm": {
+    "viaBrand": "via FeedScan",
+    "subtitle": "Aidez-nous à améliorer votre expérience. Moins d'une minute.",
+    "submit": "Envoyer mon avis",
+    "sending": "Envoi en cours...",
+    "requiredField": "Ce champ est obligatoire",
+    "textPlaceholder": "Votre avis compte...",
+    "followUpPlaceholder": "Précisez si vous le souhaitez...",
+    "followUpBadge": "Suivi",
+    "alreadyResponded": "Vous avez déjà partagé votre avis. Merci !",
+    "thankYou": {
+      "title": "Merci !",
+      "message": "Votre avis nous aide à nous améliorer. Bonne fin de journée !",
+      "messageMorning": "Votre avis nous aide à nous améliorer. Bonne journée !",
+      "messageEvening": "Votre avis nous aide à nous améliorer. Bonne soirée !"
+    },
+    "formNotFound": "Ce formulaire n'existe pas ou n'est plus disponible.",
+    "formNotFoundAction": "Retour à l'accueil"
+  },
+  "settings": {
+    "title": "Paramètres",
+    "subtitle": "Gérez votre profil, votre plan et votre facturation.",
+    "profile": {
+      "title": "Profil commerce",
+      "businessName": "Nom du commerce",
+      "businessType": "Type d'activité",
+      "email": "Courriel",
+      "connectionMethod": "Méthode de connexion",
+      "language": "Langue de l'interface",
+      "save": "Enregistrer les modifications"
+    },
+    "plan": {
+      "title": "Plan & facturation",
+      "currentPlan": "Plan actuel",
+      "renewal": "Renouvellement le {date}",
+      "manageSubscription": "Gérer l'abonnement",
+      "upgrade": "Passer au {plan}",
+      "downgrade": "Rétrograder",
+      "current": "Actuel"
+    },
+    "usage": {
+      "title": "Utilisation ce mois",
+      "forms": "Formulaires",
+      "responses": "Réponses",
+      "aiGenerations": "Générations IA"
+    },
+    "comparePlans": {
+      "title": "Comparer les plans",
+      "popular": "Populaire",
+      "comingSoon": "Bientôt disponible"
+    },
+    "danger": {
+      "title": "Zone danger",
+      "description": "La suppression de votre compte est irréversible. Toutes vos données seront perdues.",
+      "deleteAccount": "Supprimer mon compte",
+      "confirmDelete": "Êtes-vous sûr ? Cette action est irréversible."
+    }
+  },
+  "pricing": {
+    "title": "Tarifs simples",
+    "subtitle": "Commencez gratuitement. Évoluez quand vous êtes prêt.",
+    "free": {
+      "name": "Gratuit",
+      "price": "0$",
+      "period": "/mois",
+      "description": "Pour tester FeedScan sur un seul point de vente.",
+      "features": {
+        "forms": "1 formulaire",
+        "responses": "50 réponses / mois",
+        "qrCodes": "1 QR code",
+        "stats": "Stats basiques",
+        "ai": "3 générations IA"
+      },
+      "cta": "Commencer"
+    },
+    "pro": {
+      "name": "Pro",
+      "price": "24$",
+      "period": "/mois",
+      "description": "Pour les commerces qui veulent comprendre leurs clients.",
+      "features": {
+        "forms": "Formulaires illimités",
+        "responses": "Réponses illimitées",
+        "qrCodes": "QR codes multiples",
+        "stats": "Dashboard complet + filtres",
+        "ai": "Génération IA illimitée"
+      },
+      "cta": "Passer au Pro"
+    },
+    "business": {
+      "name": "Business",
+      "price": "49$",
+      "period": "/mois",
+      "description": "Multi-établissements et fonctions avancées.",
+      "features": {
+        "forms": "Tout le plan Pro",
+        "multiLocation": "Multi-établissements",
+        "export": "Export CSV",
+        "branding": "Branding personnalisé",
+        "support": "Support prioritaire"
+      },
+      "cta": "Bientôt disponible"
+    }
+  },
+  "landing": {
+    "hero": {
+      "badge": "Nouveau à Montréal",
+      "titleLine1": "Le feedback client",
+      "titleLine2": "avant qu'il soit trop tard",
+      "subtitle": "Collectez l'avis de vos clients en moins d'une minute via QR code. Découvrez ce qui marche — et ce qui cloche — avant que ça finisse sur Google Reviews.",
+      "cta": "Commencer gratuitement",
+      "demo": "Voir la démo"
+    },
+    "howItWorks": {
+      "title": "Comment ça marche",
+      "subtitle": "Trois étapes. Moins de 10 minutes pour commencer.",
+      "step1": {
+        "title": "Créez votre formulaire",
+        "description": "Builder visuel ou génération IA. Choisissez vos points cibles : qualité, service, propreté..."
+      },
+      "step2": {
+        "title": "Placez vos QR codes",
+        "description": "Générez un QR par table, comptoir ou caisse. Vos clients scannent et répondent en 45 secondes."
+      },
+      "step3": {
+        "title": "Suivez vos résultats",
+        "description": "Dashboard en temps réel avec scores, tendances et alertes. Réagissez avant Google Reviews."
+      }
+    },
+    "features": {
+      "title": "Tout ce qu'il vous faut",
+      "subtitle": "Pensé pour les commerces physiques, pas les startups tech.",
+      "qrCodes": {
+        "title": "QR codes contextuels",
+        "description": "Un QR par emplacement. Sachez exactement d'où vient chaque feedback."
+      },
+      "ai": {
+        "title": "Génération IA",
+        "description": "Décrivez votre commerce. L'IA crée un formulaire pertinent en 10 secondes."
+      },
+      "dashboard": {
+        "title": "Dashboard visuel",
+        "description": "Scores, tendances, comparaisons par source. Le tout dans un langage clair."
+      },
+      "short": {
+        "title": "Court par design",
+        "description": "3 à 7 questions max. Taux de complétion 85%+ garanti."
+      },
+      "noFriction": {
+        "title": "Zéro friction client",
+        "description": "Pas d'app à télécharger. Le client scanne, répond, c'est fini."
+      },
+      "humanLanguage": {
+        "title": "Langage humain",
+        "description": "Pas de NPS. « Vos clients sont 80% satisfaits de la propreté, +5% cette semaine. »"
+      }
+    },
+    "footer": {
+      "copyright": "FeedScan 2026. Fait à Montréal.",
+      "privacy": "Confidentialité",
+      "terms": "Conditions",
+      "contact": "Contact"
+    }
+  }
+}

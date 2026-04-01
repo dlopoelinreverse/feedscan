@@ -1,0 +1,379 @@
+{
+  "common": {
+    "loading": "Loading...",
+    "save": "Save",
+    "cancel": "Cancel",
+    "delete": "Delete",
+    "edit": "Edit",
+    "create": "Create",
+    "back": "Back",
+    "next": "Next",
+    "confirm": "Confirm",
+    "search": "Search",
+    "noResults": "No results",
+    "error": "Something went wrong",
+    "success": "Success",
+    "required": "Required",
+    "optional": "Optional",
+    "unlimited": "Unlimited",
+    "poweredBy": "Powered by FeedScan",
+    "or": "or"
+  },
+  "nav": {
+    "dashboard": "Dashboard",
+    "forms": "Forms",
+    "qrCodes": "QR Codes",
+    "settings": "Settings",
+    "logout": "Log out",
+    "login": "Log in",
+    "register": "Sign up",
+    "backToSite": "Back to site"
+  },
+  "auth": {
+    "loginTitle": "Log in to FeedScan",
+    "loginSubtitle": "Sign in to your account",
+    "registerTitle": "Create your account",
+    "registerSubtitle": "Start collecting feedback",
+    "email": "Email",
+    "emailPlaceholder": "you@example.com",
+    "password": "Password",
+    "passwordPlaceholder": "8 characters minimum",
+    "confirmPassword": "Confirm password",
+    "confirmPasswordPlaceholder": "••••••••",
+    "forgotPassword": "Forgot your password?",
+    "googleLogin": "Sign in with Google",
+    "googleRegister": "Sign up with Google",
+    "noAccount": "Don't have an account?",
+    "hasAccount": "Already have an account?",
+    "signUp": "Sign up",
+    "signIn": "Sign in",
+    "signingIn": "Signing in...",
+    "signingUp": "Creating account...",
+    "resetPassword": "Reset your password",
+    "resetSent": "A reset email has been sent. Check your inbox.",
+    "sendResetLink": "Send reset link",
+    "sendingResetLink": "Sending...",
+    "backToLogin": "Back to login",
+    "passwordMinLength": "8 characters minimum.",
+    "passwordMismatch": "Passwords don't match.",
+    "invalidEmail": "Invalid email address.",
+    "emailRequired": "Email is required.",
+    "passwordRequired": "Password is required.",
+    "confirmRequired": "Password confirmation is required.",
+    "sessionExpired": "Session expired. Please log in again."
+  },
+  "onboarding": {
+    "welcome": "Welcome to FeedScan!",
+    "subtitle": "Tell us about your business to personalize your experience.",
+    "businessName": "Business name",
+    "businessNamePlaceholder": "e.g. Cafe Milano",
+    "businessNameRequired": "Business name is required.",
+    "businessType": "Business type",
+    "businessTypeRequired": "Please select a business type.",
+    "selectPlaceholder": "Select...",
+    "types": {
+      "restaurant": "Restaurant",
+      "cafe": "Cafe",
+      "salon": "Salon / Beauty",
+      "clinique": "Clinic",
+      "gym": "Gym / Studio",
+      "coworking": "Coworking space",
+      "autre": "Other"
+    },
+    "getStarted": "Get started",
+    "settingUp": "Setting up..."
+  },
+  "dashboard": {
+    "title": "Dashboard",
+    "welcome": "Welcome back",
+    "period": {
+      "7d": "7 days",
+      "30d": "30 days",
+      "90d": "90 days"
+    },
+    "metrics": {
+      "totalResponses": "Total responses",
+      "averageScore": "Average score",
+      "activeForms": "Active forms",
+      "completionRate": "Completion rate",
+      "vsLastPeriod": "vs previous period",
+      "outOf": "out of {count} created"
+    },
+    "charts": {
+      "responseTrend": "Response trend",
+      "thisMonth": "This month",
+      "lastMonth": "Last month",
+      "scoresByCategory": "Scores by category"
+    },
+    "recentResponses": {
+      "title": "Recent responses",
+      "source": "Source",
+      "ago": "{time} ago",
+      "viewDetail": "View details"
+    },
+    "empty": {
+      "noForms": "Create your first form to see your stats here",
+      "noResponses": "No responses yet. Place your QR codes to start collecting feedback.",
+      "createFirst": "Create your first form"
+    }
+  },
+  "forms": {
+    "title": "Forms",
+    "createNew": "Create a form",
+    "manageForms": "Manage your feedback forms",
+    "status": {
+      "draft": "Draft",
+      "active": "Active",
+      "archived": "Archived"
+    },
+    "responses": "{count} responses",
+    "createdAt": "Created on {date}",
+    "builder": {
+      "title": "Form title",
+      "titlePlaceholder": "e.g. Restaurant satisfaction",
+      "description": "Description",
+      "descriptionPlaceholder": "A short message for your customers",
+      "publish": "Publish",
+      "saveDraft": "Save draft",
+      "preview": "Preview",
+      "edit": "Edit",
+      "questionCount": "{count}/7 questions",
+      "minQuestions": "At least 3 questions required",
+      "maxQuestions": "Maximum 7 questions reached",
+      "translationMissing": "Translation missing — the French text will be used",
+      "autoTranslate": "Auto-translate"
+    },
+    "questionTypes": {
+      "stars": "Stars",
+      "emoji": "Emoji",
+      "choice": "Choice",
+      "text": "Text"
+    },
+    "addQuestion": "Add a question",
+    "questionLabel": "Question",
+    "questionLabelPlaceholder": "e.g. How would you rate the food quality?",
+    "options": "Answer options",
+    "addOption": "Add an option",
+    "required": "Required",
+    "duplicate": "Duplicate",
+    "multipleChoice": "Multiple choice",
+    "singleChoice": "Single choice",
+    "emojiLevels": "Emoji levels",
+    "branching": {
+      "toggle": "Conditional follow-up",
+      "active": "Follow-up enabled",
+      "inactive": "No follow-up",
+      "lowScore": "Low score",
+      "highScore": "High score",
+      "ifScore": "If score between",
+      "and": "and",
+      "followUpQuestion": "Follow-up question",
+      "followUpPlaceholder": "e.g. What didn't meet your expectations?",
+      "followUpOptions": "Answer options",
+      "allowFreeText": "Allow free text",
+      "neutralNote": "Neutral scores don't trigger a follow-up."
+    },
+    "ai": {
+      "generate": "Generate with AI",
+      "prompt": "Describe your business and what you want to measure",
+      "promptPlaceholder": "e.g. I run an Italian restaurant in the Plateau. I want to know if my customers are happy with the food, service, and ambiance.",
+      "generating": "Generating...",
+      "generated": "Form generated! You can edit it before publishing.",
+      "remaining": "{count}/3 AI generations left",
+      "limitReached": "You've reached the 3 AI generation limit. Upgrade to Pro for unlimited generations.",
+      "error": "Generation didn't produce a valid result. Try again with a more detailed description.",
+      "retry": "Try again",
+      "minLength": "At least 20 characters"
+    },
+    "rateLimit": {
+      "title": "Response limits",
+      "frequency": "Frequency per customer",
+      "modes": {
+        "none": "No limit",
+        "per_session": "Once per visit",
+        "per_24h": "Once every 24h",
+        "per_week": "Once per week",
+        "custom": "Custom"
+      },
+      "customHours": "Duration in hours",
+      "duplicateMessage": "Duplicate message"
+    },
+    "planLimit": "Upgrade to Pro to create more forms"
+  },
+  "qrCodes": {
+    "title": "QR Codes",
+    "generate": "Generate a QR Code",
+    "label": "Label",
+    "labelPlaceholder": "e.g. Table 1, Counter, Register",
+    "scans": "{count} scans",
+    "download": "Download PNG",
+    "copyLink": "Copy link",
+    "linkCopied": "Link copied!",
+    "empty": "No QR codes yet. Generate one to get started.",
+    "planLimit": "Upgrade to Pro to create more QR codes"
+  },
+  "publicForm": {
+    "viaBrand": "via FeedScan",
+    "subtitle": "Help us improve your experience. Less than a minute.",
+    "submit": "Submit my feedback",
+    "sending": "Submitting...",
+    "requiredField": "This field is required",
+    "textPlaceholder": "Your feedback matters...",
+    "followUpPlaceholder": "Feel free to elaborate...",
+    "followUpBadge": "Follow-up",
+    "alreadyResponded": "You've already shared your feedback. Thank you!",
+    "thankYou": {
+      "title": "Thank you!",
+      "message": "Your feedback helps us improve. Have a great day!",
+      "messageMorning": "Your feedback helps us improve. Have a great day!",
+      "messageEvening": "Your feedback helps us improve. Have a great evening!"
+    },
+    "formNotFound": "This form doesn't exist or is no longer available.",
+    "formNotFoundAction": "Back to home"
+  },
+  "settings": {
+    "title": "Settings",
+    "subtitle": "Manage your profile, plan, and billing.",
+    "profile": {
+      "title": "Business profile",
+      "businessName": "Business name",
+      "businessType": "Business type",
+      "email": "Email",
+      "connectionMethod": "Login method",
+      "language": "Interface language",
+      "save": "Save changes"
+    },
+    "plan": {
+      "title": "Plan & billing",
+      "currentPlan": "Current plan",
+      "renewal": "Renewal on {date}",
+      "manageSubscription": "Manage subscription",
+      "upgrade": "Upgrade to {plan}",
+      "downgrade": "Downgrade",
+      "current": "Current"
+    },
+    "usage": {
+      "title": "This month's usage",
+      "forms": "Forms",
+      "responses": "Responses",
+      "aiGenerations": "AI generations"
+    },
+    "comparePlans": {
+      "title": "Compare plans",
+      "popular": "Popular",
+      "comingSoon": "Coming soon"
+    },
+    "danger": {
+      "title": "Danger zone",
+      "description": "Deleting your account is permanent. All your data will be lost.",
+      "deleteAccount": "Delete my account",
+      "confirmDelete": "Are you sure? This can't be undone."
+    }
+  },
+  "pricing": {
+    "title": "Simple pricing",
+    "subtitle": "Start for free. Upgrade when you're ready.",
+    "free": {
+      "name": "Free",
+      "price": "$0",
+      "period": "/month",
+      "description": "Try FeedScan at a single location.",
+      "features": {
+        "forms": "1 form",
+        "responses": "50 responses / month",
+        "qrCodes": "1 QR code",
+        "stats": "Basic stats",
+        "ai": "3 AI generations"
+      },
+      "cta": "Get started"
+    },
+    "pro": {
+      "name": "Pro",
+      "price": "$24",
+      "period": "/month",
+      "description": "For businesses that want to understand their customers.",
+      "features": {
+        "forms": "Unlimited forms",
+        "responses": "Unlimited responses",
+        "qrCodes": "Multiple QR codes",
+        "stats": "Full dashboard + filters",
+        "ai": "Unlimited AI generation"
+      },
+      "cta": "Upgrade to Pro"
+    },
+    "business": {
+      "name": "Business",
+      "price": "$49",
+      "period": "/month",
+      "description": "Multi-location and advanced features.",
+      "features": {
+        "forms": "Everything in Pro",
+        "multiLocation": "Multi-location",
+        "export": "CSV export",
+        "branding": "Custom branding",
+        "support": "Priority support"
+      },
+      "cta": "Coming soon"
+    }
+  },
+  "landing": {
+    "hero": {
+      "badge": "New in Montreal",
+      "titleLine1": "Customer feedback",
+      "titleLine2": "before it's too late",
+      "subtitle": "Collect customer feedback in under a minute via QR code. Find out what works — and what doesn't — before it ends up on Google Reviews.",
+      "cta": "Get started for free",
+      "demo": "Watch the demo"
+    },
+    "howItWorks": {
+      "title": "How it works",
+      "subtitle": "Three steps. Under 10 minutes to get started.",
+      "step1": {
+        "title": "Create your form",
+        "description": "Visual builder or AI generation. Choose what to measure: quality, service, cleanliness..."
+      },
+      "step2": {
+        "title": "Place your QR codes",
+        "description": "Generate a QR for each table, counter, or register. Customers scan and respond in 45 seconds."
+      },
+      "step3": {
+        "title": "Track your results",
+        "description": "Real-time dashboard with scores, trends, and alerts. React before Google Reviews."
+      }
+    },
+    "features": {
+      "title": "Everything you need",
+      "subtitle": "Built for brick-and-mortar businesses, not tech startups.",
+      "qrCodes": {
+        "title": "Contextual QR codes",
+        "description": "One QR per location. Know exactly where each piece of feedback comes from."
+      },
+      "ai": {
+        "title": "AI generation",
+        "description": "Describe your business. AI creates a relevant form in 10 seconds."
+      },
+      "dashboard": {
+        "title": "Visual dashboard",
+        "description": "Scores, trends, comparisons by source. All in plain language."
+      },
+      "short": {
+        "title": "Short by design",
+        "description": "3 to 7 questions max. 85%+ completion rate guaranteed."
+      },
+      "noFriction": {
+        "title": "Zero customer friction",
+        "description": "No app to download. Customer scans, answers, done."
+      },
+      "humanLanguage": {
+        "title": "Plain language",
+        "description": "No NPS jargon. 'Your customers are 80% happy with cleanliness, up 5% this week.'"
+      }
+    },
+    "footer": {
+      "copyright": "FeedScan 2026. Made in Montreal.",
+      "privacy": "Privacy",
+      "terms": "Terms",
+      "contact": "Contact"
+    }
+  }
+}
