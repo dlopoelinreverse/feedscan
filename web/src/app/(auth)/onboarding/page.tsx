@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { useForm } from "@tanstack/react-form";
 import { createClient } from "@/lib/supabase/client";
 import { getAppUrl, getRootUrl } from "@/lib/domains";
 
@@ -15,15 +16,12 @@ const BUSINESS_TYPES = [
 ];
 
 export default function OnboardingPage() {
-  const [businessName, setBusinessName] = useState("");
-  const [businessType, setBusinessType] = useState("");
-  const [error, setError] = useState<string | null>(null);
-  const [loading, setLoading] = useState(false);
+  const [serverError, setServerError] = useState<string | null>(null);
   const [checking, setChecking] = useState(true);
 
-  // If businessName is already set, redirect immediately
+  // Redirect if onboarding already done
   useEffect(() => {
-    const checkOnboarding = async () => {
+    const check = async () => {
       try {
         const supabase = createClient();
         const {
@@ -31,7 +29,6 @@ export default function OnboardingPage() {
         } = await supabase.auth.getUser();
 
         if (!user) {
-          // Not logged in — stay on page (proxy will handle redirect)
           setChecking(false);
           return;
         }
@@ -48,73 +45,64 @@ export default function OnboardingPage() {
           return;
         }
       } catch {
-        // Ignore errors, let user complete onboarding
+        // ignore
       }
       setChecking(false);
     };
 
-    checkOnboarding();
+    check();
   }, []);
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setError(null);
+  const form = useForm({
+    defaultValues: { businessName: "", businessType: "" },
+    onSubmit: async ({ value }) => {
+      setServerError(null);
 
-    if (!businessName.trim()) {
-      setError("Veuillez entrer le nom de votre commerce.");
-      return;
-    }
-    if (!businessType) {
-      setError("Veuillez sélectionner un type d'activité.");
-      return;
-    }
+      try {
+        const supabase = createClient();
+        const {
+          data: { user },
+        } = await supabase.auth.getUser();
 
-    setLoading(true);
+        if (!user) {
+          setServerError("Session expirée. Veuillez vous reconnecter.");
+          return;
+        }
 
-    try {
-      const supabase = createClient();
-      const {
-        data: { user },
-      } = await supabase.auth.getUser();
+        // Update Supabase metadata
+        await supabase.auth.updateUser({
+          data: {
+            business_name: value.businessName,
+            business_type: value.businessType,
+          },
+        });
 
-      if (!user) {
-        setError("Session expirée. Veuillez vous reconnecter.");
-        setLoading(false);
-        return;
+        // Upsert Prisma User
+        await fetch("/api/auth/complete-onboarding", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            userId: user.id,
+            email: user.email,
+            name: user.user_metadata?.full_name || user.email,
+            businessName: value.businessName,
+            businessType: value.businessType,
+          }),
+        });
+
+        window.location.href = getAppUrl("/dashboard");
+      } catch {
+        setServerError("Une erreur est survenue. Veuillez réessayer.");
       }
-
-      // Update Supabase user metadata
-      await supabase.auth.updateUser({
-        data: {
-          business_name: businessName,
-          business_type: businessType,
-        },
-      });
-
-      // Update Prisma User record
-      await fetch("/api/auth/complete-onboarding", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          userId: user.id,
-          email: user.email,
-          name: user.user_metadata?.full_name || user.email,
-          businessName,
-          businessType,
-        }),
-      });
-
-      window.location.href = getAppUrl("/dashboard");
-    } catch {
-      setError("Une erreur est survenue. Veuillez réessayer.");
-      setLoading(false);
-    }
-  };
+    },
+  });
 
   if (checking) {
     return (
       <div className="flex min-h-screen items-center justify-center bg-muted/30">
-        <div className="text-muted-foreground text-sm animate-pulse">Chargement...</div>
+        <div className="text-muted-foreground text-sm animate-pulse">
+          Chargement...
+        </div>
       </div>
     );
   }
@@ -135,55 +123,107 @@ export default function OnboardingPage() {
           </div>
 
           {/* Form */}
-          <form onSubmit={handleSubmit} className="space-y-4">
-            {error && (
+          <form
+            onSubmit={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+              form.handleSubmit();
+            }}
+            className="space-y-4"
+          >
+            {serverError && (
               <div className="rounded-md bg-destructive/10 p-3 text-sm text-destructive">
-                {error}
+                {serverError}
               </div>
             )}
 
-            <div className="space-y-2">
-              <label htmlFor="businessName" className="text-sm font-medium">
-                Nom du commerce
-              </label>
-              <input
-                id="businessName"
-                type="text"
-                value={businessName}
-                onChange={(e) => setBusinessName(e.target.value)}
-                required
-                className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-ring"
-                placeholder="Mon Restaurant"
-              />
-            </div>
-
-            <div className="space-y-2">
-              <label htmlFor="businessType" className="text-sm font-medium">
-                Type d&apos;activité
-              </label>
-              <select
-                id="businessType"
-                value={businessType}
-                onChange={(e) => setBusinessType(e.target.value)}
-                required
-                className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-ring"
-              >
-                <option value="">Sélectionnez...</option>
-                {BUSINESS_TYPES.map((t) => (
-                  <option key={t.value} value={t.value}>
-                    {t.label}
-                  </option>
-                ))}
-              </select>
-            </div>
-
-            <button
-              type="submit"
-              disabled={loading}
-              className="w-full rounded-md bg-primary px-4 py-2.5 text-sm font-medium text-primary-foreground hover:bg-primary/90 disabled:opacity-50 transition-colors"
+            {/* Business name */}
+            <form.Field
+              name="businessName"
+              validators={{
+                onBlur: ({ value }) => {
+                  if (!value.trim()) return "Le nom du commerce est requis.";
+                  return undefined;
+                },
+              }}
             >
-              {loading ? "Configuration..." : "Commencer"}
-            </button>
+              {(field) => (
+                <div className="space-y-2">
+                  <label htmlFor="businessName" className="text-sm font-medium">
+                    Nom du commerce
+                  </label>
+                  <input
+                    id="businessName"
+                    type="text"
+                    value={field.state.value}
+                    onChange={(e) => field.handleChange(e.target.value)}
+                    onBlur={field.handleBlur}
+                    className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-ring"
+                    placeholder="Mon Restaurant"
+                  />
+                  {field.state.meta.isTouched &&
+                    field.state.meta.errors.length > 0 && (
+                      <p className="text-xs text-destructive">
+                        {field.state.meta.errors.join(", ")}
+                      </p>
+                    )}
+                </div>
+              )}
+            </form.Field>
+
+            {/* Business type */}
+            <form.Field
+              name="businessType"
+              validators={{
+                onBlur: ({ value }) => {
+                  if (!value) return "Veuillez sélectionner un type d'activité.";
+                  return undefined;
+                },
+              }}
+            >
+              {(field) => (
+                <div className="space-y-2">
+                  <label htmlFor="businessType" className="text-sm font-medium">
+                    Type d&apos;activité
+                  </label>
+                  <select
+                    id="businessType"
+                    value={field.state.value}
+                    onChange={(e) => field.handleChange(e.target.value)}
+                    onBlur={field.handleBlur}
+                    className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-ring"
+                  >
+                    <option value="">Sélectionnez...</option>
+                    {BUSINESS_TYPES.map((t) => (
+                      <option key={t.value} value={t.value}>
+                        {t.label}
+                      </option>
+                    ))}
+                  </select>
+                  {field.state.meta.isTouched &&
+                    field.state.meta.errors.length > 0 && (
+                      <p className="text-xs text-destructive">
+                        {field.state.meta.errors.join(", ")}
+                      </p>
+                    )}
+                </div>
+              )}
+            </form.Field>
+
+            {/* Submit */}
+            <form.Subscribe
+              selector={(s) => [s.canSubmit, s.isSubmitting] as const}
+            >
+              {([canSubmit, isSubmitting]) => (
+                <button
+                  type="submit"
+                  disabled={!canSubmit}
+                  className="w-full rounded-md bg-primary px-4 py-2.5 text-sm font-medium text-primary-foreground hover:bg-primary/90 disabled:opacity-50 transition-colors"
+                >
+                  {isSubmitting ? "Configuration..." : "Commencer"}
+                </button>
+              )}
+            </form.Subscribe>
           </form>
         </div>
       </div>
