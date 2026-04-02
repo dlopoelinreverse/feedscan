@@ -4,39 +4,18 @@ services:
       context: ./web
       target: development
     ports:
-      - "3000:3000"
+      - "3001:3000"
     env_file:
-      - ./web/.env
+      - ./.env
     volumes:
-      - ./web/node_modules:/app/node_modules
-    develop:
-      watch:
-        - action: sync
-          path: ./web/src/app
-          target: /app/src/app
-          ignore:
-            - node_modules/
-            - .next/
-        - action: sync
-          path: ./web/src/components
-          target: /app/src/components
-        - action: sync
-          path: ./web/components.json
-          target: /app/components.json
-        - action: sync
-          path: ./web/src/contexts
-          target: /app/src/contexts
-        - action: sync
-          path: ./web/src/hooks
-          target: /app/src/hooks
-        - action: sync
-          path: ./web/src/types
-          target: /app/src/types
-        - action: sync
-          path: ./web/src/lib
-          target: /app/src/lib
-        - action: rebuild
-          path: ./web/package.json
+      - ./web/src:/app/src
+      - ./web/public:/app/public
+      - ./web/prisma:/app/prisma
+      - ./web/components.json:/app/components.json
+      - ./web/next.config.ts:/app/next.config.ts
+      - ./web/tailwind.config.ts:/app/tailwind.config.ts
+      - ./web/tsconfig.json:/app/tsconfig.json
+      - ./web/postcss.config.mjs:/app/postcss.config.mjs
     networks:
       - feedscan-network
 

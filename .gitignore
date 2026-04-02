@@ -45,4 +45,7 @@ Thumbs.db
 # Docker
 .dockerignore
 
-.env*
+.env
+.env.local
+.env.*.local
+!.env.example

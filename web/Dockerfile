@@ -3,10 +3,13 @@ FROM node:20-alpine AS development
 
 WORKDIR /app
 
+# Native dependencies for @parcel/watcher on Alpine (ARM64)
+RUN apk add --no-cache libc6-compat
+
 # Install bun for faster installs
 RUN npm install -g bun
 
-COPY package.json bun.lockb* package-lock.json* ./
+COPY package.json bun.lock* bun.lockb* package-lock.json* ./
 RUN bun install
 
 COPY . .
