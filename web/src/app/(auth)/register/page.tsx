@@ -4,7 +4,7 @@ import { useState } from "react";
 import { useForm } from "@tanstack/react-form";
 import { useTranslations } from "next-intl";
 import { createClient } from "@/lib/supabase/client";
-import { getAuthUrl, getRootUrl } from "@/lib/domains";
+import { getAuthUrl, getRootUrl, getAbsoluteAuthUrl } from "@/lib/domains";
 import { LanguageSwitcher } from "@/components/ui/language-switcher";
 
 export default function RegisterPage() {
@@ -21,7 +21,7 @@ export default function RegisterPage() {
       const { error } = await supabase.auth.signUp({
         email: value.email,
         password: value.password,
-        options: { emailRedirectTo: getAuthUrl("/api/auth/callback") },
+        options: { emailRedirectTo: getAbsoluteAuthUrl("/api/auth/callback") },
       });
       if (error) { setServerError(error.message); return; }
       window.location.href = getAuthUrl("/onboarding");
@@ -32,7 +32,7 @@ export default function RegisterPage() {
     const supabase = createClient();
     await supabase.auth.signInWithOAuth({
       provider: "google",
-      options: { redirectTo: getAuthUrl("/api/auth/callback") },
+      options: { redirectTo: getAbsoluteAuthUrl("/api/auth/callback") },
     });
   };
 
@@ -47,7 +47,7 @@ export default function RegisterPage() {
           </div>
           <form onSubmit={(e) => { e.preventDefault(); e.stopPropagation(); form.handleSubmit(); }} className="space-y-4">
             {serverError && <div className="rounded-md bg-destructive/10 p-3 text-sm text-destructive">{serverError}</div>}
-            <form.Field name="email" validators={{ onBlur: ({ value }) => { if (!value) return t("emailRequired"); if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value)) return t("invalidEmail"); return undefined; } }}>
+            <form.Field name="email" validators={{ onChange: ({ value }) => { if (!value) return t("emailRequired"); if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value)) return t("invalidEmail"); return undefined; } }}>
               {(field) => (
                 <div className="space-y-2">
                   <label htmlFor="email" className="text-sm font-medium">{t("email")}</label>
@@ -56,7 +56,7 @@ export default function RegisterPage() {
                 </div>
               )}
             </form.Field>
-            <form.Field name="password" validators={{ onBlur: ({ value }) => { if (!value) return t("passwordRequired"); if (value.length < 8) return t("passwordMinLength"); return undefined; } }}>
+            <form.Field name="password" validators={{ onChange: ({ value }) => { if (!value) return t("passwordRequired"); if (value.length < 8) return t("passwordMinLength"); return undefined; } }}>
               {(field) => (
                 <div className="space-y-2">
                   <label htmlFor="password" className="text-sm font-medium">{t("password")}</label>
@@ -65,7 +65,7 @@ export default function RegisterPage() {
                 </div>
               )}
             </form.Field>
-            <form.Field name="confirmPassword" validators={{ onChangeListenTo: ["password"], onBlur: ({ value, fieldApi }) => { const pw = fieldApi.form.getFieldValue("password"); if (!value) return t("confirmRequired"); if (value !== pw) return t("passwordMismatch"); return undefined; } }}>
+            <form.Field name="confirmPassword" validators={{ onChangeListenTo: ["password"], onChange: ({ value, fieldApi }) => { const pw = fieldApi.form.getFieldValue("password"); if (!value) return t("confirmRequired"); if (value !== pw) return t("passwordMismatch"); return undefined; } }}>
               {(field) => (
                 <div className="space-y-2">
                   <label htmlFor="confirmPassword" className="text-sm font-medium">{t("confirmPassword")}</label>

@@ -1,22 +1,19 @@
 import { createBrowserClient } from "@supabase/ssr";
 
-function getCookieDomain(): string | undefined {
-  const rootDomain = process.env.NEXT_PUBLIC_ROOT_DOMAIN;
-  if (!rootDomain || rootDomain.includes("localhost")) return undefined;
-  // Leading dot allows cookie to be shared across all subdomains
-  return `.${rootDomain}`;
-}
+const isDev = process.env.NODE_ENV === "development";
 
 export function createClient() {
   return createBrowserClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_DEFAULT_KEY!,
-    {
-      cookieOptions: {
-        domain: getCookieDomain(),
-        secure: !process.env.NEXT_PUBLIC_ROOT_DOMAIN?.includes("localhost"),
-        sameSite: "lax",
-      },
-    }
+    isDev
+      ? {}
+      : {
+          cookieOptions: {
+            domain: `.${process.env.NEXT_PUBLIC_ROOT_DOMAIN}`,
+            secure: true,
+            sameSite: "lax" as const,
+          },
+        }
   );
 }

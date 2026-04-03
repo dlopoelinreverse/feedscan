@@ -4,7 +4,7 @@ import { useState } from "react";
 import { useForm } from "@tanstack/react-form";
 import { useTranslations } from "next-intl";
 import { createClient } from "@/lib/supabase/client";
-import { getAuthUrl, getAppUrl, getRootUrl } from "@/lib/domains";
+import { getAuthUrl, getAppUrl, getRootUrl, getAbsoluteAuthUrl } from "@/lib/domains";
 import { LanguageSwitcher } from "@/components/ui/language-switcher";
 
 export default function LoginPage() {
@@ -46,7 +46,7 @@ export default function LoginPage() {
       setServerError(null);
       const supabase = createClient();
       const { error } = await supabase.auth.resetPasswordForEmail(value.email, {
-        redirectTo: getAuthUrl("/login"),
+        redirectTo: getAbsoluteAuthUrl("/login"),
       });
       if (error) { setServerError(error.message); return; }
       setResetSent(true);
@@ -57,7 +57,7 @@ export default function LoginPage() {
     const supabase = createClient();
     await supabase.auth.signInWithOAuth({
       provider: "google",
-      options: { redirectTo: getAuthUrl("/api/auth/callback") },
+      options: { redirectTo: getAbsoluteAuthUrl("/api/auth/callback") },
     });
   };
 
@@ -83,7 +83,7 @@ export default function LoginPage() {
             ) : (
               <form onSubmit={(e) => { e.preventDefault(); e.stopPropagation(); resetForm.handleSubmit(); }} className="space-y-4">
                 {serverError && <div className="rounded-md bg-destructive/10 p-3 text-sm text-destructive">{serverError}</div>}
-                <resetForm.Field name="email" validators={{ onBlur: ({ value }) => { if (!value) return t("emailRequired"); if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value)) return t("invalidEmail"); return undefined; } }}>
+                <resetForm.Field name="email" validators={{ onChange: ({ value }) => { if (!value) return t("emailRequired"); if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value)) return t("invalidEmail"); return undefined; } }}>
                   {(field) => (
                     <div className="space-y-2">
                       <label htmlFor="resetEmail" className="text-sm font-medium">{t("email")}</label>
@@ -119,7 +119,7 @@ export default function LoginPage() {
           </div>
           <form onSubmit={(e) => { e.preventDefault(); e.stopPropagation(); loginForm.handleSubmit(); }} className="space-y-4">
             {serverError && <div className="rounded-md bg-destructive/10 p-3 text-sm text-destructive">{serverError}</div>}
-            <loginForm.Field name="email" validators={{ onBlur: ({ value }) => { if (!value) return t("emailRequired"); if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value)) return t("invalidEmail"); return undefined; } }}>
+            <loginForm.Field name="email" validators={{ onChange: ({ value }) => { if (!value) return t("emailRequired"); if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value)) return t("invalidEmail"); return undefined; } }}>
               {(field) => (
                 <div className="space-y-2">
                   <label htmlFor="email" className="text-sm font-medium">{t("email")}</label>
@@ -128,7 +128,7 @@ export default function LoginPage() {
                 </div>
               )}
             </loginForm.Field>
-            <loginForm.Field name="password" validators={{ onBlur: ({ value }) => { if (!value) return t("passwordRequired"); return undefined; } }}>
+            <loginForm.Field name="password" validators={{ onChange: ({ value }) => { if (!value) return t("passwordRequired"); return undefined; } }}>
               {(field) => (
                 <div className="space-y-2">
                   <div className="flex items-center justify-between">
