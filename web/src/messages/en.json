@@ -128,6 +128,7 @@
     },
     "responses": "{count} responses",
     "createdAt": "Created on {date}",
+    "emptyState": "Create your first form",
     "builder": {
       "title": "Form title",
       "titlePlaceholder": "e.g. Restaurant satisfaction",
@@ -135,13 +136,22 @@
       "descriptionPlaceholder": "A short message for your customers",
       "publish": "Publish",
       "saveDraft": "Save draft",
-      "preview": "Preview",
+      "preview": "Mobile preview",
       "edit": "Edit",
       "questionCount": "{count}/7 questions",
       "minQuestions": "At least 3 questions required",
       "maxQuestions": "Maximum 7 questions reached",
+      "draftSaved": "Draft saved",
+      "published": "Form published!",
       "translationMissing": "Translation missing — the French text will be used",
-      "autoTranslate": "Auto-translate"
+      "autoTranslate": "Auto-translate",
+      "buildManually": "or build manually"
+    },
+    "detail": {
+      "stats": "Statistics",
+      "statsPlaceholder": "Statistics coming soon",
+      "qrcodes": "QR Codes",
+      "qrcodesPlaceholder": "QR Codes coming soon"
     },
     "questionTypes": {
       "stars": "Stars",

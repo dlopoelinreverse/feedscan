@@ -1,12 +1,9 @@
-import { getTranslations } from "next-intl/server";
+import { FormBuilder } from "@/components/forms/form-builder";
 
-export default async function NewFormPage() {
-  const t = await getTranslations("forms");
-
+export default function NewFormPage() {
   return (
-    <div className="p-6">
-      <h1 className="text-2xl font-bold">{t("createNew")}</h1>
-      <p className="text-muted-foreground mt-1">{t("builder.titlePlaceholder")}</p>
+    <div className="h-[calc(100vh-49px)] md:h-screen flex flex-col">
+      <FormBuilder />
     </div>
   );
 }

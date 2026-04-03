@@ -128,6 +128,7 @@
     },
     "responses": "{count} réponses",
     "createdAt": "Créé le {date}",
+    "emptyState": "Créez votre premier formulaire",
     "builder": {
       "title": "Titre du formulaire",
       "titlePlaceholder": "Ex : Satisfaction restaurant",
@@ -135,13 +136,22 @@
       "descriptionPlaceholder": "Un court message pour vos clients",
       "publish": "Publier",
       "saveDraft": "Brouillon",
-      "preview": "Prévisualisation",
+      "preview": "Prévisualisation mobile",
       "edit": "Éditer",
       "questionCount": "{count}/7 questions",
       "minQuestions": "Minimum 3 questions requises",
       "maxQuestions": "Maximum 7 questions atteint",
+      "draftSaved": "Brouillon sauvegardé",
+      "published": "Formulaire publié !",
       "translationMissing": "Traduction manquante — le texte français sera utilisé",
-      "autoTranslate": "Traduire automatiquement"
+      "autoTranslate": "Traduire automatiquement",
+      "buildManually": "ou construisez manuellement"
+    },
+    "detail": {
+      "stats": "Statistiques",
+      "statsPlaceholder": "Les statistiques arrivent bientôt",
+      "qrcodes": "QR Codes",
+      "qrcodesPlaceholder": "Les QR codes arrivent bientôt"
     },
     "questionTypes": {
       "stars": "Étoiles",
