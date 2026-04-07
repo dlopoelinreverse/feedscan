@@ -151,7 +151,15 @@
       "stats": "Statistics",
       "statsPlaceholder": "Statistics coming soon",
       "qrcodes": "QR Codes",
-      "qrcodesPlaceholder": "QR Codes coming soon"
+      "qrcodesPlaceholder": "QR Codes coming soon",
+      "deleteConfirmTitle": "Delete this form?",
+      "deleteConfirmDescription": "This action cannot be undone. The form and all its responses will be deleted."
+    },
+    "dialog": {
+      "addQuestionTitle": "Add a question",
+      "editQuestionTitle": "Edit question",
+      "placeholderLabel": "Placeholder text (optional)",
+      "placeholderInputPlaceholder": "Your feedback..."
     },
     "questionTypes": {
       "stars": "Stars",

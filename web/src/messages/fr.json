@@ -151,7 +151,15 @@
       "stats": "Statistiques",
       "statsPlaceholder": "Les statistiques arrivent bientôt",
       "qrcodes": "QR Codes",
-      "qrcodesPlaceholder": "Les QR codes arrivent bientôt"
+      "qrcodesPlaceholder": "Les QR codes arrivent bientôt",
+      "deleteConfirmTitle": "Supprimer ce formulaire ?",
+      "deleteConfirmDescription": "Cette action est irréversible. Le formulaire et toutes ses réponses seront supprimés."
+    },
+    "dialog": {
+      "addQuestionTitle": "Ajouter une question",
+      "editQuestionTitle": "Modifier la question",
+      "placeholderLabel": "Texte d'aide (optionnel)",
+      "placeholderInputPlaceholder": "Votre avis..."
     },
     "questionTypes": {
       "stars": "Étoiles",

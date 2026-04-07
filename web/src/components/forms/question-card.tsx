@@ -26,6 +26,7 @@ export function QuestionCard({
   onUpdate,
 }: QuestionCardProps) {
   const t = useTranslations("forms");
+  const tCommon = useTranslations("common");
   const badge = QUESTION_TYPE_BADGE[question.type];
 
   const {
@@ -43,7 +44,7 @@ export function QuestionCard({
     opacity: isDragging ? 0.5 : 1,
   };
 
-  const metaLine = buildMetaLine(question, t);
+  const metaLine = buildMetaLine(question, t, tCommon);
 
   return (
     <Card
@@ -92,7 +93,7 @@ export function QuestionCard({
                 onClick={onEdit}
                 className="text-xs text-muted-foreground hover:text-foreground transition-colors"
               >
-                {t("common.edit" as never) || "Modifier"}
+                {tCommon("edit")}
               </button>
               <button
                 onClick={onDuplicate}
@@ -104,7 +105,7 @@ export function QuestionCard({
                 onClick={onDelete}
                 className="text-xs text-muted-foreground hover:text-destructive transition-colors"
               >
-                {t("common.delete" as never) || "Supprimer"}
+                {tCommon("delete")}
               </button>
             </div>
           </div>
@@ -121,7 +122,8 @@ export function QuestionCard({
 
 function buildMetaLine(
   q: QuestionState,
-  t: ReturnType<typeof useTranslations<"forms">>
+  t: ReturnType<typeof useTranslations<"forms">>,
+  tCommon: ReturnType<typeof useTranslations<"common">>
 ): string {
   const parts: string[] = [];
 
@@ -129,20 +131,16 @@ function buildMetaLine(
     parts.push("\u2605\u2605\u2605\u2605\u2605 (1-5)");
   }
   if (q.type === "EMOJI") {
-    parts.push(`${q.emojiLevels ?? 5} niveaux d'emoji`);
+    parts.push(`${q.emojiLevels ?? 5} ${t("emojiLevels").toLowerCase()}`);
   }
   if (q.type === "CHOICE" && q.options.length > 0) {
     parts.push(q.options.join(", "));
   }
   if (q.type === "TEXT") {
-    parts.push("Texte libre");
+    parts.push(t("questionTypes.text"));
   }
 
-  parts.push(
-    q.required
-      ? (t("required") || "Obligatoire")
-      : (t("common.optional" as never) || "Optionnel")
-  );
+  parts.push(q.required ? t("required") : tCommon("optional"));
 
   return parts.join(" \u2014 ");
 }

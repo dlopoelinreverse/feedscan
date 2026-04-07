@@ -1,7 +1,7 @@
-import { notFound, redirect } from "next/navigation";
+import { notFound } from "next/navigation";
 import Link from "next/link";
 import { getTranslations } from "next-intl/server";
-import { getFormById, deleteForm } from "@/lib/actions/form-actions";
+import { getFormById } from "@/lib/actions/form-actions";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -20,6 +20,7 @@ interface FormDetailPageProps {
 export default async function FormDetailPage({ params }: FormDetailPageProps) {
   const { id } = await params;
   const t = await getTranslations("forms");
+  const tCommon = await getTranslations("common");
   const form = await getFormById(id);
 
   if (!form) {
@@ -52,9 +53,7 @@ export default async function FormDetailPage({ params }: FormDetailPageProps) {
         </div>
         <div className="flex items-center gap-2">
           <Button asChild variant="outline">
-            <Link href={`/dashboard/forms/${id}/edit`}>
-              {t("common.edit" as never) || "Modifier"}
-            </Link>
+            <Link href={`/dashboard/forms/${id}/edit`}>{tCommon("edit")}</Link>
           </Button>
           <FormDeleteButton formId={id} />
         </div>
@@ -63,17 +62,17 @@ export default async function FormDetailPage({ params }: FormDetailPageProps) {
       {/* Tabs */}
       <Tabs defaultValue="stats">
         <TabsList>
-          <TabsTrigger value="stats">Statistiques</TabsTrigger>
-          <TabsTrigger value="qrcodes">QR Codes</TabsTrigger>
+          <TabsTrigger value="stats">{t("detail.stats")}</TabsTrigger>
+          <TabsTrigger value="qrcodes">{t("detail.qrcodes")}</TabsTrigger>
         </TabsList>
         <TabsContent value="stats">
           <div className="flex items-center justify-center py-20 text-muted-foreground">
-            &#128202; Les statistiques arrivent bient&ocirc;t
+            &#128202; {t("detail.statsPlaceholder")}
           </div>
         </TabsContent>
         <TabsContent value="qrcodes">
           <div className="flex items-center justify-center py-20 text-muted-foreground">
-            &#128241; Les QR codes arrivent bient&ocirc;t
+            &#128241; {t("detail.qrcodesPlaceholder")}
           </div>
         </TabsContent>
       </Tabs>

@@ -23,6 +23,7 @@ export function FormDeleteButton({ formId }: FormDeleteButtonProps) {
   const [open, setOpen] = useState(false);
   const [deleting, setDeleting] = useState(false);
   const t = useTranslations("common");
+  const tForms = useTranslations("forms");
   const router = useRouter();
 
   const handleDelete = async () => {
@@ -46,10 +47,9 @@ export function FormDeleteButton({ formId }: FormDeleteButtonProps) {
       <Dialog open={open} onOpenChange={setOpen}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>{t("confirm")}</DialogTitle>
+            <DialogTitle>{tForms("detail.deleteConfirmTitle")}</DialogTitle>
             <DialogDescription>
-              Cette action est irr&eacute;versible. Le formulaire et toutes ses
-              r&eacute;ponses seront supprim&eacute;s.
+              {tForms("detail.deleteConfirmDescription")}
             </DialogDescription>
           </DialogHeader>
           <DialogFooter>
