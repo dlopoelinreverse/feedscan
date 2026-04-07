@@ -25,6 +25,7 @@ FROM node:20-alpine AS builder
 
 WORKDIR /app
 
+RUN apk add --no-cache libc6-compat openssl
 RUN npm install -g bun
 
 COPY package.json bun.lockb* package-lock.json* ./
@@ -47,6 +48,7 @@ ENV NEXT_PUBLIC_SUPABASE_URL=$NEXT_PUBLIC_SUPABASE_URL \
     NEXT_PUBLIC_APP_DOMAIN=$NEXT_PUBLIC_APP_DOMAIN \
     NEXT_PUBLIC_APP_URL=$NEXT_PUBLIC_APP_URL
 
+RUN mkdir -p public
 RUN bun run db:generate
 RUN bun run build
 
@@ -56,6 +58,8 @@ FROM node:20-alpine AS production
 WORKDIR /app
 
 ENV NODE_ENV=production
+
+RUN apk add --no-cache libc6-compat openssl
 
 RUN addgroup --system --gid 1001 nodejs
 RUN adduser --system --uid 1001 nextjs
