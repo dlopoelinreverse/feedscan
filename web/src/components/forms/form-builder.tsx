@@ -195,12 +195,12 @@ export function FormBuilder({ initialData }: FormBuilderProps) {
       const result = await saveForm(input);
 
       if (status === "DRAFT") {
-        toast({ title: "Brouillon sauvegard\u00e9" });
+        toast({ title: t("builder.draftSaved") });
         if (!form.id) {
           router.replace(`/dashboard/forms/${result.id}/edit`);
         }
       } else {
-        toast({ title: "Formulaire publi\u00e9 !" });
+        toast({ title: t("builder.published") });
         router.push(`/dashboard/forms/${result.id}`);
       }
     } catch (err: unknown) {
@@ -232,13 +232,13 @@ export function FormBuilder({ initialData }: FormBuilderProps) {
             disabled
             className="bg-gradient-to-r from-[#6C5CE7] to-[#00B894] text-white opacity-50 cursor-not-allowed"
           >
-            &#10024; G&eacute;n&eacute;rer
+            &#10024; {t("ai.generate")}
           </Button>
         </div>
         <div className="flex items-center gap-3 mt-3">
           <Separator className="flex-1" />
           <span className="text-xs text-muted-foreground whitespace-nowrap">
-            ou construisez manuellement
+            {t("builder.buildManually")}
           </span>
           <Separator className="flex-1" />
         </div>

@@ -41,6 +41,7 @@ export function QuestionDialog({
   nextOrder,
 }: QuestionDialogProps) {
   const t = useTranslations("forms");
+  const tCommon = useTranslations("common");
 
   const [label, setLabel] = useState(editing?.label ?? "");
   const [required, setRequired] = useState(editing?.required ?? true);
@@ -79,7 +80,7 @@ export function QuestionDialog({
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
           <DialogTitle>
-            {editing ? t("questionLabel") : t("addQuestion")} —{" "}
+            {editing ? t("dialog.editQuestionTitle") : t("dialog.addQuestionTitle")} —{" "}
             {t(`questionTypes.${type.toLowerCase()}` as "questionTypes.stars" | "questionTypes.emoji" | "questionTypes.choice" | "questionTypes.text")}
           </DialogTitle>
         </DialogHeader>
@@ -165,11 +166,11 @@ export function QuestionDialog({
           {/* Text placeholder */}
           {type === "TEXT" && (
             <div className="space-y-2">
-              <Label>Placeholder ({t("required" as never) ? "optionnel" : "optional"})</Label>
+              <Label>{t("dialog.placeholderLabel")}</Label>
               <Input
                 value={placeholder}
                 onChange={(e) => setPlaceholder(e.target.value)}
-                placeholder="Votre avis..."
+                placeholder={t("dialog.placeholderInputPlaceholder")}
               />
             </div>
           )}
@@ -183,10 +184,10 @@ export function QuestionDialog({
 
         <DialogFooter>
           <Button variant="outline" onClick={onClose}>
-            {t("cancel" as never) || "Annuler"}
+            {tCommon("cancel")}
           </Button>
           <Button onClick={handleSave} disabled={!label.trim()}>
-            {t("save" as never) || "Enregistrer"}
+            {tCommon("save")}
           </Button>
         </DialogFooter>
       </DialogContent>

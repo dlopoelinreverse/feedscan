@@ -74,7 +74,7 @@ function QuestionPreview({ question }: { question: QuestionState }) {
       {question.type === "TEXT" && (
         <div className="rounded-md border border-border bg-gray-50 p-2">
           <p className="text-[10px] text-muted-foreground">
-            {question.placeholder || "Votre avis..."}
+            {question.placeholder || tForms("dialog.placeholderInputPlaceholder")}
           </p>
         </div>
       )}
