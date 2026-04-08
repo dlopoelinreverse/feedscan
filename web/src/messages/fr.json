@@ -17,7 +17,8 @@
     "optional": "Optionnel",
     "unlimited": "Illimité",
     "poweredBy": "Propulsé par FeedScan",
-    "or": "ou"
+    "or": "ou",
+    "copy": "Copier"
   },
   "nav": {
     "dashboard": "Dashboard",
@@ -135,17 +136,24 @@
       "description": "Description",
       "descriptionPlaceholder": "Un court message pour vos clients",
       "publish": "Publier",
+      "republish": "Republier",
+      "unpublish": "Dépublier",
       "saveDraft": "Brouillon",
       "preview": "Prévisualisation mobile",
       "edit": "Éditer",
       "questionCount": "{count}/7 questions",
       "minQuestions": "Minimum 3 questions requises",
       "maxQuestions": "Maximum 7 questions atteint",
-      "draftSaved": "Brouillon sauvegardé",
-      "published": "Formulaire publié !",
+      "draftSaved": "Brouillon sauvegardé ✓",
+      "published": "Formulaire publié ✓",
       "translationMissing": "Traduction manquante — le texte français sera utilisé",
       "autoTranslate": "Traduire automatiquement",
       "buildManually": "ou construisez manuellement"
+    },
+    "validation": {
+      "labelRequired": "Le libellé de la question est requis",
+      "emptyLabel": "Toutes les questions doivent avoir un libellé",
+      "minTwoOptions": "Les questions à choix doivent avoir au moins 2 options"
     },
     "detail": {
       "stats": "Statistiques",
@@ -158,8 +166,11 @@
     "dialog": {
       "addQuestionTitle": "Ajouter une question",
       "editQuestionTitle": "Modifier la question",
+      "addButton": "Ajouter",
       "placeholderLabel": "Texte d'aide (optionnel)",
-      "placeholderInputPlaceholder": "Votre avis..."
+      "placeholderInputPlaceholder": "Votre avis...",
+      "allowMultiple": "Autoriser plusieurs réponses",
+      "addBranching": "Ajouter un suivi conditionnel"
     },
     "questionTypes": {
       "stars": "Étoiles",
@@ -220,18 +231,23 @@
   },
   "qrCodes": {
     "title": "QR Codes",
+    "subtitle": "Générez un QR code par emplacement pour identifier d'où vient chaque feedback.",
     "generate": "Générer un QR Code",
     "label": "Label",
-    "labelPlaceholder": "Ex : Table 1, Comptoir, Caisse",
+    "labelPlaceholder": "Ex : Table 3, Caisse, Terrasse...",
+    "labelHelp": "Ce label vous aide à identifier d'où vient le feedback. Le client ne le voit pas.",
+    "created": "QR code généré ✓",
     "scans": "{count} scans",
     "download": "Télécharger PNG",
+    "downloadShort": "PNG",
     "copyLink": "Copier le lien",
     "linkCopied": "Lien copié !",
-    "empty": "Aucun QR code. Générez-en un pour commencer.",
+    "empty": "Générez votre premier QR code pour commencer à collecter du feedback",
     "planLimit": "Passez au Pro pour créer plus de QR codes"
   },
   "publicForm": {
     "viaBrand": "via FeedScan",
+    "poweredBy": "Propulsé par FeedScan",
     "subtitle": "Aidez-nous à améliorer votre expérience. Moins d'une minute.",
     "submit": "Envoyer mon avis",
     "sending": "Envoi en cours...",
@@ -240,6 +256,7 @@
     "followUpPlaceholder": "Précisez si vous le souhaitez...",
     "followUpBadge": "Suivi",
     "alreadyResponded": "Vous avez déjà partagé votre avis. Merci !",
+    "formNotFoundMessage": "Ce formulaire n'existe pas ou n'est plus disponible.",
     "thankYou": {
       "title": "Merci !",
       "message": "Votre avis nous aide à nous améliorer. Bonne fin de journée !",

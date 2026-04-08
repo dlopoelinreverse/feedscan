@@ -17,7 +17,8 @@
     "optional": "Optional",
     "unlimited": "Unlimited",
     "poweredBy": "Powered by FeedScan",
-    "or": "or"
+    "or": "or",
+    "copy": "Copy"
   },
   "nav": {
     "dashboard": "Dashboard",
@@ -135,17 +136,24 @@
       "description": "Description",
       "descriptionPlaceholder": "A short message for your customers",
       "publish": "Publish",
+      "republish": "Republish",
+      "unpublish": "Unpublish",
       "saveDraft": "Save draft",
       "preview": "Mobile preview",
       "edit": "Edit",
       "questionCount": "{count}/7 questions",
       "minQuestions": "At least 3 questions required",
       "maxQuestions": "Maximum 7 questions reached",
-      "draftSaved": "Draft saved",
-      "published": "Form published!",
+      "draftSaved": "Draft saved ✓",
+      "published": "Form published ✓",
       "translationMissing": "Translation missing — the French text will be used",
       "autoTranslate": "Auto-translate",
       "buildManually": "or build manually"
+    },
+    "validation": {
+      "labelRequired": "Question label is required",
+      "emptyLabel": "All questions must have a label",
+      "minTwoOptions": "Choice questions must have at least 2 options"
     },
     "detail": {
       "stats": "Statistics",
@@ -158,8 +166,11 @@
     "dialog": {
       "addQuestionTitle": "Add a question",
       "editQuestionTitle": "Edit question",
+      "addButton": "Add",
       "placeholderLabel": "Placeholder text (optional)",
-      "placeholderInputPlaceholder": "Your feedback..."
+      "placeholderInputPlaceholder": "Your feedback...",
+      "allowMultiple": "Allow multiple answers",
+      "addBranching": "Add conditional follow-up"
     },
     "questionTypes": {
       "stars": "Stars",
@@ -220,18 +231,23 @@
   },
   "qrCodes": {
     "title": "QR Codes",
+    "subtitle": "Generate one QR code per location to know where each piece of feedback comes from.",
     "generate": "Generate a QR Code",
     "label": "Label",
-    "labelPlaceholder": "e.g. Table 1, Counter, Register",
+    "labelPlaceholder": "e.g. Table 3, Register, Patio...",
+    "labelHelp": "This label helps you identify where feedback is coming from. Customers don't see it.",
+    "created": "QR code created ✓",
     "scans": "{count} scans",
     "download": "Download PNG",
+    "downloadShort": "PNG",
     "copyLink": "Copy link",
     "linkCopied": "Link copied!",
-    "empty": "No QR codes yet. Generate one to get started.",
+    "empty": "Generate your first QR code to start collecting feedback",
     "planLimit": "Upgrade to Pro to create more QR codes"
   },
   "publicForm": {
     "viaBrand": "via FeedScan",
+    "poweredBy": "Powered by FeedScan",
     "subtitle": "Help us improve your experience. Less than a minute.",
     "submit": "Submit my feedback",
     "sending": "Submitting...",
@@ -240,6 +256,7 @@
     "followUpPlaceholder": "Feel free to elaborate...",
     "followUpBadge": "Follow-up",
     "alreadyResponded": "You've already shared your feedback. Thank you!",
+    "formNotFoundMessage": "This form doesn't exist or is no longer available.",
     "thankYou": {
       "title": "Thank you!",
       "message": "Your feedback helps us improve. Have a great day!",

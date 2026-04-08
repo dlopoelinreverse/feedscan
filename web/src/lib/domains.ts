@@ -47,3 +47,14 @@ export function getAbsoluteAppUrl(path: string = "/dashboard"): string {
   const domain = process.env.NEXT_PUBLIC_APP_DOMAIN!;
   return `https://${domain}${path}`;
 }
+
+export function getAbsoluteRootUrl(path: string = "/"): string {
+  if (isDev) return `${DEV_ORIGIN}${path}`;
+  const domain = process.env.NEXT_PUBLIC_ROOT_DOMAIN!;
+  return `https://${domain}${path}`;
+}
+
+/** Absolute public form URL — used for QR code encoding and sharing */
+export function getAbsoluteFormUrl(slug: string): string {
+  return getAbsoluteRootUrl(`/f/${slug}`);
+}

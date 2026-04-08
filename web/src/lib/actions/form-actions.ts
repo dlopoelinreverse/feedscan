@@ -28,6 +28,8 @@ export interface FollowUpRuleInput {
   followUpLabel: string;
   followUpOptions: string[];
   allowFreeText: boolean;
+  enabled?: boolean;
+  allowOptions?: boolean;
 }
 
 export interface SaveFormInput {
