@@ -22,13 +22,6 @@ services:
       - "3000"
     networks:
       - dokploy-network
-    labels:
-      - "traefik.enable=true"
-      - "traefik.docker.network=dokploy-network"
-      - "traefik.http.routers.feedscan-root.rule=Host(`${NEXT_PUBLIC_ROOT_DOMAIN}`) || Host(`${NEXT_PUBLIC_AUTH_DOMAIN}`) || Host(`${NEXT_PUBLIC_APP_DOMAIN}`)"
-      - "traefik.http.routers.feedscan-root.entrypoints=websecure"
-      - "traefik.http.routers.feedscan-root.tls.certresolver=letsencrypt"
-      - "traefik.http.services.feedscan.loadbalancer.server.port=3000"
 
 networks:
   dokploy-network:
