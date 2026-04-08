@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useTranslations } from "next-intl";
 import { nanoid } from "nanoid";
 import {
@@ -21,7 +21,16 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import type { QuestionType, QuestionState } from "./types";
+import {
+  canHaveBranching,
+  defaultFollowUpRules,
+  defaultQuestionLabel,
+  defaultQuestionPlaceholder,
+  defaultRequired,
+  type FollowUpRuleState,
+  type QuestionState,
+  type QuestionType,
+} from "./types";
 
 interface QuestionDialogProps {
   open: boolean;
@@ -42,21 +51,100 @@ export function QuestionDialog({
 }: QuestionDialogProps) {
   const t = useTranslations("forms");
   const tCommon = useTranslations("common");
+  const tBranch = useTranslations("forms.branching");
 
-  const [label, setLabel] = useState(editing?.label ?? "");
-  const [required, setRequired] = useState(editing?.required ?? true);
-  const [emojiLevels, setEmojiLevels] = useState(editing?.emojiLevels ?? 5);
-  const [multipleChoice, setMultipleChoice] = useState(
-    editing?.multipleChoice ?? false
-  );
-  const [options, setOptions] = useState<string[]>(
-    editing?.options ?? (type === "CHOICE" ? [""] : [])
-  );
-  const [placeholder, setPlaceholder] = useState(editing?.placeholder ?? "");
+  const [label, setLabel] = useState("");
+  const [required, setRequired] = useState(true);
+  const [emojiLevels, setEmojiLevels] = useState<number>(5);
+  const [multipleChoice, setMultipleChoice] = useState(false);
+  const [options, setOptions] = useState<string[]>([]);
+  const [placeholder, setPlaceholder] = useState("");
+  const [hasBranching, setHasBranching] = useState(false);
+  const [followUpRules, setFollowUpRules] = useState<FollowUpRuleState[]>([]);
+  const [error, setError] = useState<string | null>(null);
+
+  // Re-init state when the dialog opens for a new question or editing
+  useEffect(() => {
+    if (!open) return;
+
+    if (editing) {
+      setLabel(editing.label);
+      setRequired(editing.required);
+      setEmojiLevels(editing.emojiLevels ?? 5);
+      setMultipleChoice(editing.multipleChoice ?? false);
+      setOptions(
+        editing.options.length > 0
+          ? [...editing.options]
+          : type === "CHOICE"
+            ? ["", ""]
+            : []
+      );
+      setPlaceholder(editing.placeholder ?? "");
+      setHasBranching(editing.hasBranching);
+      setFollowUpRules(
+        editing.followUpRules.length > 0
+          ? editing.followUpRules.map((r) => ({ ...r }))
+          : defaultFollowUpRules(type, editing.emojiLevels)
+      );
+    } else {
+      setLabel(defaultQuestionLabel(type));
+      setRequired(defaultRequired(type));
+      setEmojiLevels(5);
+      setMultipleChoice(false);
+      setOptions(type === "CHOICE" ? ["", ""] : []);
+      setPlaceholder(defaultQuestionPlaceholder(type));
+      setHasBranching(false);
+      setFollowUpRules(defaultFollowUpRules(type));
+    }
+    setError(null);
+  }, [open, editing, type]);
+
+  // When emoji levels change, reset the branching rule ranges to sensible defaults
+  useEffect(() => {
+    if (type === "EMOJI" && hasBranching) {
+      setFollowUpRules((prev) =>
+        defaultFollowUpRules("EMOJI", emojiLevels).map((defRule) => {
+          const existing = prev.find(
+            (r) => r.triggerType === defRule.triggerType
+          );
+          return existing
+            ? {
+                ...defRule,
+                followUpLabel: existing.followUpLabel,
+                followUpOptions: existing.followUpOptions,
+                allowFreeText: existing.allowFreeText,
+              }
+            : defRule;
+        })
+      );
+    }
+  }, [emojiLevels, type, hasBranching]);
 
   const handleSave = () => {
-    if (!label.trim()) return;
-    const filteredOptions = options.filter((o) => o.trim() !== "");
+    if (!label.trim()) {
+      setError(t("validation.labelRequired"));
+      return;
+    }
+    if (type === "CHOICE") {
+      const filtered = options.map((o) => o.trim()).filter((o) => o !== "");
+      if (filtered.length < 2) {
+        setError(t("validation.minTwoOptions"));
+        return;
+      }
+    }
+
+    const filteredOptions =
+      type === "CHOICE"
+        ? options.map((o) => o.trim()).filter((o) => o !== "")
+        : [];
+
+    const finalRules =
+      canHaveBranching(type) && hasBranching
+        ? followUpRules.map((r) => ({
+            ...r,
+            followUpOptions: r.followUpOptions.filter((o) => o.trim() !== ""),
+          }))
+        : [];
 
     onSave({
       clientId: editing?.clientId ?? nanoid(),
@@ -66,22 +154,44 @@ export function QuestionDialog({
       options: filteredOptions,
       order: editing?.order ?? nextOrder,
       required,
-      hasBranching: editing?.hasBranching ?? false,
+      hasBranching: canHaveBranching(type) && hasBranching,
       emojiLevels: type === "EMOJI" ? emojiLevels : undefined,
       multipleChoice: type === "CHOICE" ? multipleChoice : undefined,
       placeholder: type === "TEXT" ? placeholder : undefined,
-      followUpRules: editing?.followUpRules ?? [],
+      followUpRules: finalRules,
     });
     onClose();
   };
 
+  const updateRule = (
+    triggerType: "LOW" | "HIGH",
+    patch: Partial<FollowUpRuleState>
+  ) => {
+    setFollowUpRules((prev) => {
+      const idx = prev.findIndex((r) => r.triggerType === triggerType);
+      if (idx === -1) return prev;
+      const next = [...prev];
+      next[idx] = { ...next[idx], ...patch };
+      return next;
+    });
+  };
+
   return (
     <Dialog open={open} onOpenChange={(v) => !v && onClose()}>
-      <DialogContent className="sm:max-w-md">
+      <DialogContent className="sm:max-w-lg max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>
-            {editing ? t("dialog.editQuestionTitle") : t("dialog.addQuestionTitle")} —{" "}
-            {t(`questionTypes.${type.toLowerCase()}` as "questionTypes.stars" | "questionTypes.emoji" | "questionTypes.choice" | "questionTypes.text")}
+            {editing
+              ? t("dialog.editQuestionTitle")
+              : t("dialog.addQuestionTitle")}{" "}
+            —{" "}
+            {t(
+              `questionTypes.${type.toLowerCase()}` as
+                | "questionTypes.stars"
+                | "questionTypes.emoji"
+                | "questionTypes.choice"
+                | "questionTypes.text"
+            )}
           </DialogTitle>
         </DialogHeader>
 
@@ -108,8 +218,8 @@ export function QuestionDialog({
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="3">3</SelectItem>
-                  <SelectItem value="5">5</SelectItem>
+                  <SelectItem value="3">{"3 (😞 😐 😊)"}</SelectItem>
+                  <SelectItem value="5">{"5 (😠 😐 🙂 😄 🤩)"}</SelectItem>
                 </SelectContent>
               </Select>
             </div>
@@ -130,25 +240,26 @@ export function QuestionDialog({
                     }}
                     placeholder={`Option ${i + 1}`}
                   />
-                  {options.length > 1 && (
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() =>
-                        setOptions(options.filter((_, j) => j !== i))
-                      }
-                    >
-                      &times;
-                    </Button>
-                  )}
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="sm"
+                    disabled={options.length <= 2}
+                    onClick={() =>
+                      setOptions(options.filter((_, j) => j !== i))
+                    }
+                  >
+                    &times;
+                  </Button>
                 </div>
               ))}
               <Button
+                type="button"
                 variant="outline"
                 size="sm"
                 onClick={() => setOptions([...options, ""])}
               >
-                {t("addOption")}
+                + {t("addOption")}
               </Button>
 
               <div className="flex items-center gap-2 pt-2">
@@ -156,8 +267,8 @@ export function QuestionDialog({
                   checked={multipleChoice}
                   onCheckedChange={setMultipleChoice}
                 />
-                <Label className="text-sm">
-                  {multipleChoice ? t("multipleChoice") : t("singleChoice")}
+                <Label className="text-sm cursor-pointer">
+                  {t("dialog.allowMultiple")}
                 </Label>
               </div>
             </div>
@@ -178,19 +289,182 @@ export function QuestionDialog({
           {/* Required switch */}
           <div className="flex items-center gap-2">
             <Switch checked={required} onCheckedChange={setRequired} />
-            <Label className="text-sm">{t("required")}</Label>
+            <Label className="text-sm cursor-pointer">{t("required")}</Label>
           </div>
+
+          {/* Branching — only for STARS and EMOJI */}
+          {canHaveBranching(type) && (
+            <div className="border-t pt-4 space-y-3">
+              <div className="flex items-center gap-2">
+                <Switch
+                  checked={hasBranching}
+                  onCheckedChange={(v) => {
+                    setHasBranching(v);
+                    if (v && followUpRules.length === 0) {
+                      setFollowUpRules(defaultFollowUpRules(type, emojiLevels));
+                    }
+                  }}
+                />
+                <Label className="text-sm font-medium cursor-pointer">
+                  {t("dialog.addBranching")}
+                </Label>
+              </div>
+
+              {hasBranching && (
+                <div className="border-l-4 border-[#6C5CE7] bg-muted/50 rounded-r-lg p-4 space-y-4">
+                  <RuleEditor
+                    rule={followUpRules.find((r) => r.triggerType === "LOW")!}
+                    variant="low"
+                    type={type}
+                    emojiLevels={emojiLevels}
+                    onChange={(patch) => updateRule("LOW", patch)}
+                  />
+                  <RuleEditor
+                    rule={followUpRules.find((r) => r.triggerType === "HIGH")!}
+                    variant="high"
+                    type={type}
+                    emojiLevels={emojiLevels}
+                    onChange={(patch) => updateRule("HIGH", patch)}
+                  />
+                  <p className="text-xs text-muted-foreground italic">
+                    &#8505; {tBranch("neutralNote")}
+                  </p>
+                </div>
+              )}
+            </div>
+          )}
+
+          {error && <p className="text-sm text-destructive">{error}</p>}
         </div>
 
         <DialogFooter>
           <Button variant="outline" onClick={onClose}>
             {tCommon("cancel")}
           </Button>
-          <Button onClick={handleSave} disabled={!label.trim()}>
-            {tCommon("save")}
+          <Button onClick={handleSave}>
+            {editing ? tCommon("save") : t("dialog.addButton")}
           </Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>
   );
+}
+
+function RuleEditor({
+  rule,
+  variant,
+  type,
+  emojiLevels,
+  onChange,
+}: {
+  rule: FollowUpRuleState;
+  variant: "low" | "high";
+  type: QuestionType;
+  emojiLevels: number;
+  onChange: (patch: Partial<FollowUpRuleState>) => void;
+}) {
+  const t = useTranslations("forms.branching");
+
+  const badgeBg =
+    variant === "low"
+      ? "bg-red-50 text-red-800 border border-red-200"
+      : "bg-green-50 text-green-800 border border-green-200";
+  const icon = variant === "low" ? "\uD83D\uDD34" : "\uD83D\uDFE2";
+
+  const scaleLabel = getScaleLabel(type, emojiLevels, rule);
+
+  const addOption = () => {
+    const val = prompt("Option");
+    if (val?.trim()) {
+      onChange({ followUpOptions: [...rule.followUpOptions, val.trim()] });
+    }
+  };
+
+  return (
+    <div className="space-y-2">
+      <div className="flex items-center gap-2 flex-wrap">
+        <span className="text-sm font-medium">
+          {icon} {variant === "low" ? t("lowScore") : t("highScore")}
+        </span>
+        <span
+          className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium ${badgeBg}`}
+        >
+          {scaleLabel}
+        </span>
+      </div>
+
+      <Input
+        value={rule.followUpLabel}
+        onChange={(e) => onChange({ followUpLabel: e.target.value })}
+        placeholder={
+          variant === "low"
+            ? "Qu'est-ce qui n'a pas \u00e9t\u00e9 \u00e0 la hauteur ?"
+            : "Qu'est-ce qui vous a le plus plu ?"
+        }
+        className="text-sm"
+      />
+
+      {/* Option pills */}
+      <div className="flex flex-wrap gap-1.5">
+        {rule.followUpOptions.map((opt, i) => (
+          <span
+            key={i}
+            className="inline-flex items-center gap-1 px-2 py-1 rounded-full bg-background border text-xs"
+          >
+            {opt}
+            <button
+              type="button"
+              className="text-muted-foreground hover:text-destructive ml-0.5"
+              onClick={() =>
+                onChange({
+                  followUpOptions: rule.followUpOptions.filter(
+                    (_, j) => j !== i
+                  ),
+                })
+              }
+            >
+              &times;
+            </button>
+          </span>
+        ))}
+        <button
+          type="button"
+          onClick={addOption}
+          className="inline-flex items-center gap-1 px-2 py-1 rounded-full border border-dashed border-[#6C5CE7] text-[#6C5CE7] text-xs hover:bg-[#EAE6FD] transition-colors"
+        >
+          + Ajouter
+        </button>
+      </div>
+
+      <div className="flex items-center gap-2">
+        <Switch
+          checked={rule.allowFreeText}
+          onCheckedChange={(v) => onChange({ allowFreeText: v })}
+        />
+        <Label className="text-xs cursor-pointer">{t("allowFreeText")}</Label>
+      </div>
+    </div>
+  );
+}
+
+function getScaleLabel(
+  type: QuestionType,
+  emojiLevels: number,
+  rule: FollowUpRuleState
+): string {
+  if (type === "STARS") {
+    return rule.triggerMin === rule.triggerMax
+      ? `${rule.triggerMin} \u2605`
+      : `${rule.triggerMin}-${rule.triggerMax} \u2605`;
+  }
+  // EMOJI
+  const emojis5 = ["\u{1F620}", "\u{1F610}", "\u{1F642}", "\u{1F604}", "\u{1F929}"];
+  const emojis3 = ["\u{1F61E}", "\u{1F610}", "\u{1F60A}"];
+  const set = emojiLevels === 3 ? emojis3 : emojis5;
+  if (rule.triggerMin === rule.triggerMax) {
+    return set[rule.triggerMin - 1] ?? "";
+  }
+  return set
+    .slice(rule.triggerMin - 1, rule.triggerMax)
+    .join("");
 }

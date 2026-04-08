@@ -20,6 +20,7 @@ export default async function FormEditPage({ params }: FormEditPageProps) {
     id: form.id,
     title: form.title,
     description: form.description ?? "",
+    status: form.status,
     rateLimitMode: form.rateLimitMode,
     rateLimitHours: form.rateLimitHours ?? undefined,
     questions: form.questions.map(

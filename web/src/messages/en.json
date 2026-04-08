@@ -135,17 +135,24 @@
       "description": "Description",
       "descriptionPlaceholder": "A short message for your customers",
       "publish": "Publish",
+      "republish": "Republish",
+      "unpublish": "Unpublish",
       "saveDraft": "Save draft",
       "preview": "Mobile preview",
       "edit": "Edit",
       "questionCount": "{count}/7 questions",
       "minQuestions": "At least 3 questions required",
       "maxQuestions": "Maximum 7 questions reached",
-      "draftSaved": "Draft saved",
-      "published": "Form published!",
+      "draftSaved": "Draft saved ✓",
+      "published": "Form published ✓",
       "translationMissing": "Translation missing — the French text will be used",
       "autoTranslate": "Auto-translate",
       "buildManually": "or build manually"
+    },
+    "validation": {
+      "labelRequired": "Question label is required",
+      "emptyLabel": "All questions must have a label",
+      "minTwoOptions": "Choice questions must have at least 2 options"
     },
     "detail": {
       "stats": "Statistics",
@@ -158,8 +165,11 @@
     "dialog": {
       "addQuestionTitle": "Add a question",
       "editQuestionTitle": "Edit question",
+      "addButton": "Add",
       "placeholderLabel": "Placeholder text (optional)",
-      "placeholderInputPlaceholder": "Your feedback..."
+      "placeholderInputPlaceholder": "Your feedback...",
+      "allowMultiple": "Allow multiple answers",
+      "addBranching": "Add conditional follow-up"
     },
     "questionTypes": {
       "stars": "Stars",

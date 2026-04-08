@@ -1,17 +1,29 @@
 "use client";
 
+import { useState } from "react";
 import { useTranslations } from "next-intl";
-import type { FormBuilderState, QuestionState } from "./types";
+import type {
+  FormBuilderState,
+  FollowUpRuleState,
+  QuestionState,
+} from "./types";
 
-const EMOJIS_5 = ["\ud83d\ude20", "\ud83d\ude1f", "\ud83d\ude42", "\ud83d\ude04", "\ud83e\udd29"];
-const EMOJIS_3 = ["\ud83d\ude1e", "\ud83d\ude42", "\ud83d\ude04"];
+const EMOJIS_5 = ["😠", "😐", "🙂", "😄", "🤩"];
+const EMOJIS_3 = ["😞", "😐", "😊"];
 
 interface MobilePreviewProps {
   form: FormBuilderState;
 }
 
+type AnswerValue = number | string | string[];
+
 export function MobilePreview({ form }: MobilePreviewProps) {
   const t = useTranslations("publicForm");
+  const [answers, setAnswers] = useState<Record<string, AnswerValue>>({});
+
+  const setAnswer = (clientId: string, value: AnswerValue) => {
+    setAnswers((prev) => ({ ...prev, [clientId]: value }));
+  };
 
   return (
     <div className="bg-white rounded-[28px] border border-border shadow-sm w-[260px] mx-auto overflow-hidden">
@@ -20,32 +32,39 @@ export function MobilePreview({ form }: MobilePreviewProps) {
         <div className="w-20 h-1.5 bg-gray-300 rounded-full" />
       </div>
 
-      <div className="px-4 pb-5 space-y-4">
+      <div className="px-4 pb-5 space-y-4 max-h-[520px] overflow-y-auto">
         {/* Title */}
         <div>
           <h3 className="font-bold text-[16px] leading-tight">
             {form.title || "..."}
           </h3>
-          {form.description && (
-            <p className="text-[11px] text-muted-foreground mt-1">
-              {form.description}
-            </p>
-          )}
-          {!form.description && (
-            <p className="text-[11px] text-muted-foreground mt-1">
-              {t("subtitle")}
-            </p>
-          )}
+          <p className="text-[11px] text-muted-foreground mt-1">
+            {form.description || t("subtitle")}
+          </p>
         </div>
 
         {/* Questions */}
+        {form.questions.length === 0 && (
+          <p className="text-xs text-muted-foreground italic text-center py-8">
+            Ajoutez des questions pour voir la preview
+          </p>
+        )}
+
         {form.questions.map((q) => (
-          <QuestionPreview key={q.clientId} question={q} />
+          <QuestionPreview
+            key={q.clientId}
+            question={q}
+            value={answers[q.clientId]}
+            onChange={(v) => setAnswer(q.clientId, v)}
+          />
         ))}
 
         {/* Submit button */}
         {form.questions.length > 0 && (
-          <button className="w-full py-2.5 rounded-lg bg-[#6C5CE7] text-white text-sm font-medium">
+          <button
+            type="button"
+            className="w-full py-2.5 rounded-lg bg-[#6C5CE7] text-white text-sm font-medium"
+          >
             {t("submit")}
           </button>
         )}
@@ -54,95 +73,251 @@ export function MobilePreview({ form }: MobilePreviewProps) {
   );
 }
 
-function QuestionPreview({ question }: { question: QuestionState }) {
-  const tForms = useTranslations("forms");
+function QuestionPreview({
+  question,
+  value,
+  onChange,
+}: {
+  question: QuestionState;
+  value: AnswerValue | undefined;
+  onChange: (v: AnswerValue) => void;
+}) {
+  const matchedRule = getMatchingRule(question, value);
 
   return (
-    <div className="space-y-1.5">
-      <p className="text-xs font-semibold">
+    <div className="space-y-2">
+      <p className="text-xs font-semibold leading-snug">
         {question.label || "..."}{" "}
         {question.required && <span className="text-red-500">*</span>}
       </p>
 
-      {question.type === "STARS" && <StarsPreview />}
+      {question.type === "STARS" && (
+        <StarsInput
+          value={typeof value === "number" ? value : 0}
+          onChange={onChange}
+        />
+      )}
       {question.type === "EMOJI" && (
-        <EmojiPreview levels={question.emojiLevels ?? 5} />
+        <EmojiInput
+          levels={question.emojiLevels ?? 5}
+          value={typeof value === "number" ? value : 0}
+          onChange={onChange}
+        />
       )}
       {question.type === "CHOICE" && (
-        <ChoicePreview options={question.options} />
+        <ChoiceInput
+          options={question.options}
+          multiple={question.multipleChoice ?? false}
+          value={value}
+          onChange={onChange}
+        />
       )}
       {question.type === "TEXT" && (
-        <div className="rounded-md border border-border bg-gray-50 p-2">
-          <p className="text-[10px] text-muted-foreground">
-            {question.placeholder || tForms("dialog.placeholderInputPlaceholder")}
-          </p>
-        </div>
+        <TextInput
+          placeholder={question.placeholder || "Votre avis..."}
+          value={typeof value === "string" ? value : ""}
+          onChange={onChange}
+        />
       )}
 
-      {question.hasBranching && (
-        <span className="inline-flex items-center gap-1 text-[9px] bg-[#EAE6FD] text-[#6C5CE7] px-1.5 py-0.5 rounded-full font-medium">
-          ⚡ {tForms("branching.toggle")}
-        </span>
+      {/* Follow-up */}
+      {matchedRule && (
+        <FollowUpBlock rule={matchedRule} variant={matchedRule.triggerType} />
       )}
     </div>
   );
 }
 
-function StarsPreview() {
+function getMatchingRule(
+  question: QuestionState,
+  value: AnswerValue | undefined
+): FollowUpRuleState | null {
+  if (!question.hasBranching) return null;
+  if (typeof value !== "number" || value === 0) return null;
+
+  for (const rule of question.followUpRules) {
+    if (value >= rule.triggerMin && value <= rule.triggerMax) {
+      return rule;
+    }
+  }
+  return null;
+}
+
+function StarsInput({
+  value,
+  onChange,
+}: {
+  value: number;
+  onChange: (v: number) => void;
+}) {
   return (
     <div className="flex gap-1">
       {[1, 2, 3, 4, 5].map((i) => (
-        <div
+        <button
           key={i}
-          className={`w-7 h-7 rounded-full flex items-center justify-center text-xs ${
-            i <= 4
+          type="button"
+          onClick={() => onChange(i)}
+          className={`w-7 h-7 rounded-full flex items-center justify-center text-sm transition-colors ${
+            i <= value
               ? "bg-[#FEF3E2] text-[#FDCB6E]"
-              : "bg-gray-100 text-gray-400"
+              : "bg-gray-100 text-gray-300 hover:bg-gray-200"
           }`}
         >
           ★
-        </div>
+        </button>
       ))}
     </div>
   );
 }
 
-function EmojiPreview({ levels }: { levels: number }) {
+function EmojiInput({
+  levels,
+  value,
+  onChange,
+}: {
+  levels: number;
+  value: number;
+  onChange: (v: number) => void;
+}) {
   const emojis = levels === 3 ? EMOJIS_3 : EMOJIS_5;
   return (
     <div className="flex gap-1">
-      {emojis.map((emoji, i) => (
-        <div
+      {emojis.map((emoji, i) => {
+        const level = i + 1;
+        const selected = value === level;
+        return (
+          <button
+            key={i}
+            type="button"
+            onClick={() => onChange(level)}
+            className={`w-9 h-9 rounded-lg flex items-center justify-center text-base transition-all ${
+              selected
+                ? "border-2 border-[#00B894] bg-[#E1F5EE]"
+                : "bg-gray-50 hover:bg-gray-100"
+            }`}
+          >
+            {emoji}
+          </button>
+        );
+      })}
+    </div>
+  );
+}
+
+function ChoiceInput({
+  options,
+  multiple,
+  value,
+  onChange,
+}: {
+  options: string[];
+  multiple: boolean;
+  value: AnswerValue | undefined;
+  onChange: (v: AnswerValue) => void;
+}) {
+  const selectedArr = Array.isArray(value) ? value : [];
+  const selectedStr = typeof value === "string" ? value : "";
+
+  const isSelected = (opt: string) =>
+    multiple ? selectedArr.includes(opt) : selectedStr === opt;
+
+  const handleClick = (opt: string) => {
+    if (multiple) {
+      if (selectedArr.includes(opt)) {
+        onChange(selectedArr.filter((o) => o !== opt));
+      } else {
+        onChange([...selectedArr, opt]);
+      }
+    } else {
+      onChange(opt);
+    }
+  };
+
+  if (options.length === 0) {
+    return (
+      <p className="text-[10px] text-muted-foreground italic">
+        Ajoutez des options...
+      </p>
+    );
+  }
+
+  return (
+    <div className="space-y-1">
+      {options.map((opt, i) => (
+        <button
           key={i}
-          className={`w-9 h-9 rounded-lg flex items-center justify-center text-sm ${
-            i === Math.floor(emojis.length / 2)
-              ? "border-2 border-[#00B894] bg-[#E1F5EE]"
-              : "bg-gray-50"
+          type="button"
+          onClick={() => handleClick(opt)}
+          className={`w-full text-left text-[10px] px-2.5 py-1.5 rounded-md border transition-colors ${
+            isSelected(opt)
+              ? "border-[#6C5CE7] bg-[#EAE6FD] text-[#6C5CE7]"
+              : "border-border hover:border-[#6C5CE7]/50"
           }`}
         >
-          {emoji}
-        </div>
+          {opt}
+        </button>
       ))}
     </div>
   );
 }
 
-function ChoicePreview({ options }: { options: string[] }) {
-  if (options.length === 0) return null;
+function TextInput({
+  placeholder,
+  value,
+  onChange,
+}: {
+  placeholder: string;
+  value: string;
+  onChange: (v: string) => void;
+}) {
   return (
-    <div className="space-y-1">
-      {options.map((opt, i) => (
-        <div
-          key={i}
-          className={`text-[10px] px-2.5 py-1.5 rounded-md border ${
-            i === 0
-              ? "border-[#6C5CE7] bg-[#EAE6FD] text-[#6C5CE7]"
-              : "border-border text-foreground"
-          }`}
-        >
-          {opt}
+    <textarea
+      value={value}
+      onChange={(e) => onChange(e.target.value)}
+      placeholder={placeholder}
+      rows={2}
+      className="w-full text-[10px] px-2 py-1.5 rounded-md border border-border bg-gray-50 resize-none focus:outline-none focus:border-[#6C5CE7]"
+    />
+  );
+}
+
+function FollowUpBlock({
+  rule,
+  variant,
+}: {
+  rule: FollowUpRuleState;
+  variant: "LOW" | "HIGH";
+}) {
+  const borderColor =
+    variant === "LOW" ? "border-red-400" : "border-green-400";
+  const bgColor = variant === "LOW" ? "bg-red-50/50" : "bg-green-50/50";
+
+  return (
+    <div
+      className={`mt-2 border-l-4 ${borderColor} ${bgColor} rounded-r-md p-2 space-y-1.5 animate-in slide-in-from-top-2 duration-200`}
+    >
+      <p className="text-[10px] font-semibold">
+        {rule.followUpLabel || "Question de suivi..."}
+      </p>
+      {rule.followUpOptions.length > 0 && (
+        <div className="flex flex-wrap gap-1">
+          {rule.followUpOptions.map((opt, i) => (
+            <span
+              key={i}
+              className="text-[9px] px-1.5 py-0.5 rounded bg-white border border-border"
+            >
+              {opt}
+            </span>
+          ))}
         </div>
-      ))}
+      )}
+      {rule.allowFreeText && (
+        <textarea
+          rows={1}
+          placeholder="Pr\u00e9cisez..."
+          className="w-full text-[9px] px-1.5 py-1 rounded border border-border bg-white resize-none focus:outline-none"
+        />
+      )}
     </div>
   );
 }

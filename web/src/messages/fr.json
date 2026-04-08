@@ -135,17 +135,24 @@
       "description": "Description",
       "descriptionPlaceholder": "Un court message pour vos clients",
       "publish": "Publier",
+      "republish": "Republier",
+      "unpublish": "Dépublier",
       "saveDraft": "Brouillon",
       "preview": "Prévisualisation mobile",
       "edit": "Éditer",
       "questionCount": "{count}/7 questions",
       "minQuestions": "Minimum 3 questions requises",
       "maxQuestions": "Maximum 7 questions atteint",
-      "draftSaved": "Brouillon sauvegardé",
-      "published": "Formulaire publié !",
+      "draftSaved": "Brouillon sauvegardé ✓",
+      "published": "Formulaire publié ✓",
       "translationMissing": "Traduction manquante — le texte français sera utilisé",
       "autoTranslate": "Traduire automatiquement",
       "buildManually": "ou construisez manuellement"
+    },
+    "validation": {
+      "labelRequired": "Le libellé de la question est requis",
+      "emptyLabel": "Toutes les questions doivent avoir un libellé",
+      "minTwoOptions": "Les questions à choix doivent avoir au moins 2 options"
     },
     "detail": {
       "stats": "Statistiques",
@@ -158,8 +165,11 @@
     "dialog": {
       "addQuestionTitle": "Ajouter une question",
       "editQuestionTitle": "Modifier la question",
+      "addButton": "Ajouter",
       "placeholderLabel": "Texte d'aide (optionnel)",
-      "placeholderInputPlaceholder": "Votre avis..."
+      "placeholderInputPlaceholder": "Votre avis...",
+      "allowMultiple": "Autoriser plusieurs réponses",
+      "addBranching": "Ajouter un suivi conditionnel"
     },
     "questionTypes": {
       "stars": "Étoiles",
