@@ -3,7 +3,7 @@
 import { prisma } from "@/lib/prisma";
 import { createClient } from "@/lib/supabase/server";
 import { generateUniqueCode } from "@/lib/utils";
-import { getFormUrl } from "@/lib/domains";
+import { getAbsoluteFormUrl } from "@/lib/domains";
 
 async function getAuthUserId(): Promise<string> {
   const supabase = await createClient();
@@ -49,7 +49,7 @@ export async function listQRCodes(formId: string): Promise<QRCodeItem[]> {
     uniqueCode: c.uniqueCode,
     scans: c.scans,
     createdAt: c.createdAt,
-    url: `${getFormUrl(form.slug)}?qr=${c.uniqueCode}`,
+    url: `${getAbsoluteFormUrl(form.slug)}?qr=${c.uniqueCode}`,
   }));
 }
 
@@ -90,7 +90,7 @@ export async function createQRCode(
     uniqueCode: qrCode.uniqueCode,
     scans: qrCode.scans,
     createdAt: qrCode.createdAt,
-    url: `${getFormUrl(form.slug)}?qr=${qrCode.uniqueCode}`,
+    url: `${getAbsoluteFormUrl(form.slug)}?qr=${qrCode.uniqueCode}`,
   };
 }
 

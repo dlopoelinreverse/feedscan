@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import QRCode from "qrcode";
 import { prisma } from "@/lib/prisma";
 import { createClient } from "@/lib/supabase/server";
-import { getFormUrl } from "@/lib/domains";
+import { getAbsoluteFormUrl } from "@/lib/domains";
 
 export async function GET(
   _request: Request,
@@ -27,7 +27,7 @@ export async function GET(
     return new NextResponse("Not found", { status: 404 });
   }
 
-  const url = `${getFormUrl(qrCode.form.slug)}?qr=${qrCode.uniqueCode}`;
+  const url = `${getAbsoluteFormUrl(qrCode.form.slug)}?qr=${qrCode.uniqueCode}`;
 
   // Generate high-resolution PNG with label text below
   const qrBuffer = await QRCode.toBuffer(url, {

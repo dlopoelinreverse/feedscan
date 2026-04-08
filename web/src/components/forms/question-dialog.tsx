@@ -371,7 +371,19 @@ function RuleEditor({
       : "bg-green-50 text-green-800 border border-green-200";
   const icon = variant === "low" ? "\uD83D\uDD34" : "\uD83D\uDFE2";
 
-  const scaleLabel = getScaleLabel(type, emojiLevels, rule);
+  const maxScale = type === "STARS" ? 5 : emojiLevels;
+  const unit = type === "STARS" ? "\u2605" : getEmojiForLevel(emojiLevels);
+
+  const setMin = (v: number) => {
+    const clamped = Math.max(1, Math.min(maxScale, v));
+    const newMax = Math.max(clamped, rule.triggerMax);
+    onChange({ triggerMin: clamped, triggerMax: Math.min(newMax, maxScale) });
+  };
+  const setMax = (v: number) => {
+    const clamped = Math.max(1, Math.min(maxScale, v));
+    const newMin = Math.min(clamped, rule.triggerMin);
+    onChange({ triggerMax: clamped, triggerMin: Math.max(newMin, 1) });
+  };
 
   const addOption = () => {
     const val = prompt("Option");
@@ -386,11 +398,29 @@ function RuleEditor({
         <span className="text-sm font-medium">
           {icon} {variant === "low" ? t("lowScore") : t("highScore")}
         </span>
-        <span
+        <div
           className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium ${badgeBg}`}
         >
-          {scaleLabel}
-        </span>
+          <span>{t("ifScore")}</span>
+          <Input
+            type="number"
+            min={1}
+            max={maxScale}
+            value={rule.triggerMin}
+            onChange={(e) => setMin(Number(e.target.value))}
+            className="w-10 h-6 text-xs p-1 border-0 bg-white/60 text-center"
+          />
+          <span>{t("and")}</span>
+          <Input
+            type="number"
+            min={1}
+            max={maxScale}
+            value={rule.triggerMax}
+            onChange={(e) => setMax(Number(e.target.value))}
+            className="w-10 h-6 text-xs p-1 border-0 bg-white/60 text-center"
+          />
+          <span className="ml-0.5">{unit}</span>
+        </div>
       </div>
 
       <Input
@@ -447,24 +477,6 @@ function RuleEditor({
   );
 }
 
-function getScaleLabel(
-  type: QuestionType,
-  emojiLevels: number,
-  rule: FollowUpRuleState
-): string {
-  if (type === "STARS") {
-    return rule.triggerMin === rule.triggerMax
-      ? `${rule.triggerMin} \u2605`
-      : `${rule.triggerMin}-${rule.triggerMax} \u2605`;
-  }
-  // EMOJI
-  const emojis5 = ["\u{1F620}", "\u{1F610}", "\u{1F642}", "\u{1F604}", "\u{1F929}"];
-  const emojis3 = ["\u{1F61E}", "\u{1F610}", "\u{1F60A}"];
-  const set = emojiLevels === 3 ? emojis3 : emojis5;
-  if (rule.triggerMin === rule.triggerMax) {
-    return set[rule.triggerMin - 1] ?? "";
-  }
-  return set
-    .slice(rule.triggerMin - 1, rule.triggerMax)
-    .join("");
+function getEmojiForLevel(emojiLevels: number): string {
+  return emojiLevels === 3 ? "\u{1F600}" : "\u{1F604}";
 }

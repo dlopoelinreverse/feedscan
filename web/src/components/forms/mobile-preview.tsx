@@ -314,7 +314,7 @@ function FollowUpBlock({
       {rule.allowFreeText && (
         <textarea
           rows={1}
-          placeholder="Pr\u00e9cisez..."
+          placeholder="Précisez..."
           className="w-full text-[9px] px-1.5 py-1 rounded border border-border bg-white resize-none focus:outline-none"
         />
       )}
