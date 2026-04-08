@@ -8,6 +8,8 @@ export interface FollowUpRuleState {
   followUpLabel: string;
   followUpOptions: string[];
   allowFreeText: boolean;
+  enabled: boolean;
+  allowOptions: boolean;
 }
 
 export interface QuestionState {
@@ -61,6 +63,8 @@ export function defaultFollowUpRules(
         followUpLabel: "",
         followUpOptions: [],
         allowFreeText: true,
+        allowOptions: true,
+        enabled: true,
       },
       {
         triggerType: "HIGH",
@@ -69,6 +73,8 @@ export function defaultFollowUpRules(
         followUpLabel: "",
         followUpOptions: [],
         allowFreeText: true,
+        allowOptions: true,
+        enabled: true,
       },
     ];
   }
@@ -83,6 +89,8 @@ export function defaultFollowUpRules(
           followUpLabel: "",
           followUpOptions: [],
           allowFreeText: true,
+          allowOptions: true,
+          enabled: true,
         },
         {
           triggerType: "HIGH",
@@ -91,6 +99,8 @@ export function defaultFollowUpRules(
           followUpLabel: "",
           followUpOptions: [],
           allowFreeText: true,
+          allowOptions: true,
+          enabled: true,
         },
       ];
     }
@@ -102,6 +112,8 @@ export function defaultFollowUpRules(
         followUpLabel: "",
         followUpOptions: [],
         allowFreeText: true,
+        allowOptions: true,
+        enabled: true,
       },
       {
         triggerType: "HIGH",
@@ -110,6 +122,8 @@ export function defaultFollowUpRules(
         followUpLabel: "",
         followUpOptions: [],
         allowFreeText: true,
+        allowOptions: true,
+        enabled: true,
       },
     ];
   }

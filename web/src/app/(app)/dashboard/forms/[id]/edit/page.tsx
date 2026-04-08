@@ -34,17 +34,22 @@ export default async function FormEditPage({ params }: FormEditPageProps) {
         required: q.required,
         hasBranching: q.hasBranching,
         followUpRules: q.followUpRules.map(
-          (r: { id: string; triggerType: string; triggerMin: number; triggerMax: number; followUpLabel: string; followUpOptions: unknown; allowFreeText: boolean }): FollowUpRuleState => ({
-            id: r.id,
-            triggerType: r.triggerType as "LOW" | "HIGH",
-            triggerMin: r.triggerMin,
-            triggerMax: r.triggerMax,
-            followUpLabel: r.followUpLabel,
-            followUpOptions: Array.isArray(r.followUpOptions)
+          (r: { id: string; triggerType: string; triggerMin: number; triggerMax: number; followUpLabel: string; followUpOptions: unknown; allowFreeText: boolean }): FollowUpRuleState => {
+            const opts = Array.isArray(r.followUpOptions)
               ? (r.followUpOptions as string[])
-              : [],
-            allowFreeText: r.allowFreeText,
-          })
+              : [];
+            return {
+              id: r.id,
+              triggerType: r.triggerType as "LOW" | "HIGH",
+              triggerMin: r.triggerMin,
+              triggerMax: r.triggerMax,
+              followUpLabel: r.followUpLabel,
+              followUpOptions: opts,
+              allowFreeText: r.allowFreeText,
+              enabled: true,
+              allowOptions: opts.length > 0,
+            };
+          }
         ),
       })
     ),

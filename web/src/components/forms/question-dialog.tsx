@@ -81,11 +81,24 @@ export function QuestionDialog({
       );
       setPlaceholder(editing.placeholder ?? "");
       setHasBranching(editing.hasBranching);
-      setFollowUpRules(
-        editing.followUpRules.length > 0
-          ? editing.followUpRules.map((r) => ({ ...r }))
-          : defaultFollowUpRules(type, editing.emojiLevels)
-      );
+      // Ensure both LOW and HIGH exist in state, mark present ones as enabled
+      const defaults = defaultFollowUpRules(type, editing.emojiLevels);
+      const merged = defaults.map((def) => {
+        const existing = editing.followUpRules.find(
+          (r) => r.triggerType === def.triggerType
+        );
+        if (existing) {
+          return {
+            ...def,
+            ...existing,
+            enabled: existing.enabled ?? true,
+            allowOptions:
+              existing.allowOptions ?? existing.followUpOptions.length > 0,
+          };
+        }
+        return { ...def, enabled: false };
+      });
+      setFollowUpRules(merged);
     } else {
       setLabel(defaultQuestionLabel(type));
       setRequired(defaultRequired(type));
@@ -113,6 +126,8 @@ export function QuestionDialog({
                 followUpLabel: existing.followUpLabel,
                 followUpOptions: existing.followUpOptions,
                 allowFreeText: existing.allowFreeText,
+                allowOptions: existing.allowOptions,
+                enabled: existing.enabled,
               }
             : defRule;
         })
@@ -140,10 +155,14 @@ export function QuestionDialog({
 
     const finalRules =
       canHaveBranching(type) && hasBranching
-        ? followUpRules.map((r) => ({
-            ...r,
-            followUpOptions: r.followUpOptions.filter((o) => o.trim() !== ""),
-          }))
+        ? followUpRules
+            .filter((r) => r.enabled)
+            .map((r) => ({
+              ...r,
+              followUpOptions: r.allowOptions
+                ? r.followUpOptions.filter((o) => o.trim() !== "")
+                : [],
+            }))
         : [];
 
     onSave({
@@ -314,6 +333,7 @@ export function QuestionDialog({
                 <div className="border-l-4 border-[#6C5CE7] bg-muted/50 rounded-r-lg p-4 space-y-4">
                   <RuleEditor
                     rule={followUpRules.find((r) => r.triggerType === "LOW")!}
+                    otherRule={followUpRules.find((r) => r.triggerType === "HIGH")!}
                     variant="low"
                     type={type}
                     emojiLevels={emojiLevels}
@@ -321,6 +341,7 @@ export function QuestionDialog({
                   />
                   <RuleEditor
                     rule={followUpRules.find((r) => r.triggerType === "HIGH")!}
+                    otherRule={followUpRules.find((r) => r.triggerType === "LOW")!}
                     variant="high"
                     type={type}
                     emojiLevels={emojiLevels}
@@ -352,18 +373,23 @@ export function QuestionDialog({
 
 function RuleEditor({
   rule,
+  otherRule,
   variant,
   type,
   emojiLevels,
   onChange,
 }: {
   rule: FollowUpRuleState;
+  otherRule: FollowUpRuleState;
   variant: "low" | "high";
   type: QuestionType;
   emojiLevels: number;
   onChange: (patch: Partial<FollowUpRuleState>) => void;
 }) {
   const t = useTranslations("forms.branching");
+  const [editingIdx, setEditingIdx] = useState<number | null>(null);
+  const [editingValue, setEditingValue] = useState("");
+  const [newOption, setNewOption] = useState("");
 
   const badgeBg =
     variant === "low"
@@ -374,27 +400,70 @@ function RuleEditor({
   const maxScale = type === "STARS" ? 5 : emojiLevels;
   const unit = type === "STARS" ? "\u2605" : getEmojiForLevel(emojiLevels);
 
-  const setMin = (v: number) => {
-    const clamped = Math.max(1, Math.min(maxScale, v));
-    const newMax = Math.max(clamped, rule.triggerMax);
-    onChange({ triggerMin: clamped, triggerMax: Math.min(newMax, maxScale) });
-  };
-  const setMax = (v: number) => {
-    const clamped = Math.max(1, Math.min(maxScale, v));
-    const newMin = Math.min(clamped, rule.triggerMin);
-    onChange({ triggerMax: clamped, triggerMin: Math.max(newMin, 1) });
-  };
-
-  const addOption = () => {
-    const val = prompt("Option");
-    if (val?.trim()) {
-      onChange({ followUpOptions: [...rule.followUpOptions, val.trim()] });
+  // Compute allowed range based on the other (enabled) rule to prevent overlap
+  const computeBounds = () => {
+    if (!otherRule.enabled) return { lo: 1, hi: maxScale };
+    if (variant === "low") {
+      // LOW must stay below HIGH.triggerMin
+      return { lo: 1, hi: Math.min(maxScale, otherRule.triggerMin - 1) };
+    } else {
+      // HIGH must stay above LOW.triggerMax
+      return { lo: Math.max(1, otherRule.triggerMax + 1), hi: maxScale };
     }
   };
 
+  const setMin = (v: number) => {
+    const { lo, hi } = computeBounds();
+    const clamped = Math.max(lo, Math.min(hi, v));
+    const newMax = Math.max(clamped, rule.triggerMax);
+    onChange({
+      triggerMin: clamped,
+      triggerMax: Math.min(newMax, hi),
+    });
+  };
+  const setMax = (v: number) => {
+    const { lo, hi } = computeBounds();
+    const clamped = Math.max(lo, Math.min(hi, v));
+    const newMin = Math.min(clamped, rule.triggerMin);
+    onChange({
+      triggerMax: clamped,
+      triggerMin: Math.max(newMin, lo),
+    });
+  };
+
+  const commitNewOption = () => {
+    const v = newOption.trim();
+    if (v) {
+      onChange({ followUpOptions: [...rule.followUpOptions, v] });
+      setNewOption("");
+    }
+  };
+
+  const commitEdit = () => {
+    if (editingIdx === null) return;
+    const v = editingValue.trim();
+    if (v) {
+      const next = [...rule.followUpOptions];
+      next[editingIdx] = v;
+      onChange({ followUpOptions: next });
+    } else {
+      onChange({
+        followUpOptions: rule.followUpOptions.filter((_, j) => j !== editingIdx),
+      });
+    }
+    setEditingIdx(null);
+    setEditingValue("");
+  };
+
+  const disabled = !rule.enabled;
+
   return (
-    <div className="space-y-2">
+    <div className={`space-y-2 ${disabled ? "opacity-50" : ""}`}>
       <div className="flex items-center gap-2 flex-wrap">
+        <Switch
+          checked={rule.enabled}
+          onCheckedChange={(v) => onChange({ enabled: v })}
+        />
         <span className="text-sm font-medium">
           {icon} {variant === "low" ? t("lowScore") : t("highScore")}
         </span>
@@ -407,6 +476,7 @@ function RuleEditor({
             min={1}
             max={maxScale}
             value={rule.triggerMin}
+            disabled={disabled}
             onChange={(e) => setMin(Number(e.target.value))}
             className="w-10 h-6 text-xs p-1 border-0 bg-white/60 text-center"
           />
@@ -416,6 +486,7 @@ function RuleEditor({
             min={1}
             max={maxScale}
             value={rule.triggerMax}
+            disabled={disabled}
             onChange={(e) => setMax(Number(e.target.value))}
             className="w-10 h-6 text-xs p-1 border-0 bg-white/60 text-center"
           />
@@ -423,56 +494,121 @@ function RuleEditor({
         </div>
       </div>
 
-      <Input
-        value={rule.followUpLabel}
-        onChange={(e) => onChange({ followUpLabel: e.target.value })}
-        placeholder={
-          variant === "low"
-            ? "Qu'est-ce qui n'a pas \u00e9t\u00e9 \u00e0 la hauteur ?"
-            : "Qu'est-ce qui vous a le plus plu ?"
-        }
-        className="text-sm"
-      />
+      {rule.enabled && (
+        <>
+          <Input
+            value={rule.followUpLabel}
+            onChange={(e) => onChange({ followUpLabel: e.target.value })}
+            placeholder={
+              variant === "low"
+                ? "Qu'est-ce qui n'a pas été à la hauteur ?"
+                : "Qu'est-ce qui vous a le plus plu ?"
+            }
+            className="text-sm"
+          />
 
-      {/* Option pills */}
-      <div className="flex flex-wrap gap-1.5">
-        {rule.followUpOptions.map((opt, i) => (
-          <span
-            key={i}
-            className="inline-flex items-center gap-1 px-2 py-1 rounded-full bg-background border text-xs"
-          >
-            {opt}
-            <button
-              type="button"
-              className="text-muted-foreground hover:text-destructive ml-0.5"
-              onClick={() =>
-                onChange({
-                  followUpOptions: rule.followUpOptions.filter(
-                    (_, j) => j !== i
-                  ),
-                })
-              }
-            >
-              &times;
-            </button>
-          </span>
-        ))}
-        <button
-          type="button"
-          onClick={addOption}
-          className="inline-flex items-center gap-1 px-2 py-1 rounded-full border border-dashed border-[#6C5CE7] text-[#6C5CE7] text-xs hover:bg-[#EAE6FD] transition-colors"
-        >
-          + Ajouter
-        </button>
-      </div>
+          {/* Option pills with inline edit */}
+          {rule.allowOptions && (
+            <div className="space-y-1.5">
+              <div className="flex flex-wrap gap-1.5 items-center">
+                {rule.followUpOptions.map((opt, i) =>
+                  editingIdx === i ? (
+                    <input
+                      key={i}
+                      value={editingValue}
+                      autoFocus
+                      onChange={(e) => setEditingValue(e.target.value)}
+                      onBlur={commitEdit}
+                      onKeyDown={(e) => {
+                        if (e.key === "Enter") {
+                          e.preventDefault();
+                          commitEdit();
+                        }
+                        if (e.key === "Escape") {
+                          setEditingIdx(null);
+                          setEditingValue("");
+                        }
+                      }}
+                      className="px-2 py-1 rounded-full border border-[#6C5CE7] bg-white text-xs outline-none min-w-[80px]"
+                    />
+                  ) : (
+                    <span
+                      key={i}
+                      className="inline-flex items-center gap-1 px-2 py-1 rounded-full bg-background border text-xs group"
+                    >
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setEditingIdx(i);
+                          setEditingValue(opt);
+                        }}
+                        className="hover:text-[#6C5CE7]"
+                      >
+                        {opt}
+                      </button>
+                      <button
+                        type="button"
+                        className="text-muted-foreground hover:text-destructive ml-0.5"
+                        onClick={() =>
+                          onChange({
+                            followUpOptions: rule.followUpOptions.filter(
+                              (_, j) => j !== i
+                            ),
+                          })
+                        }
+                      >
+                        &times;
+                      </button>
+                    </span>
+                  )
+                )}
+              </div>
 
-      <div className="flex items-center gap-2">
-        <Switch
-          checked={rule.allowFreeText}
-          onCheckedChange={(v) => onChange({ allowFreeText: v })}
-        />
-        <Label className="text-xs cursor-pointer">{t("allowFreeText")}</Label>
-      </div>
+              {/* Inline add input */}
+              <div className="flex gap-1.5">
+                <input
+                  value={newOption}
+                  onChange={(e) => setNewOption(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter") {
+                      e.preventDefault();
+                      commitNewOption();
+                    }
+                  }}
+                  placeholder="Nouvelle option..."
+                  className="flex-1 px-2 py-1 rounded-md border border-dashed border-[#6C5CE7]/50 bg-background text-xs outline-none focus:border-[#6C5CE7]"
+                />
+                <button
+                  type="button"
+                  onClick={commitNewOption}
+                  disabled={!newOption.trim()}
+                  className="px-2.5 py-1 rounded-md bg-[#6C5CE7] text-white text-xs font-medium disabled:opacity-40 hover:bg-[#5A4BD5] transition-colors"
+                >
+                  +
+                </button>
+              </div>
+            </div>
+          )}
+
+          {/* Toggles */}
+          <div className="flex items-center gap-4 flex-wrap pt-1">
+            <label className="flex items-center gap-1.5 cursor-pointer">
+              <Switch
+                checked={rule.allowOptions}
+                onCheckedChange={(v) => onChange({ allowOptions: v })}
+              />
+              <span className="text-xs">Options</span>
+            </label>
+            <label className="flex items-center gap-1.5 cursor-pointer">
+              <Switch
+                checked={rule.allowFreeText}
+                onCheckedChange={(v) => onChange({ allowFreeText: v })}
+              />
+              <span className="text-xs">{t("allowFreeText")}</span>
+            </label>
+          </div>
+        </>
+      )}
     </div>
   );
 }
