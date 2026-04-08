@@ -1,22 +1,122 @@
 import { getTranslations } from "next-intl/server";
-import { LanguageSwitcher } from "@/components/ui/language-switcher";
+import Link from "next/link";
+import { prisma } from "@/lib/prisma";
+import { getRootUrl, getAppUrl } from "@/lib/domains";
+import { PublicForm } from "@/components/public/public-form";
+import type { PublicFormData, PublicQuestion, PublicFollowUpRule } from "@/components/public/types";
 
 interface PublicFormPageProps {
   params: Promise<{ slug: string }>;
+  searchParams: Promise<{ qr?: string }>;
 }
 
-export default async function PublicFormPage({ params }: PublicFormPageProps) {
+export default async function PublicFormPage({
+  params,
+  searchParams,
+}: PublicFormPageProps) {
   const { slug } = await params;
-  const t = await getTranslations("common");
+  const { qr } = await searchParams;
+  const t = await getTranslations("publicForm");
+
+  const form = await prisma.form.findUnique({
+    where: { slug },
+    include: {
+      questions: {
+        orderBy: { order: "asc" },
+        include: { followUpRules: true },
+      },
+    },
+  });
+
+  // Not found or not active → stylized 404
+  if (!form || form.status !== "ACTIVE") {
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-gradient-to-b from-white to-gray-50 px-4">
+        <div className="text-center space-y-4 max-w-md">
+          <div className="text-6xl">🔍</div>
+          <h1 className="text-2xl font-bold">{t("formNotFound")}</h1>
+          <p className="text-muted-foreground">
+            {t("formNotFoundMessage")}
+          </p>
+          <Link
+            href={getRootUrl()}
+            className="inline-block px-6 py-2.5 rounded-lg bg-[#6C5CE7] text-white font-medium hover:bg-[#5A4BD5] transition-colors"
+          >
+            {t("formNotFoundAction")}
+          </Link>
+          <p className="text-xs text-muted-foreground pt-4">
+            {t("viaBrand")}
+          </p>
+        </div>
+      </div>
+    );
+  }
+
+  // Find QR code by uniqueCode if provided
+  let qrCodeId: string | null = null;
+  if (qr) {
+    const qrCode = await prisma.qRCode.findUnique({
+      where: { uniqueCode: qr },
+      select: { id: true, formId: true },
+    });
+    if (qrCode && qrCode.formId === form.id) {
+      qrCodeId = qrCode.id;
+    }
+  }
+
+  const publicData: PublicFormData = {
+    id: form.id,
+    title: form.title,
+    description: form.description ?? null,
+    rateLimitMode: form.rateLimitMode,
+    rateLimitHours: form.rateLimitHours ?? null,
+    questions: form.questions.map(
+      (q): PublicQuestion => ({
+        id: q.id,
+        type: q.type as "STARS" | "EMOJI" | "CHOICE" | "TEXT",
+        label: q.label,
+        options: Array.isArray(q.options) ? (q.options as string[]) : [],
+        required: q.required,
+        hasBranching: q.hasBranching,
+        emojiLevels: detectEmojiLevels(q.followUpRules, q.type),
+        multipleChoice: false, // not stored yet — default single
+        placeholder: null,
+        followUpRules: q.followUpRules.map(
+          (r): PublicFollowUpRule => ({
+            id: r.id,
+            triggerType: r.triggerType as "LOW" | "HIGH",
+            triggerMin: r.triggerMin,
+            triggerMax: r.triggerMax,
+            followUpLabel: r.followUpLabel,
+            followUpOptions: Array.isArray(r.followUpOptions)
+              ? (r.followUpOptions as string[])
+              : [],
+            allowFreeText: r.allowFreeText,
+          })
+        ),
+      })
+    ),
+  };
+
+  // Build API endpoint for CORS scenario (app subdomain) or same-origin (dev)
+  const apiBase = getAppUrl("");
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-background px-4">
-      <div className="w-full max-w-lg">
-        <div className="flex justify-end mb-4">
-          <LanguageSwitcher />
-        </div>
-        <p className="text-muted-foreground text-center">{t("loading")} {slug}</p>
-      </div>
+    <div className="min-h-screen bg-gradient-to-b from-white to-gray-50">
+      <PublicForm form={publicData} qrCodeId={qrCodeId} apiBase={apiBase} />
     </div>
   );
+}
+
+function detectEmojiLevels(
+  rules: Array<{ triggerMin: number; triggerMax: number }>,
+  type: string
+): number | undefined {
+  if (type !== "EMOJI") return undefined;
+  // If any rule has triggerMax > 3, likely 5 levels
+  const maxSeen = rules.reduce(
+    (acc, r) => Math.max(acc, r.triggerMax),
+    0
+  );
+  return maxSeen > 3 ? 5 : 3;
 }

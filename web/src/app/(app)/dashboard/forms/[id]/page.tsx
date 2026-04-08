@@ -1,11 +1,12 @@
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import { getTranslations } from "next-intl/server";
-import { getFormById } from "@/lib/actions/form-actions";
+import { getFormById, getUserPlan } from "@/lib/actions/form-actions";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { FormDeleteButton } from "@/components/forms/form-delete-button";
+import { QRCodesTab } from "@/components/forms/qr-codes-tab";
 
 const statusColor: Record<string, string> = {
   DRAFT: "bg-gray-100 text-gray-600 hover:bg-gray-100",
@@ -21,7 +22,7 @@ export default async function FormDetailPage({ params }: FormDetailPageProps) {
   const { id } = await params;
   const t = await getTranslations("forms");
   const tCommon = await getTranslations("common");
-  const form = await getFormById(id);
+  const [form, plan] = await Promise.all([getFormById(id), getUserPlan()]);
 
   if (!form) {
     notFound();
@@ -70,10 +71,8 @@ export default async function FormDetailPage({ params }: FormDetailPageProps) {
             &#128202; {t("detail.statsPlaceholder")}
           </div>
         </TabsContent>
-        <TabsContent value="qrcodes">
-          <div className="flex items-center justify-center py-20 text-muted-foreground">
-            &#128241; {t("detail.qrcodesPlaceholder")}
-          </div>
+        <TabsContent value="qrcodes" className="mt-6">
+          <QRCodesTab formId={id} formTitle={form.title} userPlan={plan} />
         </TabsContent>
       </Tabs>
     </div>

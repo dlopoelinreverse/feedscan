@@ -17,7 +17,8 @@
     "optional": "Optional",
     "unlimited": "Unlimited",
     "poweredBy": "Powered by FeedScan",
-    "or": "or"
+    "or": "or",
+    "copy": "Copy"
   },
   "nav": {
     "dashboard": "Dashboard",
@@ -230,18 +231,23 @@
   },
   "qrCodes": {
     "title": "QR Codes",
+    "subtitle": "Generate one QR code per location to know where each piece of feedback comes from.",
     "generate": "Generate a QR Code",
     "label": "Label",
-    "labelPlaceholder": "e.g. Table 1, Counter, Register",
+    "labelPlaceholder": "e.g. Table 3, Register, Patio...",
+    "labelHelp": "This label helps you identify where feedback is coming from. Customers don't see it.",
+    "created": "QR code created ✓",
     "scans": "{count} scans",
     "download": "Download PNG",
+    "downloadShort": "PNG",
     "copyLink": "Copy link",
     "linkCopied": "Link copied!",
-    "empty": "No QR codes yet. Generate one to get started.",
+    "empty": "Generate your first QR code to start collecting feedback",
     "planLimit": "Upgrade to Pro to create more QR codes"
   },
   "publicForm": {
     "viaBrand": "via FeedScan",
+    "poweredBy": "Powered by FeedScan",
     "subtitle": "Help us improve your experience. Less than a minute.",
     "submit": "Submit my feedback",
     "sending": "Submitting...",
@@ -250,6 +256,7 @@
     "followUpPlaceholder": "Feel free to elaborate...",
     "followUpBadge": "Follow-up",
     "alreadyResponded": "You've already shared your feedback. Thank you!",
+    "formNotFoundMessage": "This form doesn't exist or is no longer available.",
     "thankYou": {
       "title": "Thank you!",
       "message": "Your feedback helps us improve. Have a great day!",
