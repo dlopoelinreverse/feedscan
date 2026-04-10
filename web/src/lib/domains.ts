@@ -34,7 +34,7 @@ export function getFormUrl(slug: string): string {
 /**
  * Returns an absolute URL — required for OAuth redirectTo and server-side redirects.
  * In dev: http://localhost:3001/path
- * In prod: https://auth.feedscan.leopoldev/path
+ * In prod: https://auth.feed-scan.leopoldev/path
  */
 export function getAbsoluteAuthUrl(path: string = "/login"): string {
   if (isDev) return `${DEV_ORIGIN}${path}`;
