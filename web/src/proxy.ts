@@ -2,8 +2,10 @@ import { NextResponse, type NextRequest } from "next/server";
 import { updateSession } from "@/lib/supabase/middleware";
 
 const ROOT_DOMAIN = process.env.NEXT_PUBLIC_ROOT_DOMAIN || "feedscan.leopoldev";
-const AUTH_DOMAIN = process.env.NEXT_PUBLIC_AUTH_DOMAIN || "auth.feedscan.leopoldev";
-const APP_DOMAIN = process.env.NEXT_PUBLIC_APP_DOMAIN || "app.feedscan.leopoldev";
+const AUTH_DOMAIN =
+  process.env.NEXT_PUBLIC_AUTH_DOMAIN || "auth.feed-scan.leopoldev";
+const APP_DOMAIN =
+  process.env.NEXT_PUBLIC_APP_DOMAIN || "app.feed-scan.leopoldev";
 
 function isLocalhost(hostname: string): boolean {
   return (
@@ -72,13 +74,10 @@ export async function proxy(request: NextRequest) {
   }
 
   // ── AUTH DOMAIN ──────────────────────────────────────────────────────────
-  // auth.feedscan.leopoldev → /login, /register, /onboarding, /api/auth/*
+  // auth.feed-scan.leopoldev → /login, /register, /onboarding, /api/auth/*
   if (hostname === AUTH_DOMAIN) {
     // Redirect authenticated users to app
-    if (
-      user &&
-      (pathname === "/login" || pathname === "/register")
-    ) {
+    if (user && (pathname === "/login" || pathname === "/register")) {
       return redirectTo(APP_DOMAIN, "/dashboard");
     }
     // Authorised paths
@@ -103,7 +102,7 @@ export async function proxy(request: NextRequest) {
   }
 
   // ── APP DOMAIN ───────────────────────────────────────────────────────────
-  // app.feedscan.leopoldev → /dashboard/*, /api/*
+  // app.feed-scan.leopoldev → /dashboard/*, /api/*
   if (hostname === APP_DOMAIN) {
     // / → root
     if (pathname === "/") {
