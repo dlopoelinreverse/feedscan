@@ -1,15 +1,24 @@
+import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
-import { getTranslations } from "next-intl/server";
+import { AnalyticsView } from "@/components/dashboard/analytics-view";
 
-export default async function DashboardPage() {
+interface DashboardPageProps {
+  searchParams: Promise<{ period?: string }>;
+}
+
+export default async function DashboardPage({ searchParams }: DashboardPageProps) {
   const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
-  const t = await getTranslations("dashboard");
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) redirect("/login");
+
+  const { period: periodParam } = await searchParams;
+  const period = [7, 30, 90].includes(Number(periodParam)) ? Number(periodParam) : 30;
 
   return (
     <div className="p-6">
-      <h1 className="text-2xl font-bold">{t("title")}</h1>
-      <p className="text-muted-foreground mt-1">{t("welcome")}, {user?.email}</p>
+      <AnalyticsView userId={user.id} period={period} title="Dashboard" />
     </div>
   );
 }

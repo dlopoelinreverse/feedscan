@@ -1,11 +1,13 @@
-import { notFound } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
 import Link from "next/link";
 import { getTranslations } from "next-intl/server";
 import { getFormById } from "@/lib/actions/form-actions";
+import { createClient } from "@/lib/supabase/server";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { FormDeleteButton } from "@/components/forms/form-delete-button";
+import { FormStats } from "@/components/dashboard/form-stats";
 
 const statusColor: Record<string, string> = {
   DRAFT: "bg-gray-100 text-gray-600 hover:bg-gray-100",
@@ -15,21 +17,25 @@ const statusColor: Record<string, string> = {
 
 interface FormDetailPageProps {
   params: Promise<{ id: string }>;
+  searchParams: Promise<{ period?: string }>;
 }
 
-export default async function FormDetailPage({ params }: FormDetailPageProps) {
+export default async function FormDetailPage({ params, searchParams }: FormDetailPageProps) {
   const { id } = await params;
+  const { period: periodParam } = await searchParams;
+  const period = [7, 30, 90].includes(Number(periodParam)) ? Number(periodParam) : 30;
+
   const t = await getTranslations("forms");
   const tCommon = await getTranslations("common");
   const form = await getFormById(id);
+  if (!form) notFound();
 
-  if (!form) {
-    notFound();
-  }
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) redirect("/login");
 
   return (
-    <div className="p-6 max-w-4xl">
-      {/* Header */}
+    <div className="p-6 max-w-6xl">
       <div className="flex items-center justify-between mb-6">
         <div className="flex items-center gap-3">
           <Link
@@ -39,10 +45,7 @@ export default async function FormDetailPage({ params }: FormDetailPageProps) {
             &larr;
           </Link>
           <h1 className="text-2xl font-bold">{form.title}</h1>
-          <Badge
-            className={statusColor[form.status]}
-            variant="secondary"
-          >
+          <Badge className={statusColor[form.status]} variant="secondary">
             {t(
               `status.${form.status.toLowerCase()}` as
                 | "status.draft"
@@ -59,16 +62,13 @@ export default async function FormDetailPage({ params }: FormDetailPageProps) {
         </div>
       </div>
 
-      {/* Tabs */}
       <Tabs defaultValue="stats">
         <TabsList>
           <TabsTrigger value="stats">{t("detail.stats")}</TabsTrigger>
           <TabsTrigger value="qrcodes">{t("detail.qrcodes")}</TabsTrigger>
         </TabsList>
         <TabsContent value="stats">
-          <div className="flex items-center justify-center py-20 text-muted-foreground">
-            &#128202; {t("detail.statsPlaceholder")}
-          </div>
+          <FormStats userId={user.id} formId={id} period={period} />
         </TabsContent>
         <TabsContent value="qrcodes">
           <div className="flex items-center justify-center py-20 text-muted-foreground">
