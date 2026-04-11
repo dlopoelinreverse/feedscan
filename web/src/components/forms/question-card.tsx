@@ -4,7 +4,6 @@ import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import { useTranslations } from "next-intl";
 import { Card } from "@/components/ui/card";
-import { BranchingPanel } from "./branching-panel";
 import { QUESTION_TYPE_BADGE } from "./types";
 import type { QuestionState } from "./types";
 
@@ -14,7 +13,6 @@ interface QuestionCardProps {
   onEdit: () => void;
   onDuplicate: () => void;
   onDelete: () => void;
-  onUpdate: (q: QuestionState) => void;
 }
 
 export function QuestionCard({
@@ -23,7 +21,6 @@ export function QuestionCard({
   onEdit,
   onDuplicate,
   onDelete,
-  onUpdate,
 }: QuestionCardProps) {
   const t = useTranslations("forms");
   const tCommon = useTranslations("common");
@@ -86,6 +83,11 @@ export function QuestionCard({
                 {metaLine}
               </p>
             )}
+            {question.hasBranching && (
+              <span className="inline-flex items-center gap-1 mt-1.5 text-[10px] bg-[#EAE6FD] text-[#6C5CE7] px-2 py-0.5 rounded-full font-medium">
+                ⚡ {t("branching.active")}
+              </span>
+            )}
 
             {/* Action buttons */}
             <div className="flex gap-3 mt-2">
@@ -112,10 +114,6 @@ export function QuestionCard({
         </div>
       </div>
 
-      {/* Branching panel (only for STARS and EMOJI) */}
-      {(question.type === "STARS" || question.type === "EMOJI") && (
-        <BranchingPanel question={question} onUpdate={onUpdate} />
-      )}
     </Card>
   );
 }

@@ -151,6 +151,7 @@ export function FormBuilder({ initialData }: FormBuilderProps) {
     initialData ?? {
       title: "",
       description: "",
+      status: "DRAFT",
       rateLimitMode: "PER_24H",
       questions: [],
     }
@@ -245,14 +246,26 @@ export function FormBuilder({ initialData }: FormBuilderProps) {
 
   const handleDuplicate = (q: QuestionState) => {
     if (form.questions.length >= 7) return;
-    const dup: QuestionState = {
-      ...q,
-      clientId: nanoid(),
-      id: undefined,
-      order: form.questions.length,
-      followUpRules: q.followUpRules.map((r) => ({ ...r, id: undefined })),
-    };
-    setForm((prev) => ({ ...prev, questions: [...prev.questions, dup] }));
+    setForm((prev) => {
+      const sourceIdx = prev.questions.findIndex(
+        (x) => x.clientId === q.clientId
+      );
+      const dup: QuestionState = {
+        ...q,
+        clientId: nanoid(),
+        id: undefined,
+        label: `${q.label} (copie)`,
+        options: [...q.options],
+        followUpRules: q.followUpRules.map((r) => ({ ...r, id: undefined })),
+        order: sourceIdx + 1,
+      };
+      const next = [
+        ...prev.questions.slice(0, sourceIdx + 1),
+        dup,
+        ...prev.questions.slice(sourceIdx + 1),
+      ].map((x, i) => ({ ...x, order: i }));
+      return { ...prev, questions: next };
+    });
   };
 
   const handleDeleteQuestion = (clientId: string) => {
@@ -264,30 +277,39 @@ export function FormBuilder({ initialData }: FormBuilderProps) {
     }));
   };
 
-  const handleUpdateQuestion = (updated: QuestionState) => {
-    setForm((prev) => ({
-      ...prev,
-      questions: prev.questions.map((q) =>
-        q.clientId === updated.clientId ? updated : q
-      ),
-    }));
+  const validateForPublish = (): string | null => {
+    if (form.questions.length < 3) {
+      return t("builder.minQuestions");
+    }
+    if (form.questions.length > 7) {
+      return t("builder.maxQuestions");
+    }
+    for (const q of form.questions) {
+      if (!q.label.trim()) {
+        return t("validation.emptyLabel");
+      }
+      if (q.type === "CHOICE" && q.options.length < 2) {
+        return t("validation.minTwoOptions");
+      }
+    }
+    return null;
   };
 
   const handleSave = async (status: "DRAFT" | "ACTIVE") => {
-    if (status === "ACTIVE" && form.questions.length < 3) {
-      toast({
-        title: t("builder.minQuestions"),
-        variant: "destructive",
-      });
-      return;
+    if (status === "ACTIVE") {
+      const error = validateForPublish();
+      if (error) {
+        toast({ title: error, variant: "destructive" });
+        return;
+      }
     }
 
     setSaving(true);
     try {
       const input: SaveFormInput = {
         id: form.id,
-        title: form.title || t("builder.titlePlaceholder"),
-        description: form.description || undefined,
+        title: form.title.trim() || t("builder.titlePlaceholder"),
+        description: form.description.trim() || undefined,
         status,
         rateLimitMode: form.rateLimitMode,
         rateLimitHours: form.rateLimitHours,
@@ -307,6 +329,7 @@ export function FormBuilder({ initialData }: FormBuilderProps) {
 
       if (status === "DRAFT") {
         toast({ title: t("builder.draftSaved") });
+        setForm((prev) => ({ ...prev, id: result.id, status: "DRAFT" }));
         if (!form.id) {
           router.replace(`/dashboard/forms/${result.id}/edit`);
         }
@@ -514,7 +537,6 @@ export function FormBuilder({ initialData }: FormBuilderProps) {
                   onEdit={() => handleEditQuestion(q)}
                   onDuplicate={() => handleDuplicate(q)}
                   onDelete={() => handleDeleteQuestion(q.clientId)}
-                  onUpdate={handleUpdateQuestion}
                 />
               ))}
             </div>
@@ -651,14 +673,18 @@ export function FormBuilder({ initialData }: FormBuilderProps) {
             onClick={() => handleSave("DRAFT")}
             disabled={saving}
           >
-            {t("builder.saveDraft")}
+            {form.status === "ACTIVE"
+              ? t("builder.unpublish")
+              : t("builder.saveDraft")}
           </Button>
           <Button
             onClick={() => handleSave("ACTIVE")}
             disabled={saving}
             className="bg-[#6C5CE7] hover:bg-[#5A4BD5] text-white"
           >
-            {t("builder.publish")}
+            {form.status === "ACTIVE"
+              ? t("builder.republish")
+              : t("builder.publish")}
           </Button>
         </div>
       </div>

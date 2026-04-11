@@ -1,12 +1,13 @@
 import { notFound, redirect } from "next/navigation";
 import Link from "next/link";
 import { getTranslations } from "next-intl/server";
-import { getFormById } from "@/lib/actions/form-actions";
+import { getFormById, getUserPlan } from "@/lib/actions/form-actions";
 import { createClient } from "@/lib/supabase/server";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { FormDeleteButton } from "@/components/forms/form-delete-button";
+import { QRCodesTab } from "@/components/forms/qr-codes-tab";
 import { FormStats } from "@/components/dashboard/form-stats";
 
 const statusColor: Record<string, string> = {
@@ -27,7 +28,8 @@ export default async function FormDetailPage({ params, searchParams }: FormDetai
 
   const t = await getTranslations("forms");
   const tCommon = await getTranslations("common");
-  const form = await getFormById(id);
+  const [form, plan] = await Promise.all([getFormById(id), getUserPlan()]);
+
   if (!form) notFound();
 
   const supabase = await createClient();
@@ -70,10 +72,8 @@ export default async function FormDetailPage({ params, searchParams }: FormDetai
         <TabsContent value="stats">
           <FormStats userId={user.id} formId={id} period={period} />
         </TabsContent>
-        <TabsContent value="qrcodes">
-          <div className="flex items-center justify-center py-20 text-muted-foreground">
-            &#128241; {t("detail.qrcodesPlaceholder")}
-          </div>
+        <TabsContent value="qrcodes" className="mt-6">
+          <QRCodesTab formId={id} formTitle={form.title} userPlan={plan} />
         </TabsContent>
       </Tabs>
     </div>
