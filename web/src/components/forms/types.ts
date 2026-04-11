@@ -63,12 +63,9 @@ export interface FormBuilderState {
   titleFr?: string;
   titleEn?: string;
   description: string;
-<<<<<<< HEAD
-  status: FormStatusState;
-=======
   descriptionFr?: string;
   descriptionEn?: string;
->>>>>>> feat/ai-wizard-chat
+  status: FormStatusState;
   rateLimitMode: "NONE" | "PER_SESSION" | "PER_24H" | "PER_WEEK" | "CUSTOM";
   rateLimitHours?: number;
   questions: QuestionState[];

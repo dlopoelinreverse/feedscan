@@ -14,6 +14,7 @@ function aiFormToBuilderState(ai: AiFormResponse): FormBuilderState {
     description: ai.descriptionFr,
     descriptionFr: ai.descriptionFr,
     descriptionEn: ai.descriptionEn,
+    status: "DRAFT",
     rateLimitMode: "PER_24H",
     questions: ai.questions.map((q, i) => ({
       clientId: nanoid(),
@@ -41,6 +42,8 @@ function aiFormToBuilderState(ai: AiFormResponse): FormBuilderState {
               followUpOptionsFr: q.branching.low.followUpOptionsFr,
               followUpOptionsEn: q.branching.low.followUpOptionsEn,
               allowFreeText: q.branching.low.allowFreeText,
+              enabled: true,
+              allowOptions: true,
             },
             {
               triggerType: "HIGH" as const,
@@ -53,6 +56,8 @@ function aiFormToBuilderState(ai: AiFormResponse): FormBuilderState {
               followUpOptionsFr: q.branching.high.followUpOptionsFr,
               followUpOptionsEn: q.branching.high.followUpOptionsEn,
               allowFreeText: q.branching.high.allowFreeText,
+              enabled: true,
+              allowOptions: true,
             },
           ]
         : [],

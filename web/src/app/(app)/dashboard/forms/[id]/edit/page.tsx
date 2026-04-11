@@ -25,12 +25,9 @@ export default async function FormEditPage({ params }: FormEditPageProps) {
     titleFr: form.titleFr || undefined,
     titleEn: form.titleEn || undefined,
     description: form.description ?? "",
-<<<<<<< HEAD
-    status: form.status,
-=======
     descriptionFr: form.descriptionFr || undefined,
     descriptionEn: form.descriptionEn || undefined,
->>>>>>> feat/ai-wizard-chat
+    status: form.status,
     rateLimitMode: form.rateLimitMode,
     rateLimitHours: form.rateLimitHours ?? undefined,
     questions: form.questions.map(
@@ -69,8 +66,7 @@ export default async function FormEditPage({ params }: FormEditPageProps) {
         required: q.required,
         hasBranching: q.hasBranching,
         followUpRules: q.followUpRules.map(
-<<<<<<< HEAD
-          (r: { id: string; triggerType: string; triggerMin: number; triggerMax: number; followUpLabel: string; followUpOptions: unknown; allowFreeText: boolean }): FollowUpRuleState => {
+          (r): FollowUpRuleState => {
             const opts = Array.isArray(r.followUpOptions)
               ? (r.followUpOptions as string[])
               : [];
@@ -80,33 +76,20 @@ export default async function FormEditPage({ params }: FormEditPageProps) {
               triggerMin: r.triggerMin,
               triggerMax: r.triggerMax,
               followUpLabel: r.followUpLabel,
+              followUpLabelFr: r.followUpLabelFr || undefined,
+              followUpLabelEn: r.followUpLabelEn || undefined,
               followUpOptions: opts,
+              followUpOptionsFr: Array.isArray(r.followUpOptionsFr)
+                ? (r.followUpOptionsFr as string[])
+                : undefined,
+              followUpOptionsEn: Array.isArray(r.followUpOptionsEn)
+                ? (r.followUpOptionsEn as string[])
+                : undefined,
               allowFreeText: r.allowFreeText,
               enabled: true,
               allowOptions: opts.length > 0,
             };
           }
-=======
-          (r): FollowUpRuleState => ({
-            id: r.id,
-            triggerType: r.triggerType as "LOW" | "HIGH",
-            triggerMin: r.triggerMin,
-            triggerMax: r.triggerMax,
-            followUpLabel: r.followUpLabel,
-            followUpLabelFr: r.followUpLabelFr || undefined,
-            followUpLabelEn: r.followUpLabelEn || undefined,
-            followUpOptions: Array.isArray(r.followUpOptions)
-              ? (r.followUpOptions as string[])
-              : [],
-            followUpOptionsFr: Array.isArray(r.followUpOptionsFr)
-              ? (r.followUpOptionsFr as string[])
-              : undefined,
-            followUpOptionsEn: Array.isArray(r.followUpOptionsEn)
-              ? (r.followUpOptionsEn as string[])
-              : undefined,
-            allowFreeText: r.allowFreeText,
-          })
->>>>>>> feat/ai-wizard-chat
         ),
       })
     ),
