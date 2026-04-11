@@ -201,7 +201,15 @@
       "limitReached": "You've reached the 3 AI generation limit. Upgrade to Pro for unlimited generations.",
       "error": "Generation didn't produce a valid result. Try again with a more detailed description.",
       "retry": "Try again",
-      "minLength": "At least 20 characters"
+      "minLength": "Describe your business in at least 20 characters",
+      "confirmTitle": "Generate a form with AI",
+      "confirmPrompt": "Your description:",
+      "confirmGenerate": "Generate form",
+      "confirmReplace": "Generation will replace existing questions. Continue?",
+      "generationsUsed": "{count}/3 generations used",
+      "unlimitedGenerations": "Unlimited generations",
+      "upgradeToPro": "Upgrade to Pro",
+      "networkError": "Unable to reach the server. Check your connection."
     },
     "rateLimit": {
       "title": "Response limits",
