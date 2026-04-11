@@ -539,8 +539,8 @@ export function FormBuilder({ initialData, userProfile }: FormBuilderProps) {
       <TabsContent value="assistant" className="flex-1 overflow-y-auto mt-0">
         <AiAssistant
           currentForm={form}
-          onFormGenerated={(f) => setForm(f)}
-          onFormUpdated={(f) => setForm(f)}
+          onFormGenerated={(f) => setForm((prev) => ({ ...f, id: prev.id, status: prev.status }))}
+          onFormUpdated={(f) => setForm((prev) => ({ ...f, id: prev.id, status: prev.status }))}
           onApplyToBuilder={handleApplyToBuilder}
           userProfile={userProfile}
         />
