@@ -116,6 +116,8 @@ function convertGeneratedToState(generated: GeneratedForm): {
           followUpLabel: q.branching.low.followUpLabel,
           followUpOptions: q.branching.low.followUpOptions,
           allowFreeText: q.branching.low.allowFreeText,
+          enabled: true,
+          allowOptions: true,
         });
         followUpRules.push({
           triggerType: "HIGH",
@@ -124,6 +126,8 @@ function convertGeneratedToState(generated: GeneratedForm): {
           followUpLabel: q.branching.high.followUpLabel,
           followUpOptions: q.branching.high.followUpOptions,
           allowFreeText: q.branching.high.allowFreeText,
+          enabled: true,
+          allowOptions: true,
         });
       }
 
