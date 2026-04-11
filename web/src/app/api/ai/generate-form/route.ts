@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { prisma } from "@/lib/prisma";
+<<<<<<< HEAD
 import Anthropic from "@anthropic-ai/sdk";
 import { z } from "zod";
 
@@ -91,6 +92,17 @@ Structure exacte :
     }
   ]
 }`;
+=======
+import { anthropic, AI_MODEL } from "@/lib/ai/client";
+import {
+  generateFormRequestSchema,
+  aiFormResponseSchema,
+} from "@/lib/ai/schemas";
+import {
+  buildGenerateSystemPrompt,
+  buildGenerateUserMessage,
+} from "@/lib/ai/prompts";
+>>>>>>> feat/ai-wizard-chat
 
 export async function POST(request: Request) {
   const supabase = await createClient();
@@ -102,9 +114,13 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  const body = await request.json();
-  const { prompt } = body;
+  // Check plan limits
+  const dbUser = await prisma.user.findUnique({
+    where: { id: user.id },
+    select: { plan: true, aiGenerationsUsed: true },
+  });
 
+<<<<<<< HEAD
   if (!prompt || typeof prompt !== "string") {
     return NextResponse.json({ error: "Prompt is required" }, { status: 400 });
   }
@@ -146,10 +162,64 @@ export async function POST(request: Request) {
     if (!textBlock || textBlock.type !== "text") {
       return NextResponse.json(
         { error: "No text response from AI" },
+=======
+  if (!dbUser) {
+    return NextResponse.json({ error: "User not found" }, { status: 404 });
+  }
+
+  if (dbUser.plan === "FREE" && dbUser.aiGenerationsUsed >= 3) {
+    return NextResponse.json(
+      { error: "AI_LIMIT_REACHED" },
+      { status: 429 }
+    );
+  }
+
+  // Parse and validate request body
+  const body = await request.json();
+  const parsed = generateFormRequestSchema.safeParse(body);
+
+  if (!parsed.success) {
+    return NextResponse.json(
+      { error: "Invalid request", details: parsed.error.issues },
+      { status: 400 }
+    );
+  }
+
+  const { businessName, businessType, targetAreas, description, specificRequest } = parsed.data;
+
+  try {
+    const response = await anthropic.messages.create({
+      model: AI_MODEL,
+      max_tokens: 2048,
+      system: buildGenerateSystemPrompt(),
+      messages: [
+        {
+          role: "user",
+          content: buildGenerateUserMessage({
+            businessName,
+            businessType,
+            targetAreas,
+            description,
+            specificRequest,
+          }),
+        },
+      ],
+    });
+
+    const text =
+      response.content[0].type === "text" ? response.content[0].text : "";
+
+    // Parse AI response as JSON
+    const jsonMatch = text.match(/\{[\s\S]*\}/);
+    if (!jsonMatch) {
+      return NextResponse.json(
+        { error: "AI did not return valid JSON" },
+>>>>>>> feat/ai-wizard-chat
         { status: 500 }
       );
     }
 
+<<<<<<< HEAD
     // Clean and parse JSON
     let rawText = textBlock.text.trim();
     // Remove potential markdown backticks
@@ -183,16 +253,37 @@ export async function POST(request: Request) {
     }
 
     // Increment usage counter
+=======
+    const aiResult = JSON.parse(jsonMatch[0]);
+    const validated = aiFormResponseSchema.safeParse(aiResult);
+
+    if (!validated.success) {
+      return NextResponse.json(
+        { error: "AI response validation failed", details: validated.error.issues },
+        { status: 500 }
+      );
+    }
+
+    // Increment AI usage counter
+>>>>>>> feat/ai-wizard-chat
     await prisma.user.update({
       where: { id: user.id },
       data: { aiGenerationsUsed: { increment: 1 } },
     });
 
+<<<<<<< HEAD
     return NextResponse.json(result.data);
   } catch (err) {
     console.error("AI generation error:", err);
     return NextResponse.json(
       { error: "server_error", message: "Erreur lors de la génération." },
+=======
+    return NextResponse.json(validated.data);
+  } catch (err) {
+    console.error("AI generation error:", err);
+    return NextResponse.json(
+      { error: "AI generation failed" },
+>>>>>>> feat/ai-wizard-chat
       { status: 500 }
     );
   }

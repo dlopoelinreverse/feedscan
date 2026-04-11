@@ -12,7 +12,11 @@
     "db:studio": "prisma studio"
   },
   "dependencies": {
+<<<<<<< HEAD
     "@anthropic-ai/sdk": "^0.87.0",
+=======
+    "@anthropic-ai/sdk": "^0.88.0",
+>>>>>>> feat/ai-wizard-chat
     "@dnd-kit/core": "^6.3.1",
     "@dnd-kit/sortable": "^10.0.0",
     "@dnd-kit/utilities": "^3.2.2",
