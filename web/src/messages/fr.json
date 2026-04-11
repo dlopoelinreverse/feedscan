@@ -252,6 +252,11 @@
   "settings": {
     "title": "Paramètres",
     "subtitle": "Gérez votre profil, votre plan et votre facturation.",
+    "subscriptionActive": "Votre abonnement Pro est activé !",
+    "subscriptionCanceled": "Abonnement annulé.",
+    "profileSaved": "Profil enregistré",
+    "editProfile": "Modifier",
+    "cancelEdit": "Annuler",
     "profile": {
       "title": "Profil commerce",
       "businessName": "Nom du commerce",
@@ -266,6 +271,7 @@
       "currentPlan": "Plan actuel",
       "renewal": "Renouvellement le {date}",
       "manageSubscription": "Gérer l'abonnement",
+      "stripePortal": "Portail Stripe",
       "upgrade": "Passer au {plan}",
       "downgrade": "Rétrograder",
       "current": "Actuel"
@@ -285,7 +291,17 @@
       "title": "Zone danger",
       "description": "La suppression de votre compte est irréversible. Toutes vos données seront perdues.",
       "deleteAccount": "Supprimer mon compte",
-      "confirmDelete": "Êtes-vous sûr ? Cette action est irréversible."
+      "confirmDelete": "Êtes-vous sûr ? Cette action est irréversible.",
+      "confirmWord": "SUPPRIMER",
+      "typeToConfirm": "Tapez {word} pour confirmer"
+    },
+    "limits": {
+      "freeBanner": "Vous utilisez le plan Gratuit. {used}/{limit} réponses ce mois.",
+      "upgradeToProCta": "Passer au Pro",
+      "formLimitReached": "Passez au Pro pour créer plus de formulaires",
+      "responseLimitReached": "Ce commerçant a atteint sa limite mensuelle.",
+      "aiRemaining": "{used}/{limit} générations restantes",
+      "aiLimitReached": "Limite de générations IA atteinte. Passez au Pro pour des générations illimitées."
     }
   },
   "pricing": {

@@ -1,5 +1,8 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
+import { prisma } from "@/lib/prisma";
+import { canUseAI } from "@/lib/plan-limits";
+import { getAppUrl } from "@/lib/domains";
 
 export async function POST(request: Request) {
   const supabase = await createClient();
@@ -9,6 +12,27 @@ export async function POST(request: Request) {
 
   if (!user) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+
+  const dbUser = await prisma.user.findUnique({
+    where: { id: user.id },
+    select: { id: true, plan: true, aiGenerationsUsed: true },
+  });
+
+  if (!dbUser) {
+    return NextResponse.json({ error: "User not found" }, { status: 404 });
+  }
+
+  if (!canUseAI(dbUser)) {
+    return NextResponse.json(
+      {
+        error: "plan_limit",
+        limit: "ai",
+        message: "AI generation limit reached",
+        upgradeUrl: getAppUrl("/dashboard/settings"),
+      },
+      { status: 403 }
+    );
   }
 
   const body = await request.json();

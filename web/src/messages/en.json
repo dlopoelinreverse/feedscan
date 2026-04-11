@@ -252,6 +252,11 @@
   "settings": {
     "title": "Settings",
     "subtitle": "Manage your profile, plan, and billing.",
+    "subscriptionActive": "Your subscription is active!",
+    "subscriptionCanceled": "Subscription canceled.",
+    "profileSaved": "Profile saved",
+    "editProfile": "Edit",
+    "cancelEdit": "Cancel",
     "profile": {
       "title": "Business profile",
       "businessName": "Business name",
@@ -266,6 +271,7 @@
       "currentPlan": "Current plan",
       "renewal": "Renewal on {date}",
       "manageSubscription": "Manage subscription",
+      "stripePortal": "Stripe Portal",
       "upgrade": "Upgrade to {plan}",
       "downgrade": "Downgrade",
       "current": "Current"
@@ -285,7 +291,17 @@
       "title": "Danger zone",
       "description": "Deleting your account is permanent. All your data will be lost.",
       "deleteAccount": "Delete my account",
-      "confirmDelete": "Are you sure? This can't be undone."
+      "confirmDelete": "Are you sure? This can't be undone.",
+      "confirmWord": "DELETE",
+      "typeToConfirm": "Type {word} to confirm"
+    },
+    "limits": {
+      "freeBanner": "You are on the Free plan. {used}/{limit} responses this month.",
+      "upgradeToProCta": "Upgrade to Pro",
+      "formLimitReached": "Upgrade to Pro to create more forms",
+      "responseLimitReached": "This merchant has reached their monthly limit.",
+      "aiRemaining": "{used}/{limit} generations remaining",
+      "aiLimitReached": "AI generation limit reached. Upgrade to Pro for unlimited."
     }
   },
   "pricing": {
