@@ -52,6 +52,13 @@ ENV NEXT_PUBLIC_SUPABASE_URL=$NEXT_PUBLIC_SUPABASE_URL \
     NEXT_PUBLIC_APP_URL=$NEXT_PUBLIC_APP_URL \
     NEXT_PUBLIC_PORT=$NEXT_PUBLIC_PORT
 
+RUN echo "=== Build Args Check ===" && \
+    echo "SUPABASE_URL=${NEXT_PUBLIC_SUPABASE_URL:-(MISSING!)}" && \
+    echo "ROOT_DOMAIN=${NEXT_PUBLIC_ROOT_DOMAIN:-(MISSING!)}" && \
+    echo "AUTH_DOMAIN=${NEXT_PUBLIC_AUTH_DOMAIN:-(MISSING!)}" && \
+    echo "APP_DOMAIN=${NEXT_PUBLIC_APP_DOMAIN:-(MISSING!)}" && \
+    echo "========================"
+
 RUN mkdir -p public
 RUN bun run db:generate
 RUN bun run build
