@@ -20,6 +20,9 @@ import { TrendChart } from "./trend-chart";
 import { ChoiceDistributionChart, ScoreDistributionChart } from "./distribution-charts";
 import { RecentResponses, type RecentResponseItem } from "./recent-responses";
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+type PrismaQuestion = any;
+
 export async function FormStats({
   userId,
   formId,
@@ -71,7 +74,7 @@ export async function FormStats({
       createdAt: r.createdAt.toISOString(),
       avgScore: calculateResponseAverage(r, form.questions),
       metadata: (r.metadata as { device?: string; lang?: string }) || undefined,
-      details: form.questions.map((q) => {
+      details: form.questions.map((q: PrismaQuestion) => {
         const a = answers[q.id];
         let answerText = "—";
         if (a) {
@@ -97,7 +100,7 @@ export async function FormStats({
   });
 
   const branchingQuestions = form.questions.filter(
-    (q) => q.hasBranching && (q.type === "STARS" || q.type === "EMOJI")
+    (q: PrismaQuestion) => q.hasBranching && (q.type === "STARS" || q.type === "EMOJI")
   );
 
   return (
@@ -146,7 +149,7 @@ export async function FormStats({
 
       {/* Per-question distributions */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        {form.questions.map((q) => {
+        {form.questions.map((q: PrismaQuestion) => {
           const label = q.labelFr || q.label;
           if (q.type === "STARS") {
             return (
@@ -205,7 +208,7 @@ export async function FormStats({
       {branchingQuestions.length > 0 && (
         <div className="space-y-4">
           <h3 className="text-sm font-semibold">Insights branching</h3>
-          {branchingQuestions.map((q) => {
+          {branchingQuestions.map((q: PrismaQuestion) => {
             const low = getTopFollowUpReasons(responses, q.id, "LOW");
             const high = getTopFollowUpReasons(responses, q.id, "HIGH");
             const lowCount = responses.filter((r) => {

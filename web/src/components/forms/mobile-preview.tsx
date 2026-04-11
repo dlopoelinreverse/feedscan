@@ -6,68 +6,116 @@ import type {
   FormBuilderState,
   FollowUpRuleState,
   QuestionState,
+  PreviewLocale,
 } from "./types";
+import { bilingualText, bilingualOptions } from "./types";
 
-const EMOJIS_5 = ["😠", "😐", "🙂", "😄", "🤩"];
-const EMOJIS_3 = ["😞", "😐", "😊"];
+const EMOJIS_5 = ["\ud83d\ude20", "\ud83d\ude10", "\ud83d\ude42", "\ud83d\ude04", "\ud83e\udd29"];
+const EMOJIS_3 = ["\ud83d\ude1e", "\ud83d\ude10", "\ud83d\ude0a"];
 
 interface MobilePreviewProps {
   form: FormBuilderState;
+  previewLocale?: PreviewLocale;
+  onLocaleChange?: (locale: PreviewLocale) => void;
 }
 
 type AnswerValue = number | string | string[];
 
-export function MobilePreview({ form }: MobilePreviewProps) {
+export function MobilePreview({
+  form,
+  previewLocale = "fr",
+  onLocaleChange,
+}: MobilePreviewProps) {
   const t = useTranslations("publicForm");
+  const tPreview = useTranslations("aiWizard.preview");
   const [answers, setAnswers] = useState<Record<string, AnswerValue>>({});
 
   const setAnswer = (clientId: string, value: AnswerValue) => {
     setAnswers((prev) => ({ ...prev, [clientId]: value }));
   };
 
-  return (
-    <div className="bg-white rounded-[28px] border border-border shadow-sm w-[260px] mx-auto overflow-hidden">
-      {/* Notch */}
-      <div className="flex justify-center pt-3 pb-2">
-        <div className="w-20 h-1.5 bg-gray-300 rounded-full" />
-      </div>
+  const title = bilingualText(form.titleFr, form.titleEn, previewLocale) || form.title;
+  const description =
+    bilingualText(form.descriptionFr, form.descriptionEn, previewLocale) ||
+    form.description;
 
-      <div className="px-4 pb-5 space-y-4 max-h-[520px] overflow-y-auto">
-        {/* Title */}
-        <div>
-          <h3 className="font-bold text-[16px] leading-tight">
-            {form.title || "..."}
-          </h3>
-          <p className="text-[11px] text-muted-foreground mt-1">
-            {form.description || t("subtitle")}
-          </p>
+  return (
+    <div className="relative">
+      {/* FR/EN toggle */}
+      {onLocaleChange && (
+        <div className="flex justify-center mb-2">
+          <div className="inline-flex rounded-full border border-border bg-white text-xs overflow-hidden">
+            <button
+              type="button"
+              onClick={() => onLocaleChange("fr")}
+              className={`px-3 py-1 font-medium transition-colors ${
+                previewLocale === "fr"
+                  ? "bg-[#6C5CE7] text-white"
+                  : "text-muted-foreground hover:text-foreground"
+              }`}
+            >
+              FR
+            </button>
+            <button
+              type="button"
+              onClick={() => onLocaleChange("en")}
+              className={`px-3 py-1 font-medium transition-colors ${
+                previewLocale === "en"
+                  ? "bg-[#6C5CE7] text-white"
+                  : "text-muted-foreground hover:text-foreground"
+              }`}
+            >
+              EN
+            </button>
+          </div>
+        </div>
+      )}
+
+      <div className="bg-white rounded-[28px] border border-border shadow-sm w-[260px] mx-auto overflow-hidden">
+        {/* Notch */}
+        <div className="flex justify-center pt-3 pb-2">
+          <div className="w-20 h-1.5 bg-gray-300 rounded-full" />
         </div>
 
-        {/* Questions */}
-        {form.questions.length === 0 && (
-          <p className="text-xs text-muted-foreground italic text-center py-8">
-            Ajoutez des questions pour voir la preview
-          </p>
-        )}
+        <div className="px-4 pb-5 space-y-4 max-h-[520px] overflow-y-auto">
+          {/* Title */}
+          <div>
+            <h3 className="font-bold text-[16px] leading-tight">
+              {title || "..."}
+            </h3>
+            <p className="text-[11px] text-muted-foreground mt-1">
+              {description || t("subtitle")}
+            </p>
+          </div>
 
-        {form.questions.map((q) => (
-          <QuestionPreview
-            key={q.clientId}
-            question={q}
-            value={answers[q.clientId]}
-            onChange={(v) => setAnswer(q.clientId, v)}
-          />
-        ))}
+          {/* Questions */}
+          {form.questions.length === 0 && (
+            <p className="text-xs text-muted-foreground italic text-center py-8">
+              {tPreview("buildingQuestions")}
+            </p>
+          )}
 
-        {/* Submit button */}
-        {form.questions.length > 0 && (
-          <button
-            type="button"
-            className="w-full py-2.5 rounded-lg bg-[#6C5CE7] text-white text-sm font-medium"
-          >
-            {t("submit")}
-          </button>
-        )}
+          {form.questions.map((q) => (
+            <QuestionPreview
+              key={q.clientId}
+              question={q}
+              value={answers[q.clientId]}
+              onChange={(v) => setAnswer(q.clientId, v)}
+              previewLocale={previewLocale}
+              missingTranslationLabel={tPreview("missingTranslation")}
+            />
+          ))}
+
+          {/* Submit button */}
+          {form.questions.length > 0 && (
+            <button
+              type="button"
+              className="w-full py-2.5 rounded-lg bg-[#6C5CE7] text-white text-sm font-medium"
+            >
+              {t("submit")}
+            </button>
+          )}
+        </div>
       </div>
     </div>
   );
@@ -77,18 +125,35 @@ function QuestionPreview({
   question,
   value,
   onChange,
+  previewLocale,
+  missingTranslationLabel,
 }: {
   question: QuestionState;
   value: AnswerValue | undefined;
   onChange: (v: AnswerValue) => void;
+  previewLocale: PreviewLocale;
+  missingTranslationLabel: string;
 }) {
   const matchedRule = getMatchingRule(question, value);
 
+  const label = bilingualText(question.labelFr, question.labelEn, previewLocale) || question.label;
+  const options = bilingualOptions(question.optionsFr, question.optionsEn, previewLocale);
+  const fallbackOptions = options.length > 0 ? options : question.options;
+
+  const isMissing =
+    (previewLocale === "en" && !question.labelEn && question.labelFr) ||
+    (previewLocale === "fr" && !question.labelFr && question.labelEn);
+
   return (
     <div className="space-y-2">
-      <p className="text-xs font-semibold leading-snug">
-        {question.label || "..."}{" "}
+      <p className={`text-xs font-semibold leading-snug ${isMissing ? "text-muted-foreground italic" : ""}`}>
+        {label || "..."}{" "}
         {question.required && <span className="text-red-500">*</span>}
+        {isMissing && (
+          <span className="text-[9px] font-normal text-orange-400 ml-1">
+            {missingTranslationLabel}
+          </span>
+        )}
       </p>
 
       {question.type === "STARS" && (
@@ -106,7 +171,7 @@ function QuestionPreview({
       )}
       {question.type === "CHOICE" && (
         <ChoiceInput
-          options={question.options}
+          options={fallbackOptions}
           multiple={question.multipleChoice ?? false}
           value={value}
           onChange={onChange}
@@ -163,7 +228,7 @@ function StarsInput({
               : "bg-gray-100 text-gray-300 hover:bg-gray-200"
           }`}
         >
-          ★
+          &#x2605;
         </button>
       ))}
     </div>
@@ -314,7 +379,7 @@ function FollowUpBlock({
       {rule.allowFreeText && (
         <textarea
           rows={1}
-          placeholder="Précisez..."
+          placeholder="Pr\u00e9cisez..."
           className="w-full text-[9px] px-1.5 py-1 rounded border border-border bg-white resize-none focus:outline-none"
         />
       )}

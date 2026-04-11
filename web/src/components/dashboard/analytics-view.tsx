@@ -20,6 +20,9 @@ import { ScoresByCriterion, type CriterionScore } from "./scores-by-criterion";
 import { RecentResponses, type RecentResponseItem } from "./recent-responses";
 import { Button } from "@/components/ui/button";
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+type PrismaQuestion = any;
+
 export async function AnalyticsView({
   userId,
   formId: explicitFormId,
@@ -79,8 +82,8 @@ export async function AnalyticsView({
   // Scores by criterion (STARS + EMOJI)
   const criteria: CriterionScore[] = form
     ? form.questions
-        .filter((q) => q.type === "STARS" || q.type === "EMOJI")
-        .map((q) => {
+        .filter((q: PrismaQuestion) => q.type === "STARS" || q.type === "EMOJI")
+        .map((q: PrismaQuestion) => {
           const avg = calculateAverageScore(responses, [q]);
           const topReasons =
             q.hasBranching && avg < 3.5
@@ -108,7 +111,7 @@ export async function AnalyticsView({
           createdAt: r.createdAt.toISOString(),
           avgScore: calculateResponseAverage(r, form.questions),
           metadata: (r.metadata as { device?: string; lang?: string }) || undefined,
-          details: form.questions.map((q) => {
+          details: form.questions.map((q: PrismaQuestion) => {
             const a = answers[q.id];
             let answerText = "—";
             if (a) {

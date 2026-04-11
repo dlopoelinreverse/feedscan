@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useCallback, useEffect, useRef } from "react";
+import { useState, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
 import {
@@ -19,12 +19,10 @@ import {
   verticalListSortingStrategy,
 } from "@dnd-kit/sortable";
 import { nanoid } from "nanoid";
-import { Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
-import { Separator } from "@/components/ui/separator";
 import {
   Select,
   SelectContent,
@@ -37,113 +35,32 @@ import {
   CollapsibleContent,
   CollapsibleTrigger,
 } from "@/components/ui/collapsible";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { toast } from "@/hooks/use-toast";
 import { saveForm, type SaveFormInput } from "@/lib/actions/form-actions";
 import { MobilePreview } from "./mobile-preview";
 import { QuestionCard } from "./question-card";
 import { QuestionDialog } from "./question-dialog";
+import { AiAssistant } from "./ai-wizard/ai-assistant";
 import type {
   FormBuilderState,
   QuestionType,
   QuestionState,
-  FollowUpRuleState,
+  PreviewLocale,
 } from "./types";
 import { QUESTION_TYPE_BADGE } from "./types";
 
 interface FormBuilderProps {
   initialData?: FormBuilderState;
-}
-
-interface UserInfo {
-  plan: "FREE" | "PRO" | "BUSINESS";
-  aiGenerationsUsed: number;
-}
-
-interface GeneratedQuestion {
-  type: "stars" | "emoji" | "choice" | "text";
-  label: string;
-  options: string[] | null;
-  required: boolean;
-  emojiLevels?: number | null;
-  branching: {
-    low: {
-      triggerMin: number;
-      triggerMax: number;
-      followUpLabel: string;
-      followUpOptions: string[];
-      allowFreeText: boolean;
-    };
-    high: {
-      triggerMin: number;
-      triggerMax: number;
-      followUpLabel: string;
-      followUpOptions: string[];
-      allowFreeText: boolean;
-    };
-  } | null;
-}
-
-interface GeneratedForm {
-  title: string;
-  description: string;
-  questions: GeneratedQuestion[];
-}
-
-function convertGeneratedToState(generated: GeneratedForm): {
-  title: string;
-  description: string;
-  questions: QuestionState[];
-} {
-  return {
-    title: generated.title,
-    description: generated.description,
-    questions: generated.questions.map((q, i) => {
-      const followUpRules: FollowUpRuleState[] = [];
-      if (q.branching) {
-        followUpRules.push({
-          triggerType: "LOW",
-          triggerMin: q.branching.low.triggerMin,
-          triggerMax: q.branching.low.triggerMax,
-          followUpLabel: q.branching.low.followUpLabel,
-          followUpOptions: q.branching.low.followUpOptions,
-          allowFreeText: q.branching.low.allowFreeText,
-        });
-        followUpRules.push({
-          triggerType: "HIGH",
-          triggerMin: q.branching.high.triggerMin,
-          triggerMax: q.branching.high.triggerMax,
-          followUpLabel: q.branching.high.followUpLabel,
-          followUpOptions: q.branching.high.followUpOptions,
-          allowFreeText: q.branching.high.allowFreeText,
-        });
-      }
-
-      return {
-        clientId: nanoid(),
-        type: q.type.toUpperCase() as QuestionType,
-        label: q.label,
-        options: q.options ?? [],
-        order: i,
-        required: q.required,
-        hasBranching: q.branching !== null,
-        emojiLevels: q.emojiLevels ?? undefined,
-        followUpRules,
-      };
-    }),
+  userProfile?: {
+    businessName?: string | null;
+    businessType?: string | null;
   };
 }
 
-export function FormBuilder({ initialData }: FormBuilderProps) {
+export function FormBuilder({ initialData, userProfile }: FormBuilderProps) {
   const t = useTranslations("forms");
+  const tWizard = useTranslations("aiWizard");
   const tCommon = useTranslations("common");
   const router = useRouter();
 
@@ -164,28 +81,10 @@ export function FormBuilder({ initialData }: FormBuilderProps) {
     QuestionState | undefined
   >();
   const [settingsOpen, setSettingsOpen] = useState(false);
-
-  // AI state
-  const [aiPrompt, setAiPrompt] = useState("");
-  const [aiDialogOpen, setAiDialogOpen] = useState(false);
-  const [aiGenerating, setAiGenerating] = useState(false);
-  const [aiError, setAiError] = useState<{
-    type: "limit" | "validation" | "network";
-    message: string;
-  } | null>(null);
-  const [userInfo, setUserInfo] = useState<UserInfo | null>(null);
-  const [confirmReplace, setConfirmReplace] = useState(false);
-  const abortRef = useRef<AbortController | null>(null);
-
-  // Fetch user info on mount
-  useEffect(() => {
-    fetch("/api/user")
-      .then((res) => (res.ok ? res.json() : null))
-      .then((data) => {
-        if (data) setUserInfo(data);
-      })
-      .catch(() => {});
-  }, []);
+  const [activeTab, setActiveTab] = useState<string>(
+    initialData ? "manual" : "assistant"
+  );
+  const [previewLocale, setPreviewLocale] = useState<PreviewLocale>("fr");
 
   const sensors = useSensors(
     useSensor(PointerSensor),
@@ -309,7 +208,11 @@ export function FormBuilder({ initialData }: FormBuilderProps) {
       const input: SaveFormInput = {
         id: form.id,
         title: form.title.trim() || t("builder.titlePlaceholder"),
+        titleFr: form.titleFr,
+        titleEn: form.titleEn,
         description: form.description.trim() || undefined,
+        descriptionFr: form.descriptionFr,
+        descriptionEn: form.descriptionEn,
         status,
         rateLimitMode: form.rateLimitMode,
         rateLimitHours: form.rateLimitHours,
@@ -317,11 +220,21 @@ export function FormBuilder({ initialData }: FormBuilderProps) {
           id: q.id,
           type: q.type,
           label: q.label,
+          labelFr: q.labelFr,
+          labelEn: q.labelEn,
           options: q.options.length > 0 ? q.options : undefined,
+          optionsFr: q.optionsFr,
+          optionsEn: q.optionsEn,
           order: q.order,
           required: q.required,
           hasBranching: q.hasBranching,
-          followUpRules: q.followUpRules,
+          followUpRules: q.followUpRules.map((r) => ({
+            ...r,
+            followUpLabelFr: r.followUpLabelFr,
+            followUpLabelEn: r.followUpLabelEn,
+            followUpOptionsFr: r.followUpOptionsFr,
+            followUpOptionsEn: r.followUpOptionsEn,
+          })),
         })),
       };
 
@@ -349,144 +262,100 @@ export function FormBuilder({ initialData }: FormBuilderProps) {
     }
   };
 
-  // AI generation handlers
-  const handleAiButtonClick = () => {
-    if (aiPrompt.trim().length < 20) {
-      toast({ title: t("ai.minLength"), variant: "destructive" });
-      return;
-    }
-
-    // If there are existing questions, ask for replace confirmation first
-    if (form.questions.length > 0) {
-      setConfirmReplace(true);
-    } else {
-      setAiError(null);
-      setAiDialogOpen(true);
-    }
+  const handleApplyToBuilder = () => {
+    setActiveTab("manual");
+    toast({ title: t("builder.draftSaved") });
   };
 
-  const handleConfirmReplace = () => {
-    setConfirmReplace(false);
-    setAiError(null);
-    setAiDialogOpen(true);
-  };
+  const handleTranslate = async () => {
+    const hasFr = form.titleFr || form.questions.some((q) => q.labelFr);
+    const hasEn = form.titleEn || form.questions.some((q) => q.labelEn);
 
-  const handleGenerate = async () => {
-    setAiGenerating(true);
-    setAiError(null);
+    if (hasFr && hasEn) return;
 
-    const controller = new AbortController();
-    abortRef.current = controller;
-
-    const timeout = setTimeout(() => controller.abort(), 30000);
+    const sourceLang = hasFr ? "fr" : "en";
+    const targetLang = hasFr ? "en" : "fr";
 
     try {
-      const res = await fetch("/api/ai/generate-form", {
+      const formData = {
+        titleFr: form.titleFr || form.title,
+        titleEn: form.titleEn || form.title,
+        descriptionFr: form.descriptionFr || form.description,
+        descriptionEn: form.descriptionEn || form.description,
+        questions: form.questions.map((q) => ({
+          type: q.type.toLowerCase(),
+          labelFr: q.labelFr || q.label,
+          labelEn: q.labelEn || q.label,
+          optionsFr: q.optionsFr?.length ? q.optionsFr : q.options.length ? q.options : null,
+          optionsEn: q.optionsEn?.length ? q.optionsEn : null,
+          required: q.required,
+          emojiLevels: q.emojiLevels ?? null,
+          branching: q.hasBranching && q.followUpRules.length >= 2
+            ? {
+                low: {
+                  triggerMin: q.followUpRules[0].triggerMin,
+                  triggerMax: q.followUpRules[0].triggerMax,
+                  followUpLabelFr: q.followUpRules[0].followUpLabelFr || q.followUpRules[0].followUpLabel,
+                  followUpLabelEn: q.followUpRules[0].followUpLabelEn || q.followUpRules[0].followUpLabel,
+                  followUpOptionsFr: q.followUpRules[0].followUpOptionsFr || q.followUpRules[0].followUpOptions,
+                  followUpOptionsEn: q.followUpRules[0].followUpOptionsEn || q.followUpRules[0].followUpOptions,
+                  allowFreeText: q.followUpRules[0].allowFreeText,
+                },
+                high: {
+                  triggerMin: q.followUpRules[1].triggerMin,
+                  triggerMax: q.followUpRules[1].triggerMax,
+                  followUpLabelFr: q.followUpRules[1].followUpLabelFr || q.followUpRules[1].followUpLabel,
+                  followUpLabelEn: q.followUpRules[1].followUpLabelEn || q.followUpRules[1].followUpLabel,
+                  followUpOptionsFr: q.followUpRules[1].followUpOptionsFr || q.followUpRules[1].followUpOptions,
+                  followUpOptionsEn: q.followUpRules[1].followUpOptionsEn || q.followUpRules[1].followUpOptions,
+                  allowFreeText: q.followUpRules[1].allowFreeText,
+                },
+              }
+            : null,
+        })),
+      };
+
+      const res = await fetch("/api/ai/translate-form", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ prompt: aiPrompt }),
-        signal: controller.signal,
+        body: JSON.stringify({ form: formData, sourceLang, targetLang }),
       });
 
-      clearTimeout(timeout);
+      if (!res.ok) throw new Error("Translation failed");
 
-      if (res.status === 403) {
-        const data = await res.json();
-        setAiError({ type: "limit", message: data.message });
-        return;
-      }
-
-      if (res.status === 422) {
-        const data = await res.json();
-        setAiError({ type: "validation", message: data.message });
-        return;
-      }
-
-      if (!res.ok) {
-        setAiError({ type: "network", message: t("ai.networkError") });
-        return;
-      }
-
-      const generated: GeneratedForm = await res.json();
-      const converted = convertGeneratedToState(generated);
+      const translated = await res.json();
 
       setForm((prev) => ({
         ...prev,
-        title: converted.title,
-        description: converted.description,
-        questions: converted.questions,
+        titleFr: translated.titleFr,
+        titleEn: translated.titleEn,
+        descriptionFr: translated.descriptionFr,
+        descriptionEn: translated.descriptionEn,
+        questions: prev.questions.map((q, i) => {
+          const tq = translated.questions[i];
+          if (!tq) return q;
+          return {
+            ...q,
+            labelFr: tq.labelFr,
+            labelEn: tq.labelEn,
+            optionsFr: tq.optionsFr ?? q.optionsFr,
+            optionsEn: tq.optionsEn ?? q.optionsEn,
+          };
+        }),
       }));
 
-      // Update local user info counter
-      setUserInfo((prev) =>
-        prev ? { ...prev, aiGenerationsUsed: prev.aiGenerationsUsed + 1 } : prev
-      );
-
-      setAiDialogOpen(false);
-      setAiPrompt("");
-      toast({ title: t("ai.generated") });
-    } catch (err) {
-      clearTimeout(timeout);
-      if (err instanceof DOMException && err.name === "AbortError") {
-        setAiError({ type: "network", message: t("ai.networkError") });
-      } else {
-        setAiError({ type: "network", message: t("ai.networkError") });
-      }
-    } finally {
-      setAiGenerating(false);
-      abortRef.current = null;
+      toast({ title: tWizard("chat.translationsGenerated") });
+    } catch {
+      toast({ title: tCommon("error"), variant: "destructive" });
     }
   };
 
-  const remainingGenerations = userInfo
-    ? Math.max(0, 3 - userInfo.aiGenerationsUsed)
-    : null;
+  const needsTranslation =
+    form.questions.length > 0 &&
+    (!form.questions.every((q) => q.labelFr && q.labelEn));
 
-  const editorContent = (
+  const manualEditorContent = (
     <div className="space-y-6">
-      {/* AI Bar */}
-      <section>
-        <p className="text-xs font-semibold text-muted-foreground tracking-wider mb-2 uppercase">
-          {t("ai.generate")}
-        </p>
-        <div className="flex gap-2">
-          <Input
-            placeholder={t("ai.promptPlaceholder")}
-            className="flex-1"
-            value={aiPrompt}
-            onChange={(e) => setAiPrompt(e.target.value)}
-          />
-          <Button
-            onClick={handleAiButtonClick}
-            className="bg-gradient-to-r from-[#6C5CE7] to-[#00B894] text-white hover:opacity-90 transition-opacity"
-          >
-            &#10024; {t("ai.generate")}
-          </Button>
-        </div>
-        {/* Generation counter */}
-        {userInfo && (
-          <p
-            className={`text-xs mt-1.5 ${
-              userInfo.plan === "FREE" && userInfo.aiGenerationsUsed >= 2
-                ? "text-orange-500"
-                : "text-muted-foreground"
-            }`}
-          >
-            &#9889;{" "}
-            {userInfo.plan === "FREE"
-              ? t("ai.generationsUsed", { count: userInfo.aiGenerationsUsed })
-              : t("ai.unlimitedGenerations")}
-          </p>
-        )}
-        <div className="flex items-center gap-3 mt-3">
-          <Separator className="flex-1" />
-          <span className="text-xs text-muted-foreground whitespace-nowrap">
-            {t("builder.buildManually")}
-          </span>
-          <Separator className="flex-1" />
-        </div>
-      </section>
-
       {/* Description */}
       <section>
         <Label className="text-xs font-semibold text-muted-foreground tracking-wider uppercase">
@@ -576,6 +445,20 @@ export function FormBuilder({ initialData }: FormBuilderProps) {
         )}
       </section>
 
+      {/* Auto-translate button */}
+      {needsTranslation && (
+        <section>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={handleTranslate}
+            className="w-full"
+          >
+            &#x1f310; {t("builder.autoTranslate")}
+          </Button>
+        </section>
+      )}
+
       {/* Advanced settings */}
       <Collapsible open={settingsOpen} onOpenChange={setSettingsOpen}>
         <CollapsibleTrigger asChild>
@@ -643,9 +526,38 @@ export function FormBuilder({ initialData }: FormBuilderProps) {
     </div>
   );
 
+  const leftColumnContent = (
+    <Tabs value={activeTab} onValueChange={setActiveTab} className="flex-1 flex flex-col">
+      <TabsList className="mx-4 mt-3 mb-0 grid grid-cols-2">
+        <TabsTrigger value="assistant" className="text-xs">
+          &#x2728; {tWizard("tabs.assistant")}
+        </TabsTrigger>
+        <TabsTrigger value="manual" className="text-xs">
+          &#x270f;&#xfe0f; {tWizard("tabs.manual")}
+        </TabsTrigger>
+      </TabsList>
+      <TabsContent value="assistant" className="flex-1 overflow-y-auto mt-0">
+        <AiAssistant
+          currentForm={form}
+          onFormGenerated={(f) => setForm((prev) => ({ ...f, id: prev.id, status: prev.status }))}
+          onFormUpdated={(f) => setForm((prev) => ({ ...f, id: prev.id, status: prev.status }))}
+          onApplyToBuilder={handleApplyToBuilder}
+          userProfile={userProfile}
+        />
+      </TabsContent>
+      <TabsContent value="manual" className="flex-1 overflow-y-auto p-4 mt-0">
+        {manualEditorContent}
+      </TabsContent>
+    </Tabs>
+  );
+
   const previewContent = (
     <div className="flex items-start justify-center py-6">
-      <MobilePreview form={form} />
+      <MobilePreview
+        form={form}
+        previewLocale={previewLocale}
+        onLocaleChange={setPreviewLocale}
+      />
     </div>
   );
 
@@ -689,15 +601,15 @@ export function FormBuilder({ initialData }: FormBuilderProps) {
         </div>
       </div>
 
-      {/* Mobile tabs */}
+      {/* Mobile layout */}
       <div className="md:hidden flex-1 flex flex-col">
         <Tabs defaultValue="edit" className="flex-1 flex flex-col">
           <TabsList className="mx-4 mt-3 mb-0">
             <TabsTrigger value="edit">{t("builder.edit")}</TabsTrigger>
             <TabsTrigger value="preview">{t("builder.preview")}</TabsTrigger>
           </TabsList>
-          <TabsContent value="edit" className="flex-1 overflow-y-auto p-4">
-            {editorContent}
+          <TabsContent value="edit" className="flex-1 overflow-y-auto flex flex-col">
+            {leftColumnContent}
           </TabsContent>
           <TabsContent
             value="preview"
@@ -710,12 +622,12 @@ export function FormBuilder({ initialData }: FormBuilderProps) {
 
       {/* Desktop split */}
       <div className="hidden md:flex flex-1 overflow-hidden">
-        <div className="flex-1 min-w-0 overflow-y-auto p-6">
-          {editorContent}
+        <div className="flex-1 min-w-0 overflow-y-auto flex flex-col">
+          {leftColumnContent}
         </div>
         <div className="w-[340px] border-l border-border bg-gray-50 overflow-y-auto shrink-0">
           <p className="text-xs text-center text-muted-foreground pt-4 pb-2">
-            {t("builder.preview")}
+            {tWizard("preview.title")}
           </p>
           {previewContent}
         </div>
@@ -730,106 +642,6 @@ export function FormBuilder({ initialData }: FormBuilderProps) {
         editing={editingQuestion}
         nextOrder={form.questions.length}
       />
-
-      {/* Confirm replace dialog */}
-      <Dialog open={confirmReplace} onOpenChange={setConfirmReplace}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>{t("ai.confirmTitle")}</DialogTitle>
-            <DialogDescription>{t("ai.confirmReplace")}</DialogDescription>
-          </DialogHeader>
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setConfirmReplace(false)}>
-              {tCommon("cancel")}
-            </Button>
-            <Button
-              onClick={handleConfirmReplace}
-              className="bg-[#6C5CE7] hover:bg-[#5A4BD5] text-white"
-            >
-              {tCommon("confirm")}
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
-
-      {/* AI generation dialog */}
-      <Dialog
-        open={aiDialogOpen}
-        onOpenChange={(open) => {
-          if (!open && !aiGenerating) {
-            setAiDialogOpen(false);
-            setAiError(null);
-          }
-        }}
-      >
-        <DialogContent
-          onPointerDownOutside={(e) => {
-            if (aiGenerating) e.preventDefault();
-          }}
-          onEscapeKeyDown={(e) => {
-            if (aiGenerating) e.preventDefault();
-          }}
-          className={aiGenerating ? "[&>button]:hidden" : ""}
-        >
-          <DialogHeader>
-            <DialogTitle>{t("ai.confirmTitle")}</DialogTitle>
-            <DialogDescription>{t("ai.confirmPrompt")}</DialogDescription>
-          </DialogHeader>
-
-          <div className="rounded-md bg-muted p-3 text-sm">{aiPrompt}</div>
-
-          {userInfo?.plan === "FREE" && (
-            <p className="text-sm text-muted-foreground">
-              &#9889; {t("ai.remaining", { count: remainingGenerations ?? 0 })}
-            </p>
-          )}
-
-          {aiError && (
-            <div className="space-y-2">
-              <p className="text-sm text-red-600">{aiError.message}</p>
-              {aiError.type === "limit" && (
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => router.push("/dashboard/settings")}
-                >
-                  {t("ai.upgradeToPro")}
-                </Button>
-              )}
-            </div>
-          )}
-
-          <DialogFooter>
-            {!aiGenerating && (
-              <Button
-                variant="outline"
-                onClick={() => {
-                  setAiDialogOpen(false);
-                  setAiError(null);
-                }}
-              >
-                {tCommon("cancel")}
-              </Button>
-            )}
-            <Button
-              onClick={handleGenerate}
-              disabled={aiGenerating}
-              className="bg-gradient-to-r from-[#6C5CE7] to-[#00B894] text-white"
-            >
-              {aiGenerating ? (
-                <>
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  {t("ai.generating")}
-                </>
-              ) : aiError && aiError.type !== "limit" ? (
-                t("ai.retry")
-              ) : (
-                t("ai.confirmGenerate")
-              )}
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
     </div>
   );
 }

@@ -13,7 +13,11 @@ export interface QuestionInput {
   id?: string;
   type: "STARS" | "EMOJI" | "CHOICE" | "TEXT";
   label: string;
+  labelFr?: string;
+  labelEn?: string;
   options?: string[];
+  optionsFr?: string[];
+  optionsEn?: string[];
   order: number;
   required: boolean;
   hasBranching: boolean;
@@ -26,7 +30,11 @@ export interface FollowUpRuleInput {
   triggerMin: number;
   triggerMax: number;
   followUpLabel: string;
+  followUpLabelFr?: string;
+  followUpLabelEn?: string;
   followUpOptions: string[];
+  followUpOptionsFr?: string[];
+  followUpOptionsEn?: string[];
   allowFreeText: boolean;
   enabled?: boolean;
   allowOptions?: boolean;
@@ -35,7 +43,11 @@ export interface FollowUpRuleInput {
 export interface SaveFormInput {
   id?: string;
   title: string;
+  titleFr?: string;
+  titleEn?: string;
   description?: string;
+  descriptionFr?: string;
+  descriptionEn?: string;
   status: FormStatus;
   rateLimitMode: RateLimitMode;
   rateLimitHours?: number;
@@ -71,9 +83,11 @@ export async function saveForm(input: SaveFormInput) {
         where: { id: input.id },
         data: {
           title: input.title,
-          titleFr: input.title,
+          titleFr: input.titleFr || input.title,
+          titleEn: input.titleEn || undefined,
           description: input.description,
-          descriptionFr: input.description,
+          descriptionFr: input.descriptionFr || input.description,
+          descriptionEn: input.descriptionEn || undefined,
           status: input.status,
           rateLimitMode: input.rateLimitMode,
           rateLimitHours: input.rateLimitHours,
@@ -103,9 +117,11 @@ export async function saveForm(input: SaveFormInput) {
         data: {
           userId,
           title: input.title,
-          titleFr: input.title,
+          titleFr: input.titleFr || input.title,
+          titleEn: input.titleEn || undefined,
           description: input.description,
-          descriptionFr: input.description,
+          descriptionFr: input.descriptionFr || input.description,
+          descriptionEn: input.descriptionEn || undefined,
           status: input.status,
           slug: input.status === "ACTIVE" ? generateSlug() : generateSlug(),
           rateLimitMode: input.rateLimitMode,
@@ -121,7 +137,8 @@ export async function saveForm(input: SaveFormInput) {
           formId: form.id,
           type: q.type,
           label: q.label,
-          labelFr: q.label,
+          labelFr: q.labelFr || q.label,
+          labelEn: q.labelEn || undefined,
           options: q.options ?? [],
           order: q.order,
           required: q.required,
@@ -138,9 +155,11 @@ export async function saveForm(input: SaveFormInput) {
             triggerMin: rule.triggerMin,
             triggerMax: rule.triggerMax,
             followUpLabel: rule.followUpLabel,
-            followUpLabelFr: rule.followUpLabel,
+            followUpLabelFr: rule.followUpLabelFr || rule.followUpLabel,
+            followUpLabelEn: rule.followUpLabelEn || undefined,
             followUpOptions: rule.followUpOptions,
-            followUpOptionsFr: rule.followUpOptions,
+            followUpOptionsFr: rule.followUpOptionsFr || rule.followUpOptions,
+            followUpOptionsEn: rule.followUpOptionsEn || undefined,
             allowFreeText: rule.allowFreeText,
           },
         });
@@ -209,4 +228,15 @@ export async function getUserPlan() {
   });
 
   return user?.plan ?? "FREE";
+}
+
+export async function getUserProfile() {
+  const userId = await getAuthUserId();
+
+  const user = await prisma.user.findUnique({
+    where: { id: userId },
+    select: { businessName: true, businessType: true },
+  });
+
+  return user;
 }
