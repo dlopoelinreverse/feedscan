@@ -334,6 +334,134 @@
       "cta": "Bientôt disponible"
     }
   },
+  "aiWizard": {
+    "tabs": {
+      "assistant": "Assistant IA",
+      "manual": "Mode manuel"
+    },
+    "switchToManual": "Passer au mode manuel",
+    "step1": {
+      "title": "Parlez-nous de votre commerce",
+      "subtitle": "On va personnaliser le formulaire selon votre activité.",
+      "businessName": "Nom du commerce",
+      "businessNamePlaceholder": "Ex : Café Milano",
+      "businessType": "Type d'activité",
+      "selectType": "Sélectionnez un type...",
+      "description": "Décrivez votre commerce en une phrase",
+      "descriptionPlaceholder": "Ex : On vient de changer notre menu, je veux savoir ce que les clients en pensent..."
+    },
+    "step2": {
+      "title": "Que voulez-vous mesurer ?",
+      "subtitle": "Sélectionnez les aspects de l'expérience client que vous souhaitez évaluer. Vous pourrez affiner ensuite.",
+      "areasToEvaluate": "Points à évaluer",
+      "specificRequest": "Quelque chose de spécifique à mesurer ?",
+      "specificRequestPlaceholder": "Ex : On vient de changer notre menu, je veux savoir ce que les clients en pensent...",
+      "minChips": "Sélectionnez au moins 2 points",
+      "chips": {
+        "restaurant": {
+          "foodQuality": "Qualité des plats",
+          "service": "Service",
+          "ambiance": "Ambiance",
+          "cleanliness": "Propreté",
+          "valueForMoney": "Rapport qualité-prix",
+          "waitTime": "Temps d'attente",
+          "welcome": "Accueil",
+          "menuVariety": "Variété du menu"
+        },
+        "cafe": {
+          "coffeeQuality": "Qualité du café",
+          "service": "Service",
+          "ambiance": "Ambiance",
+          "cleanliness": "Propreté",
+          "pricing": "Prix",
+          "waitTime": "Temps d'attente",
+          "pastries": "Pâtisseries",
+          "wifiComfort": "Wifi & confort"
+        },
+        "salon": {
+          "cutQuality": "Qualité coupe/soin",
+          "welcome": "Accueil",
+          "waitTime": "Temps d'attente",
+          "cleanliness": "Propreté",
+          "valueForMoney": "Rapport qualité-prix",
+          "stylistAdvice": "Conseils du coiffeur",
+          "ambiance": "Ambiance"
+        },
+        "clinique": {
+          "welcome": "Accueil",
+          "waitTime": "Temps d'attente",
+          "practitionerAttentiveness": "Écoute du praticien",
+          "cleanliness": "Propreté",
+          "clarityOfExplanations": "Clarté des explications",
+          "followUpCare": "Suivi"
+        },
+        "gym": {
+          "equipment": "Équipement",
+          "cleanliness": "Propreté",
+          "groupClasses": "Cours collectifs",
+          "availability": "Disponibilité",
+          "staff": "Personnel",
+          "ambiance": "Ambiance",
+          "valueForMoney": "Rapport qualité-prix"
+        },
+        "coworking": {
+          "wifiConnectivity": "Wifi & connectivité",
+          "comfort": "Confort",
+          "noiseLevel": "Bruit",
+          "cleanliness": "Propreté",
+          "coffeeKitchen": "Café & cuisine",
+          "space": "Espace",
+          "valueForMoney": "Rapport qualité-prix"
+        },
+        "autre": {
+          "serviceQuality": "Qualité du service",
+          "welcome": "Accueil",
+          "cleanliness": "Propreté",
+          "valueForMoney": "Rapport qualité-prix",
+          "waitTime": "Temps d'attente",
+          "ambiance": "Ambiance"
+        }
+      }
+    },
+    "step3": {
+      "messages": {
+        "analyzing": "Analyse de vos besoins...",
+        "creating": "Création des questions...",
+        "branching": "Configuration du suivi conditionnel...",
+        "finalizing": "Finalisation..."
+      },
+      "error": "La génération a échoué. Veuillez réessayer.",
+      "retry": "Réessayer"
+    },
+    "chat": {
+      "badge": "FeedScan IA",
+      "formCreated": "J'ai créé un formulaire de {count} questions basé sur vos critères. Voici ce que j'ai préparé :",
+      "questionStar": "{index}. \u2b50 {label} (étoiles 1-5)",
+      "questionEmoji": "{index}. \ud83d\ude0a {label} (emoji {levels} niveaux)",
+      "questionChoice": "{index}. \u2611\ufe0f {label} (choix multiples)",
+      "questionText": "{index}. \ud83d\udcac {label}",
+      "branchingNote": "J'ai aussi ajouté des questions de suivi automatiques pour les scores bas et hauts.\nVoulez-vous modifier quelque chose ?",
+      "placeholder": "Demandez une modification...",
+      "send": "Envoyer",
+      "suggestions": {
+        "addQuestion": "Ajouter une question",
+        "changeOrder": "Changer l'ordre",
+        "looksGreat": "C'est parfait !"
+      },
+      "validated": "Formulaire prêt \u2014 {count} questions avec suivi conditionnel",
+      "applyToBuilder": "Appliquer au builder",
+      "translationsGenerated": "Traductions générées ! Vérifiez avant de publier.",
+      "limitReached": "Vous avez atteint la limite de 3 générations IA. Passez au Pro pour des générations illimitées.",
+      "upgradeCta": "Passer au Pro"
+    },
+    "preview": {
+      "title": "Prévisualisation en temps réel",
+      "building": "En construction...",
+      "buildingDescription": "Titre en attente...",
+      "buildingQuestions": "Les questions apparaîtront ici au fur et à mesure",
+      "missingTranslation": "(traduction manquante)"
+    }
+  },
   "landing": {
     "hero": {
       "badge": "Nouveau à Montréal",

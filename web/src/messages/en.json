@@ -334,6 +334,134 @@
       "cta": "Coming soon"
     }
   },
+  "aiWizard": {
+    "tabs": {
+      "assistant": "AI Assistant",
+      "manual": "Manual mode"
+    },
+    "switchToManual": "Switch to manual mode",
+    "step1": {
+      "title": "Tell us about your business",
+      "subtitle": "We'll personalize the form based on your activity.",
+      "businessName": "Business name",
+      "businessNamePlaceholder": "e.g. Cafe Milano",
+      "businessType": "Business type",
+      "selectType": "Select a type...",
+      "description": "Describe your business in one sentence",
+      "descriptionPlaceholder": "e.g. We just changed our menu, I want to know what customers think..."
+    },
+    "step2": {
+      "title": "What do you want to measure?",
+      "subtitle": "Select the areas you want to evaluate. You can refine them later.",
+      "areasToEvaluate": "Areas to evaluate",
+      "specificRequest": "Anything specific to measure?",
+      "specificRequestPlaceholder": "e.g. We just changed our menu, I want to know what customers think...",
+      "minChips": "Select at least 2 areas",
+      "chips": {
+        "restaurant": {
+          "foodQuality": "Food quality",
+          "service": "Service",
+          "ambiance": "Ambiance",
+          "cleanliness": "Cleanliness",
+          "valueForMoney": "Value for money",
+          "waitTime": "Wait time",
+          "welcome": "Welcome",
+          "menuVariety": "Menu variety"
+        },
+        "cafe": {
+          "coffeeQuality": "Coffee quality",
+          "service": "Service",
+          "ambiance": "Ambiance",
+          "cleanliness": "Cleanliness",
+          "pricing": "Pricing",
+          "waitTime": "Wait time",
+          "pastries": "Pastries",
+          "wifiComfort": "Wifi & comfort"
+        },
+        "salon": {
+          "cutQuality": "Cut/treatment quality",
+          "welcome": "Welcome",
+          "waitTime": "Wait time",
+          "cleanliness": "Cleanliness",
+          "valueForMoney": "Value for money",
+          "stylistAdvice": "Stylist advice",
+          "ambiance": "Ambiance"
+        },
+        "clinique": {
+          "welcome": "Welcome",
+          "waitTime": "Wait time",
+          "practitionerAttentiveness": "Practitioner attentiveness",
+          "cleanliness": "Cleanliness",
+          "clarityOfExplanations": "Clarity of explanations",
+          "followUpCare": "Follow-up care"
+        },
+        "gym": {
+          "equipment": "Equipment",
+          "cleanliness": "Cleanliness",
+          "groupClasses": "Group classes",
+          "availability": "Availability",
+          "staff": "Staff",
+          "ambiance": "Ambiance",
+          "valueForMoney": "Value for money"
+        },
+        "coworking": {
+          "wifiConnectivity": "Wifi & connectivity",
+          "comfort": "Comfort",
+          "noiseLevel": "Noise level",
+          "cleanliness": "Cleanliness",
+          "coffeeKitchen": "Coffee & kitchen",
+          "space": "Space",
+          "valueForMoney": "Value for money"
+        },
+        "autre": {
+          "serviceQuality": "Service quality",
+          "welcome": "Welcome",
+          "cleanliness": "Cleanliness",
+          "valueForMoney": "Value for money",
+          "waitTime": "Wait time",
+          "ambiance": "Ambiance"
+        }
+      }
+    },
+    "step3": {
+      "messages": {
+        "analyzing": "Analyzing your needs...",
+        "creating": "Creating questions...",
+        "branching": "Setting up conditional follow-ups...",
+        "finalizing": "Finalizing..."
+      },
+      "error": "Generation failed. Please try again.",
+      "retry": "Try again"
+    },
+    "chat": {
+      "badge": "FeedScan AI",
+      "formCreated": "I've created a {count}-question form based on your criteria. Here's what I prepared:",
+      "questionStar": "{index}. \u2b50 {label} (stars 1-5)",
+      "questionEmoji": "{index}. \ud83d\ude0a {label} (emoji {levels} levels)",
+      "questionChoice": "{index}. \u2611\ufe0f {label} (multiple choice)",
+      "questionText": "{index}. \ud83d\udcac {label}",
+      "branchingNote": "I also added automatic follow-up questions for low and high scores.\nWant to change anything?",
+      "placeholder": "Ask for a modification...",
+      "send": "Send",
+      "suggestions": {
+        "addQuestion": "Add a question",
+        "changeOrder": "Change the order",
+        "looksGreat": "Looks great!"
+      },
+      "validated": "Form ready \u2014 {count} questions with conditional follow-up",
+      "applyToBuilder": "Apply to builder",
+      "translationsGenerated": "Translations generated! Please review before publishing.",
+      "limitReached": "You've reached the 3 AI generation limit. Upgrade to Pro for unlimited generations.",
+      "upgradeCta": "Upgrade to Pro"
+    },
+    "preview": {
+      "title": "Real-time preview",
+      "building": "Building...",
+      "buildingDescription": "Title pending...",
+      "buildingQuestions": "Questions will appear here as they are created",
+      "missingTranslation": "(missing translation)"
+    }
+  },
   "landing": {
     "hero": {
       "badge": "New in Montreal",
