@@ -201,7 +201,15 @@
       "limitReached": "Vous avez atteint la limite de 3 générations IA. Passez au Pro pour des générations illimitées.",
       "error": "La génération n'a pas produit un résultat valide. Réessayez avec une description plus détaillée.",
       "retry": "Réessayer",
-      "minLength": "Minimum 20 caractères"
+      "minLength": "Décrivez votre commerce en au moins 20 caractères",
+      "confirmTitle": "Générer un formulaire avec l'IA",
+      "confirmPrompt": "Votre description :",
+      "confirmGenerate": "Générer le formulaire",
+      "confirmReplace": "La génération va remplacer les questions existantes. Continuer ?",
+      "generationsUsed": "{count}/3 générations utilisées",
+      "unlimitedGenerations": "Générations illimitées",
+      "upgradeToPro": "Passer au Pro",
+      "networkError": "Impossible de contacter le serveur. Vérifiez votre connexion."
     },
     "rateLimit": {
       "title": "Limitation des réponses",

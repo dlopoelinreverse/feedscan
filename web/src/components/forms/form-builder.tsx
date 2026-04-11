@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
 import {
@@ -19,6 +19,7 @@ import {
   verticalListSortingStrategy,
 } from "@dnd-kit/sortable";
 import { nanoid } from "nanoid";
+import { Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -36,6 +37,14 @@ import {
   CollapsibleContent,
   CollapsibleTrigger,
 } from "@/components/ui/collapsible";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { toast } from "@/hooks/use-toast";
 import { saveForm, type SaveFormInput } from "@/lib/actions/form-actions";
@@ -46,11 +55,91 @@ import type {
   FormBuilderState,
   QuestionType,
   QuestionState,
+  FollowUpRuleState,
 } from "./types";
 import { QUESTION_TYPE_BADGE } from "./types";
 
 interface FormBuilderProps {
   initialData?: FormBuilderState;
+}
+
+interface UserInfo {
+  plan: "FREE" | "PRO" | "BUSINESS";
+  aiGenerationsUsed: number;
+}
+
+interface GeneratedQuestion {
+  type: "stars" | "emoji" | "choice" | "text";
+  label: string;
+  options: string[] | null;
+  required: boolean;
+  emojiLevels?: number | null;
+  branching: {
+    low: {
+      triggerMin: number;
+      triggerMax: number;
+      followUpLabel: string;
+      followUpOptions: string[];
+      allowFreeText: boolean;
+    };
+    high: {
+      triggerMin: number;
+      triggerMax: number;
+      followUpLabel: string;
+      followUpOptions: string[];
+      allowFreeText: boolean;
+    };
+  } | null;
+}
+
+interface GeneratedForm {
+  title: string;
+  description: string;
+  questions: GeneratedQuestion[];
+}
+
+function convertGeneratedToState(generated: GeneratedForm): {
+  title: string;
+  description: string;
+  questions: QuestionState[];
+} {
+  return {
+    title: generated.title,
+    description: generated.description,
+    questions: generated.questions.map((q, i) => {
+      const followUpRules: FollowUpRuleState[] = [];
+      if (q.branching) {
+        followUpRules.push({
+          triggerType: "LOW",
+          triggerMin: q.branching.low.triggerMin,
+          triggerMax: q.branching.low.triggerMax,
+          followUpLabel: q.branching.low.followUpLabel,
+          followUpOptions: q.branching.low.followUpOptions,
+          allowFreeText: q.branching.low.allowFreeText,
+        });
+        followUpRules.push({
+          triggerType: "HIGH",
+          triggerMin: q.branching.high.triggerMin,
+          triggerMax: q.branching.high.triggerMax,
+          followUpLabel: q.branching.high.followUpLabel,
+          followUpOptions: q.branching.high.followUpOptions,
+          allowFreeText: q.branching.high.allowFreeText,
+        });
+      }
+
+      return {
+        clientId: nanoid(),
+        type: q.type.toUpperCase() as QuestionType,
+        label: q.label,
+        options: q.options ?? [],
+        order: i,
+        required: q.required,
+        hasBranching: q.branching !== null,
+        emojiLevels: q.emojiLevels ?? undefined,
+        followUpRules,
+      };
+    }),
+  };
 }
 
 export function FormBuilder({ initialData }: FormBuilderProps) {
@@ -74,6 +163,28 @@ export function FormBuilder({ initialData }: FormBuilderProps) {
     QuestionState | undefined
   >();
   const [settingsOpen, setSettingsOpen] = useState(false);
+
+  // AI state
+  const [aiPrompt, setAiPrompt] = useState("");
+  const [aiDialogOpen, setAiDialogOpen] = useState(false);
+  const [aiGenerating, setAiGenerating] = useState(false);
+  const [aiError, setAiError] = useState<{
+    type: "limit" | "validation" | "network";
+    message: string;
+  } | null>(null);
+  const [userInfo, setUserInfo] = useState<UserInfo | null>(null);
+  const [confirmReplace, setConfirmReplace] = useState(false);
+  const abortRef = useRef<AbortController | null>(null);
+
+  // Fetch user info on mount
+  useEffect(() => {
+    fetch("/api/user")
+      .then((res) => (res.ok ? res.json() : null))
+      .then((data) => {
+        if (data) setUserInfo(data);
+      })
+      .catch(() => {});
+  }, []);
 
   const sensors = useSensors(
     useSensor(PointerSensor),
@@ -215,6 +326,99 @@ export function FormBuilder({ initialData }: FormBuilderProps) {
     }
   };
 
+  // AI generation handlers
+  const handleAiButtonClick = () => {
+    if (aiPrompt.trim().length < 20) {
+      toast({ title: t("ai.minLength"), variant: "destructive" });
+      return;
+    }
+
+    // If there are existing questions, ask for replace confirmation first
+    if (form.questions.length > 0) {
+      setConfirmReplace(true);
+    } else {
+      setAiError(null);
+      setAiDialogOpen(true);
+    }
+  };
+
+  const handleConfirmReplace = () => {
+    setConfirmReplace(false);
+    setAiError(null);
+    setAiDialogOpen(true);
+  };
+
+  const handleGenerate = async () => {
+    setAiGenerating(true);
+    setAiError(null);
+
+    const controller = new AbortController();
+    abortRef.current = controller;
+
+    const timeout = setTimeout(() => controller.abort(), 30000);
+
+    try {
+      const res = await fetch("/api/ai/generate-form", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ prompt: aiPrompt }),
+        signal: controller.signal,
+      });
+
+      clearTimeout(timeout);
+
+      if (res.status === 403) {
+        const data = await res.json();
+        setAiError({ type: "limit", message: data.message });
+        return;
+      }
+
+      if (res.status === 422) {
+        const data = await res.json();
+        setAiError({ type: "validation", message: data.message });
+        return;
+      }
+
+      if (!res.ok) {
+        setAiError({ type: "network", message: t("ai.networkError") });
+        return;
+      }
+
+      const generated: GeneratedForm = await res.json();
+      const converted = convertGeneratedToState(generated);
+
+      setForm((prev) => ({
+        ...prev,
+        title: converted.title,
+        description: converted.description,
+        questions: converted.questions,
+      }));
+
+      // Update local user info counter
+      setUserInfo((prev) =>
+        prev ? { ...prev, aiGenerationsUsed: prev.aiGenerationsUsed + 1 } : prev
+      );
+
+      setAiDialogOpen(false);
+      setAiPrompt("");
+      toast({ title: t("ai.generated") });
+    } catch (err) {
+      clearTimeout(timeout);
+      if (err instanceof DOMException && err.name === "AbortError") {
+        setAiError({ type: "network", message: t("ai.networkError") });
+      } else {
+        setAiError({ type: "network", message: t("ai.networkError") });
+      }
+    } finally {
+      setAiGenerating(false);
+      abortRef.current = null;
+    }
+  };
+
+  const remainingGenerations = userInfo
+    ? Math.max(0, 3 - userInfo.aiGenerationsUsed)
+    : null;
+
   const editorContent = (
     <div className="space-y-6">
       {/* AI Bar */}
@@ -226,15 +430,31 @@ export function FormBuilder({ initialData }: FormBuilderProps) {
           <Input
             placeholder={t("ai.promptPlaceholder")}
             className="flex-1"
-            disabled
+            value={aiPrompt}
+            onChange={(e) => setAiPrompt(e.target.value)}
           />
           <Button
-            disabled
-            className="bg-gradient-to-r from-[#6C5CE7] to-[#00B894] text-white opacity-50 cursor-not-allowed"
+            onClick={handleAiButtonClick}
+            className="bg-gradient-to-r from-[#6C5CE7] to-[#00B894] text-white hover:opacity-90 transition-opacity"
           >
             &#10024; {t("ai.generate")}
           </Button>
         </div>
+        {/* Generation counter */}
+        {userInfo && (
+          <p
+            className={`text-xs mt-1.5 ${
+              userInfo.plan === "FREE" && userInfo.aiGenerationsUsed >= 2
+                ? "text-orange-500"
+                : "text-muted-foreground"
+            }`}
+          >
+            &#9889;{" "}
+            {userInfo.plan === "FREE"
+              ? t("ai.generationsUsed", { count: userInfo.aiGenerationsUsed })
+              : t("ai.unlimitedGenerations")}
+          </p>
+        )}
         <div className="flex items-center gap-3 mt-3">
           <Separator className="flex-1" />
           <span className="text-xs text-muted-foreground whitespace-nowrap">
@@ -484,6 +704,106 @@ export function FormBuilder({ initialData }: FormBuilderProps) {
         editing={editingQuestion}
         nextOrder={form.questions.length}
       />
+
+      {/* Confirm replace dialog */}
+      <Dialog open={confirmReplace} onOpenChange={setConfirmReplace}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>{t("ai.confirmTitle")}</DialogTitle>
+            <DialogDescription>{t("ai.confirmReplace")}</DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setConfirmReplace(false)}>
+              {tCommon("cancel")}
+            </Button>
+            <Button
+              onClick={handleConfirmReplace}
+              className="bg-[#6C5CE7] hover:bg-[#5A4BD5] text-white"
+            >
+              {tCommon("confirm")}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* AI generation dialog */}
+      <Dialog
+        open={aiDialogOpen}
+        onOpenChange={(open) => {
+          if (!open && !aiGenerating) {
+            setAiDialogOpen(false);
+            setAiError(null);
+          }
+        }}
+      >
+        <DialogContent
+          onPointerDownOutside={(e) => {
+            if (aiGenerating) e.preventDefault();
+          }}
+          onEscapeKeyDown={(e) => {
+            if (aiGenerating) e.preventDefault();
+          }}
+          className={aiGenerating ? "[&>button]:hidden" : ""}
+        >
+          <DialogHeader>
+            <DialogTitle>{t("ai.confirmTitle")}</DialogTitle>
+            <DialogDescription>{t("ai.confirmPrompt")}</DialogDescription>
+          </DialogHeader>
+
+          <div className="rounded-md bg-muted p-3 text-sm">{aiPrompt}</div>
+
+          {userInfo?.plan === "FREE" && (
+            <p className="text-sm text-muted-foreground">
+              &#9889; {t("ai.remaining", { count: remainingGenerations ?? 0 })}
+            </p>
+          )}
+
+          {aiError && (
+            <div className="space-y-2">
+              <p className="text-sm text-red-600">{aiError.message}</p>
+              {aiError.type === "limit" && (
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => router.push("/dashboard/settings")}
+                >
+                  {t("ai.upgradeToPro")}
+                </Button>
+              )}
+            </div>
+          )}
+
+          <DialogFooter>
+            {!aiGenerating && (
+              <Button
+                variant="outline"
+                onClick={() => {
+                  setAiDialogOpen(false);
+                  setAiError(null);
+                }}
+              >
+                {tCommon("cancel")}
+              </Button>
+            )}
+            <Button
+              onClick={handleGenerate}
+              disabled={aiGenerating}
+              className="bg-gradient-to-r from-[#6C5CE7] to-[#00B894] text-white"
+            >
+              {aiGenerating ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  {t("ai.generating")}
+                </>
+              ) : aiError && aiError.type !== "limit" ? (
+                t("ai.retry")
+              ) : (
+                t("ai.confirmGenerate")
+              )}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
