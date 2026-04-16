@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { prisma } from "@/lib/prisma";
+<<<<<<< HEAD
 import { anthropic, AI_MODEL } from "@/lib/ai/client";
 import {
   generateFormRequestSchema,
@@ -10,6 +11,10 @@ import {
   buildGenerateSystemPrompt,
   buildGenerateUserMessage,
 } from "@/lib/ai/prompts";
+=======
+import { canUseAI } from "@/lib/plan-limits";
+import { getAppUrl } from "@/lib/domains";
+>>>>>>> test/stripe-integration
 
 export async function POST(request: Request) {
   const supabase = await createClient();
@@ -21,11 +26,37 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
+<<<<<<< HEAD
   // Check plan limits
   const dbUser = await prisma.user.findUnique({
     where: { id: user.id },
     select: { plan: true, aiGenerationsUsed: true },
   });
+=======
+  const dbUser = await prisma.user.findUnique({
+    where: { id: user.id },
+    select: { id: true, plan: true, aiGenerationsUsed: true },
+  });
+
+  if (!dbUser) {
+    return NextResponse.json({ error: "User not found" }, { status: 404 });
+  }
+
+  if (!canUseAI(dbUser)) {
+    return NextResponse.json(
+      {
+        error: "plan_limit",
+        limit: "ai",
+        message: "AI generation limit reached",
+        upgradeUrl: getAppUrl("/dashboard/settings"),
+      },
+      { status: 403 }
+    );
+  }
+
+  const body = await request.json();
+  const { prompt } = body;
+>>>>>>> test/stripe-integration
 
   if (!dbUser) {
     return NextResponse.json({ error: "User not found" }, { status: 404 });
