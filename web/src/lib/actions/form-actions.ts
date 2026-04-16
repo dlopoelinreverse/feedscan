@@ -3,6 +3,7 @@
 import { prisma } from "@/lib/prisma";
 import { createClient } from "@/lib/supabase/server";
 import { generateSlug } from "@/lib/utils";
+import { canCreateForm } from "@/lib/plan-limits";
 import type { Prisma } from "@prisma/client";
 
 type FormStatus = "DRAFT" | "ACTIVE" | "ARCHIVED";
@@ -101,14 +102,14 @@ export async function saveForm(input: SaveFormInput) {
       // Delete existing questions (cascade deletes followUpRules)
       await tx.question.deleteMany({ where: { formId: form.id } });
     } else {
-      // Check plan limit for FREE
+      // Check plan limit
       const user = await tx.user.findUnique({
         where: { id: userId },
-        select: { plan: true },
+        select: { id: true, plan: true, aiGenerationsUsed: true },
       });
-      if (user?.plan === "FREE") {
-        const count = await tx.form.count({ where: { userId } });
-        if (count >= 1) {
+      if (user) {
+        const allowed = await canCreateForm(user);
+        if (!allowed) {
           throw new Error("PLAN_LIMIT");
         }
       }

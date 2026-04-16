@@ -47,7 +47,15 @@ export default async function FormsListPage() {
             </TooltipTrigger>
             {!canCreate && (
               <TooltipContent>
-                <p>{t("planLimit")}</p>
+                <p>
+                  {t("planLimit")}{" "}
+                  <Link
+                    href="/dashboard/settings"
+                    className="underline text-primary"
+                  >
+                    &rarr;
+                  </Link>
+                </p>
               </TooltipContent>
             )}
           </Tooltip>
