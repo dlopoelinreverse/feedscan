@@ -61,7 +61,11 @@
     "emailRequired": "L'email est requis.",
     "passwordRequired": "Le mot de passe est requis.",
     "confirmRequired": "La confirmation est requise.",
-    "sessionExpired": "Session expirée. Veuillez vous reconnecter."
+    "sessionExpired": "Session expirée. Veuillez vous reconnecter.",
+    "pleaseLogin": "Veuillez vous connecter pour continuer.",
+    "checkEmailTitle": "Vérifiez votre boîte mail",
+    "checkEmailMessage": "Nous avons envoyé un lien de confirmation à {email}. Cliquez dessus pour activer votre compte.",
+    "checkEmailHint": "Vous ne l'avez pas reçu ? Vérifiez vos spams ou réessayez dans une minute."
   },
   "onboarding": {
     "welcome": "Bienvenue sur FeedScan !",

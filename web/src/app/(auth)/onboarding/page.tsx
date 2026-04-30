@@ -4,12 +4,13 @@ import { useState, useEffect } from "react";
 import { useForm } from "@tanstack/react-form";
 import { useTranslations } from "next-intl";
 import { createClient } from "@/lib/supabase/client";
-import { getAppUrl, getRootUrl } from "@/lib/domains";
+import { getAppUrl, getAuthUrl, getRootUrl } from "@/lib/domains";
 
 const BUSINESS_TYPE_KEYS = ["restaurant", "cafe", "salon", "clinique", "gym", "coworking", "autre"] as const;
 
 export default function OnboardingPage() {
   const t = useTranslations("onboarding");
+  const tAuth = useTranslations("auth");
   const tCommon = useTranslations("common");
   const [serverError, setServerError] = useState<string | null>(null);
   const [checking, setChecking] = useState(true);
@@ -19,7 +20,11 @@ export default function OnboardingPage() {
       try {
         const supabase = createClient();
         const { data: { user } } = await supabase.auth.getUser();
-        if (!user) { setChecking(false); return; }
+        // No session → redirect to login with friendly notice
+        if (!user) {
+          window.location.href = getAuthUrl("/login?reason=please_login");
+          return;
+        }
         const res = await fetch("/api/auth/check-onboarding", {
           method: "POST", headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ userId: user.id, email: user.email }),
@@ -39,12 +44,24 @@ export default function OnboardingPage() {
       try {
         const supabase = createClient();
         const { data: { user } } = await supabase.auth.getUser();
-        if (!user) { setServerError(t("sessionExpired") || tCommon("error")); return; }
+        if (!user) {
+          // Lost session mid-flow → bounce to login
+          window.location.href = getAuthUrl("/login?reason=please_login");
+          return;
+        }
         await supabase.auth.updateUser({ data: { business_name: value.businessName, business_type: value.businessType } });
-        await fetch("/api/auth/complete-onboarding", {
+        const res = await fetch("/api/auth/complete-onboarding", {
           method: "POST", headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ userId: user.id, email: user.email, name: user.user_metadata?.full_name || user.email, businessName: value.businessName, businessType: value.businessType }),
         });
+        if (!res.ok) {
+          if (res.status === 401) {
+            window.location.href = getAuthUrl("/login?reason=please_login");
+            return;
+          }
+          setServerError(tAuth("sessionExpired"));
+          return;
+        }
         window.location.href = getAppUrl("/dashboard");
       } catch { setServerError(tCommon("error")); }
     },

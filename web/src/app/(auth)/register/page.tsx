@@ -12,19 +12,27 @@ export default function RegisterPage() {
   const tNav = useTranslations("nav");
   const tCommon = useTranslations("common");
   const [serverError, setServerError] = useState<string | null>(null);
+  const [checkEmail, setCheckEmail] = useState<string | null>(null);
 
   const form = useForm({
     defaultValues: { email: "", password: "", confirmPassword: "" },
     onSubmit: async ({ value }) => {
       setServerError(null);
       const supabase = createClient();
-      const { error } = await supabase.auth.signUp({
+      const { data, error } = await supabase.auth.signUp({
         email: value.email,
         password: value.password,
         options: { emailRedirectTo: getAbsoluteAuthUrl("/api/auth/callback") },
       });
       if (error) { setServerError(error.message); return; }
-      window.location.href = getAuthUrl("/onboarding");
+
+      // If a session was created (email confirmation disabled), proceed to onboarding.
+      // Otherwise show a "check your email" screen.
+      if (data.session) {
+        window.location.href = getAuthUrl("/onboarding");
+      } else {
+        setCheckEmail(value.email);
+      }
     },
   });
 
@@ -35,6 +43,33 @@ export default function RegisterPage() {
       options: { redirectTo: getAbsoluteAuthUrl("/api/auth/callback") },
     });
   };
+
+  if (checkEmail) {
+    return (
+      <div className="flex min-h-screen items-center justify-center px-4">
+        <div className="w-full max-w-md">
+          <div className="rounded-xl border border-border bg-card p-8 shadow-sm space-y-6 text-center">
+            <div className="flex justify-end"><LanguageSwitcher /></div>
+            <a href={getRootUrl()} className="inline-block"><span className="text-3xl font-bold text-primary">FeedScan</span></a>
+            <div className="mx-auto h-12 w-12 rounded-full bg-primary/10 flex items-center justify-center">
+              <svg className="h-6 w-6 text-primary" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <rect width="20" height="16" x="2" y="4" rx="2" />
+                <path d="m22 7-10 5L2 7" />
+              </svg>
+            </div>
+            <div className="space-y-2">
+              <h2 className="text-lg font-semibold">{t("checkEmailTitle")}</h2>
+              <p className="text-sm text-muted-foreground">{t("checkEmailMessage", { email: checkEmail })}</p>
+              <p className="text-xs text-muted-foreground">{t("checkEmailHint")}</p>
+            </div>
+            <div className="text-center">
+              <a href={getAuthUrl("/login")} className="text-sm text-primary hover:underline">{t("backToLogin")}</a>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="flex min-h-screen items-center justify-center px-4">

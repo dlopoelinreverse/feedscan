@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useForm } from "@tanstack/react-form";
 import { useTranslations } from "next-intl";
 import { createClient } from "@/lib/supabase/client";
@@ -12,8 +12,20 @@ export default function LoginPage() {
   const tNav = useTranslations("nav");
   const tCommon = useTranslations("common");
   const [serverError, setServerError] = useState<string | null>(null);
+  const [notice, setNotice] = useState<string | null>(null);
   const [showReset, setShowReset] = useState(false);
   const [resetSent, setResetSent] = useState(false);
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const params = new URLSearchParams(window.location.search);
+    const reason = params.get("reason");
+    const error = params.get("error");
+    if (reason === "please_login") setNotice(t("pleaseLogin"));
+    else if (error === "auth_callback_error") setServerError(t("sessionExpired"));
+    else if (error === "missing_code") setServerError(t("sessionExpired"));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const loginForm = useForm({
     defaultValues: { email: "", password: "" },
@@ -118,6 +130,7 @@ export default function LoginPage() {
             <p className="mt-2 text-muted-foreground">{t("loginSubtitle")}</p>
           </div>
           <form onSubmit={(e) => { e.preventDefault(); e.stopPropagation(); loginForm.handleSubmit(); }} className="space-y-4">
+            {notice && <div className="rounded-md bg-amber-50 border border-amber-200 p-3 text-sm text-amber-800">{notice}</div>}
             {serverError && <div className="rounded-md bg-destructive/10 p-3 text-sm text-destructive">{serverError}</div>}
             <loginForm.Field name="email" validators={{ onChange: ({ value }) => { if (!value) return t("emailRequired"); if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value)) return t("invalidEmail"); return undefined; } }}>
               {(field) => (
