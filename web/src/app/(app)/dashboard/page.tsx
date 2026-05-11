@@ -32,7 +32,7 @@ export default async function DashboardPage({ searchParams }: DashboardPageProps
   }
 
   return (
-    <div className="p-6">
+    <div className="p-4 sm:p-6">
       {showBanner && (
         <FreePlanBanner used={responseUsage.used} limit={responseUsage.limit} />
       )}

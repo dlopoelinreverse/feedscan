@@ -87,10 +87,10 @@ export function QRCodesTab({ formId, formTitle, userPlan }: QRCodesTabProps) {
   };
 
   return (
-    <div className="space-y-4">
-      <div className="flex items-center justify-between">
-        <div>
-          <h2 className="text-lg font-semibold">
+    <div className="space-y-4 mt-4">
+      <div className="flex flex-wrap items-start justify-between gap-3">
+        <div className="min-w-0">
+          <h2 className="text-base sm:text-lg font-semibold truncate">
             {t("title")} — {formTitle}
           </h2>
           <p className="text-sm text-muted-foreground">{t("subtitle")}</p>
@@ -98,7 +98,8 @@ export function QRCodesTab({ formId, formTitle, userPlan }: QRCodesTabProps) {
         <Button
           onClick={() => setDialogOpen(true)}
           disabled={!canCreate}
-          className="bg-[#6C5CE7] hover:bg-[#5A4BD5] text-white"
+          size="sm"
+          className="bg-[#6C5CE7] hover:bg-[#5A4BD5] text-white shrink-0 sm:h-10 sm:px-4"
         >
           + {t("generate")}
         </Button>
@@ -185,8 +186,8 @@ function QRCodeRow({
   }, [code.url]);
 
   return (
-    <Card className="p-4 flex items-center gap-4">
-      <div className="w-20 h-20 shrink-0 bg-white rounded-md border border-border flex items-center justify-center overflow-hidden">
+    <Card className="p-3 sm:p-4 flex items-center gap-3 sm:gap-4">
+      <div className="w-16 h-16 sm:w-20 sm:h-20 shrink-0 bg-white rounded-md border border-border flex items-center justify-center overflow-hidden">
         {dataUrl && (
           // eslint-disable-next-line @next/next/no-img-element
           <img
@@ -198,7 +199,7 @@ function QRCodeRow({
       </div>
 
       <div className="flex-1 min-w-0">
-        <p className="font-semibold">{code.label}</p>
+        <p className="font-semibold truncate">{code.label}</p>
         <p className="text-xs text-muted-foreground font-mono truncate">
           {code.url}
         </p>
@@ -208,10 +209,10 @@ function QRCodeRow({
       </div>
 
       <div className="flex flex-col gap-1 shrink-0">
-        <Button variant="outline" size="sm" onClick={onDownload}>
+        <Button variant="outline" size="sm" onClick={onDownload} className="text-xs h-8 px-2">
           ↓ {t("downloadShort")}
         </Button>
-        <Button variant="outline" size="sm" onClick={onCopy}>
+        <Button variant="outline" size="sm" onClick={onCopy} className="text-xs h-8 px-2">
           {tCommon("copy")}
         </Button>
       </div>

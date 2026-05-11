@@ -140,8 +140,8 @@ export async function AnalyticsView({
   return (
     <div className="space-y-6">
       {showHeader && (
-        <div className="flex items-center justify-between">
-          <h1 className="text-2xl font-bold">{title ?? "Dashboard"}</h1>
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <h1 className="text-xl sm:text-2xl font-bold">{title ?? "Dashboard"}</h1>
           <PeriodSelector current={period} />
         </div>
       )}
@@ -206,7 +206,7 @@ export async function AnalyticsView({
       {form && (
         <>
           {/* Trend chart */}
-          <div className="rounded-lg border border-border bg-card p-6">
+          <div className="rounded-lg border border-border bg-card p-4 sm:p-6">
             <h3 className="text-sm font-semibold mb-4">
               Tendance des réponses ({period} jours)
             </h3>
@@ -220,14 +220,14 @@ export async function AnalyticsView({
 
           {/* Scores by criterion */}
           {criteria.length > 0 && (
-            <div className="rounded-lg border border-border bg-card p-6">
+            <div className="rounded-lg border border-border bg-card p-4 sm:p-6">
               <h3 className="text-sm font-semibold mb-4">Scores par critère</h3>
               <ScoresByCriterion items={criteria} topReasonsLabel="Top raisons" />
             </div>
           )}
 
           {/* Recent responses */}
-          <div className="rounded-lg border border-border bg-card p-6">
+          <div className="rounded-lg border border-border bg-card p-4 sm:p-6">
             <h3 className="text-sm font-semibold mb-2">Dernières réponses</h3>
             <RecentResponses items={recent} />
           </div>

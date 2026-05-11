@@ -562,41 +562,62 @@ export function FormBuilder({ initialData, userProfile }: FormBuilderProps) {
   );
 
   return (
-    <div className="flex flex-col h-full">
+    <div className="flex flex-col h-full overflow-hidden">
       {/* Topbar */}
-      <div className="flex items-center justify-between border-b border-border px-4 py-3 bg-card shrink-0">
-        <div className="flex items-center gap-3">
+      <div className="flex items-center justify-between border-b border-border px-2 sm:px-4 py-2 sm:py-3 bg-card shrink-0 gap-2">
+        <div className="flex items-center gap-1 sm:gap-3 min-w-0 flex-1">
           <button
             onClick={() => router.push("/dashboard/forms")}
-            className="text-muted-foreground hover:text-foreground transition-colors"
+            className="text-muted-foreground hover:text-foreground transition-colors shrink-0 px-1"
+            aria-label={tCommon("back")}
           >
-            &larr; {tCommon("back")}
+            <span className="sm:hidden text-xl leading-none">&larr;</span>
+            <span className="hidden sm:inline">&larr; {tCommon("back")}</span>
           </button>
           <input
             value={form.title}
             onChange={(e) => updateForm({ title: e.target.value })}
             placeholder={t("builder.titlePlaceholder")}
-            className="text-lg font-bold bg-transparent border-none outline-none w-auto min-w-[200px]"
+            className="text-base sm:text-lg font-bold bg-transparent border-none outline-none min-w-0 flex-1 truncate"
           />
         </div>
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-1 sm:gap-2 shrink-0">
           <Button
             variant="outline"
+            size="sm"
             onClick={() => handleSave("DRAFT")}
             disabled={saving}
+            className="px-2 sm:px-3"
+            aria-label={
+              form.status === "ACTIVE"
+                ? t("builder.unpublish")
+                : t("builder.saveDraft")
+            }
           >
-            {form.status === "ACTIVE"
-              ? t("builder.unpublish")
-              : t("builder.saveDraft")}
+            <span className="sm:hidden">&#x1f4be;</span>
+            <span className="hidden sm:inline">
+              {form.status === "ACTIVE"
+                ? t("builder.unpublish")
+                : t("builder.saveDraft")}
+            </span>
           </Button>
           <Button
+            size="sm"
             onClick={() => handleSave("ACTIVE")}
             disabled={saving}
-            className="bg-[#6C5CE7] hover:bg-[#5A4BD5] text-white"
+            className="bg-[#6C5CE7] hover:bg-[#5A4BD5] text-white px-2 sm:px-3"
+            aria-label={
+              form.status === "ACTIVE"
+                ? t("builder.republish")
+                : t("builder.publish")
+            }
           >
-            {form.status === "ACTIVE"
-              ? t("builder.republish")
-              : t("builder.publish")}
+            <span className="sm:hidden">&#x1f680;</span>
+            <span className="hidden sm:inline">
+              {form.status === "ACTIVE"
+                ? t("builder.republish")
+                : t("builder.publish")}
+            </span>
           </Button>
         </div>
       </div>

@@ -135,7 +135,7 @@ export async function FormStats({
         <MetricCard title="Taux de complétion" value={`${completionRate}%`} />
       </div>
 
-      <div className="rounded-lg border border-border bg-card p-6">
+      <div className="rounded-lg border border-border bg-card p-4 sm:p-6">
         <h3 className="text-sm font-semibold mb-4">
           Tendance des réponses ({period} jours)
         </h3>
@@ -222,7 +222,7 @@ export async function FormStats({
 
             return (
               <div key={q.id} className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="rounded-lg border border-border border-l-4 border-l-[#E24B4A] bg-card p-5">
+                <div className="rounded-lg border border-border border-l-4 border-l-[#E24B4A] bg-card p-4 sm:p-5">
                   <h4 className="text-sm font-semibold">
                     {q.labelFr || q.label} — Score bas (1-2) · {lowCount} réponses
                   </h4>
@@ -247,7 +247,7 @@ export async function FormStats({
                     )}
                   </div>
                 </div>
-                <div className="rounded-lg border border-border border-l-4 border-l-[#00B894] bg-card p-5">
+                <div className="rounded-lg border border-border border-l-4 border-l-[#00B894] bg-card p-4 sm:p-5">
                   <h4 className="text-sm font-semibold">
                     {q.labelFr || q.label} — Score haut (4-5) · {highCount} réponses
                   </h4>
@@ -278,7 +278,7 @@ export async function FormStats({
         </div>
       )}
 
-      <div className="rounded-lg border border-border bg-card p-6">
+      <div className="rounded-lg border border-border bg-card p-4 sm:p-6">
         <h3 className="text-sm font-semibold mb-2">Dernières réponses</h3>
         <RecentResponses items={recent} />
       </div>

@@ -24,10 +24,10 @@ export default async function FormsListPage() {
   const canCreate = plan !== "FREE" || forms.length < 1;
 
   return (
-    <div className="p-6 max-w-4xl">
-      <div className="flex items-center justify-between mb-6">
-        <div>
-          <h1 className="text-2xl font-bold">{t("title")}</h1>
+    <div className="p-4 sm:p-6 max-w-4xl">
+      <div className="flex flex-wrap items-start justify-between gap-3 mb-6">
+        <div className="min-w-0">
+          <h1 className="text-xl sm:text-2xl font-bold">{t("title")}</h1>
           <p className="text-muted-foreground text-sm mt-1">
             {t("manageForms")}
           </p>
@@ -35,13 +35,13 @@ export default async function FormsListPage() {
         <TooltipProvider>
           <Tooltip>
             <TooltipTrigger asChild>
-              <span>
+              <span className="shrink-0">
                 {canCreate ? (
-                  <Button asChild>
+                  <Button asChild size="sm" className="sm:h-10 sm:px-4">
                     <Link href="/dashboard/forms/new">{t("createNew")}</Link>
                   </Button>
                 ) : (
-                  <Button disabled>{t("createNew")}</Button>
+                  <Button disabled size="sm" className="sm:h-10 sm:px-4">{t("createNew")}</Button>
                 )}
               </span>
             </TooltipTrigger>
@@ -89,10 +89,10 @@ export default async function FormsListPage() {
           {forms.map((form: { id: string; title: string; status: string; createdAt: Date; _count: { responses: number } }) => (
             <Link key={form.id} href={`/dashboard/forms/${form.id}`}>
               <Card className="hover:border-primary/30 transition-colors cursor-pointer mb-3">
-                <CardContent className="flex items-center justify-between py-4 px-5">
-                  <div className="space-y-1">
-                    <div className="flex items-center gap-2">
-                      <span className="font-semibold">{form.title}</span>
+                <CardContent className="flex items-center justify-between gap-3 py-4 px-4 sm:px-5">
+                  <div className="space-y-1 min-w-0 flex-1">
+                    <div className="flex flex-wrap items-center gap-2">
+                      <span className="font-semibold truncate">{form.title}</span>
                       <Badge
                         className={statusColor[form.status]}
                         variant="secondary"
@@ -105,7 +105,7 @@ export default async function FormsListPage() {
                         )}
                       </Badge>
                     </div>
-                    <p className="text-sm text-muted-foreground">
+                    <p className="text-sm text-muted-foreground truncate">
                       {t("responses", { count: form._count.responses })}{" "}
                       &middot;{" "}
                       {t("createdAt", {
@@ -114,7 +114,7 @@ export default async function FormsListPage() {
                     </p>
                   </div>
                   <svg
-                    className="h-5 w-5 text-muted-foreground"
+                    className="h-5 w-5 text-muted-foreground shrink-0"
                     xmlns="http://www.w3.org/2000/svg"
                     viewBox="0 0 24 24"
                     fill="none"

@@ -18,7 +18,7 @@ RUN bun run db:generate
 
 EXPOSE 3000
 
-CMD ["bun", "run", "dev"]
+CMD ["sh", "-c", "bunx prisma db push --skip-generate --accept-data-loss && bun run dev"]
 
 # ---- Builder stage ----
 FROM node:20-alpine AS builder

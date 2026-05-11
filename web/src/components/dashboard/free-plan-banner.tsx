@@ -12,7 +12,7 @@ export function FreePlanBanner({ used, limit }: FreePlanBannerProps) {
   const t = useTranslations("settings");
 
   return (
-    <div className="bg-amber-50 border border-amber-200 rounded-lg px-4 py-3 flex items-center justify-between gap-4 mb-4">
+    <div className="bg-amber-50 border border-amber-200 rounded-lg px-4 py-3 flex flex-wrap items-center justify-between gap-3 mb-4">
       <p className="text-sm text-amber-800">
         {t("limits.freeBanner", { used, limit })}
       </p>

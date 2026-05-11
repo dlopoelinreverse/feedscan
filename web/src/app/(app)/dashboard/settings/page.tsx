@@ -22,8 +22,8 @@ export default async function SettingsPage() {
     provider === "google" ? "Google OAuth" : "Email / Password";
 
   return (
-    <div className="p-6">
-      <h1 className="text-2xl font-bold">{t("title")}</h1>
+    <div className="p-4 sm:p-6">
+      <h1 className="text-xl sm:text-2xl font-bold">{t("title")}</h1>
       <p className="text-muted-foreground mt-1 mb-6">{t("subtitle")}</p>
       <SettingsClient
         data={data}

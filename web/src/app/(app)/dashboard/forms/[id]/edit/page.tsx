@@ -96,7 +96,7 @@ export default async function FormEditPage({ params }: FormEditPageProps) {
   };
 
   return (
-    <div className="h-[calc(100vh-49px)] md:h-screen flex flex-col">
+    <div className="h-[calc(100dvh-57px)] md:h-screen flex flex-col overflow-hidden">
       <FormBuilder initialData={initialData} userProfile={userProfile ?? undefined} />
     </div>
   );

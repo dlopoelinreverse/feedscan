@@ -37,17 +37,17 @@ export default async function FormDetailPage({ params, searchParams }: FormDetai
   if (!user) redirect("/login");
 
   return (
-    <div className="p-6 max-w-6xl">
-      <div className="flex items-center justify-between mb-6">
-        <div className="flex items-center gap-3">
+    <div className="p-4 sm:p-6 max-w-6xl">
+      <div className="flex flex-wrap items-center justify-between gap-3 mb-6">
+        <div className="flex items-center gap-2 sm:gap-3 min-w-0 flex-1">
           <Link
             href="/dashboard/forms"
-            className="text-muted-foreground hover:text-foreground transition-colors"
+            className="text-muted-foreground hover:text-foreground transition-colors shrink-0"
           >
             &larr;
           </Link>
-          <h1 className="text-2xl font-bold">{form.title}</h1>
-          <Badge className={statusColor[form.status]} variant="secondary">
+          <h1 className="text-xl sm:text-2xl font-bold truncate min-w-0">{form.title}</h1>
+          <Badge className={`${statusColor[form.status]} shrink-0`} variant="secondary">
             {t(
               `status.${form.status.toLowerCase()}` as
                 | "status.draft"
@@ -56,8 +56,8 @@ export default async function FormDetailPage({ params, searchParams }: FormDetai
             )}
           </Badge>
         </div>
-        <div className="flex items-center gap-2">
-          <Button asChild variant="outline">
+        <div className="flex items-center gap-2 shrink-0">
+          <Button asChild variant="outline" size="sm" className="sm:h-10 sm:px-4">
             <Link href={`/dashboard/forms/${id}/edit`}>{tCommon("edit")}</Link>
           </Button>
           <FormDeleteButton formId={id} />
