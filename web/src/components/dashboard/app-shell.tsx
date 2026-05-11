@@ -63,17 +63,17 @@ export function AppShell({ userEmail, plan, children }: AppShellProps) {
   );
 
   return (
-    <div className="flex min-h-screen">
+    <div className="flex h-screen overflow-hidden">
       <aside className="hidden md:flex md:w-[220px] md:flex-col md:border-r md:border-border md:bg-card">{navContent}</aside>
-      <div className="flex flex-1 flex-col">
-        <header className="md:hidden flex items-center justify-between border-b border-border px-4 py-3 bg-card">
+      <div className="flex flex-1 flex-col min-h-0">
+        <header className="md:hidden sticky top-0 z-30 flex items-center justify-between border-b border-border px-4 py-3 bg-card">
           <a href={getRootUrl()} className="text-lg font-bold text-primary">FeedScan</a>
           <Sheet open={mobileOpen} onOpenChange={setMobileOpen}>
             <SheetTrigger asChild><button className="p-2 rounded-md hover:bg-muted transition-colors"><MenuIcon className="h-5 w-5" /></button></SheetTrigger>
             <SheetContent side="left" className="w-[260px] p-0 flex flex-col"><SheetTitle className="sr-only">Navigation</SheetTitle>{navContent}</SheetContent>
           </Sheet>
         </header>
-        <main className="flex-1">{children}</main>
+        <main className="flex-1 overflow-y-auto">{children}</main>
       </div>
     </div>
   );

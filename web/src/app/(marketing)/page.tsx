@@ -13,11 +13,11 @@ export default async function Home() {
         <LanguageSwitcher />
       </div>
       <div className="text-center space-y-6 px-4">
-        <h1 className="text-5xl font-bold text-primary">FeedScan</h1>
-        <p className="text-xl text-muted-foreground max-w-md">{t("subtitle")}</p>
-        <div className="flex gap-4 justify-center">
-          <a href={getAuthUrl("/register")} className="bg-primary text-primary-foreground px-6 py-3 rounded-lg font-medium hover:opacity-90 transition-opacity">{t("cta")}</a>
-          <a href="#how-it-works" className="border border-border px-6 py-3 rounded-lg font-medium hover:bg-muted transition-colors">{t("demo")}</a>
+        <h1 className="text-4xl sm:text-5xl font-bold text-primary">FeedScan</h1>
+        <p className="text-lg sm:text-xl text-muted-foreground max-w-md">{t("subtitle")}</p>
+        <div className="flex flex-row gap-3 sm:gap-4 justify-center">
+          <a href={getAuthUrl("/register")} className="bg-primary text-primary-foreground px-4 py-2 text-sm sm:px-6 sm:py-3 sm:text-base rounded-lg font-medium hover:opacity-90 transition-opacity">{t("cta")}</a>
+          <a href="#how-it-works" className="border border-border px-4 py-2 text-sm sm:px-6 sm:py-3 sm:text-base rounded-lg font-medium hover:bg-muted transition-colors">{t("demo")}</a>
         </div>
       </div>
     </main>
