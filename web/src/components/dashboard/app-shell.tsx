@@ -63,7 +63,7 @@ export function AppShell({ userEmail, plan, children }: AppShellProps) {
   );
 
   return (
-    <div className="flex h-screen overflow-hidden">
+    <div className="flex h-[100dvh] overflow-hidden">
       <aside className="hidden md:flex md:w-[220px] md:flex-col md:border-r md:border-border md:bg-card">{navContent}</aside>
       <div className="flex flex-1 flex-col min-h-0">
         <header className="md:hidden sticky top-0 z-30 flex items-center justify-between border-b border-border px-4 py-3 bg-card">
