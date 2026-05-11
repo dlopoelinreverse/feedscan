@@ -29,7 +29,8 @@ RUN apk add --no-cache libc6-compat openssl
 RUN npm install -g bun@1.2.21
 
 COPY package.json bun.lock* bun.lockb* package-lock.json* ./
-RUN bun install --frozen-lockfile
+RUN bun install 
+# RUN bun install --frozen-lockfile
 
 COPY . .
 
