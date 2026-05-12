@@ -42,7 +42,7 @@ import { MobilePreview } from "./mobile-preview";
 import { QuestionCard } from "./question-card";
 import { QuestionDialog } from "./question-dialog";
 import { AiAssistant } from "./ai-wizard/ai-assistant";
-import { useAiAssistant } from "./ai-wizard/use-ai-assistant";
+import { useAiAssistant, migrateAiAssistantStorage } from "./ai-wizard/use-ai-assistant";
 import type {
   FormBuilderState,
   QuestionType,
@@ -96,6 +96,7 @@ export function FormBuilder({ initialData, userProfile }: FormBuilderProps) {
     userLocale: locale,
     initialBusinessName: userProfile?.businessName || "",
     initialBusinessType: userProfile?.businessType || "",
+    formId: initialData?.id,
   });
 
   const sensors = useSensors(
@@ -256,6 +257,7 @@ export function FormBuilder({ initialData, userProfile }: FormBuilderProps) {
         toast({ title: t("builder.draftSaved") });
         setForm((prev) => ({ ...prev, id: result.id, status: "DRAFT" }));
         if (!form.id) {
+          migrateAiAssistantStorage(undefined, result.id);
           router.replace(`/dashboard/forms/${result.id}/edit`);
         }
       } else {

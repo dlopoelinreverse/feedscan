@@ -1,10 +1,75 @@
 "use client";
 
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect, useRef } from "react";
 import { nanoid } from "nanoid";
 import type { AiFormResponse } from "@/lib/ai/schemas";
 import type { FormBuilderState } from "../types";
 import type { AiAssistantState, ChatMessage } from "./types";
+
+const STORAGE_PREFIX = "feedscan:ai-assistant:";
+
+function storageKey(formId: string | undefined): string {
+  return `${STORAGE_PREFIX}${formId ?? "new"}`;
+}
+
+function loadPersistedState(
+  formId: string | undefined
+): Partial<AiAssistantState> | null {
+  if (typeof window === "undefined") return null;
+  try {
+    const raw = window.sessionStorage.getItem(storageKey(formId));
+    if (!raw) return null;
+    return JSON.parse(raw) as Partial<AiAssistantState>;
+  } catch {
+    return null;
+  }
+}
+
+function persistState(
+  formId: string | undefined,
+  state: AiAssistantState
+): void {
+  if (typeof window === "undefined") return;
+  try {
+    const { isGenerating: _g, isSending: _s, error: _e, ...durable } = state;
+    void _g;
+    void _s;
+    void _e;
+    window.sessionStorage.setItem(
+      storageKey(formId),
+      JSON.stringify(durable)
+    );
+  } catch {
+    // ignore quota / serialization errors
+  }
+}
+
+export function clearAiAssistantStorage(formId: string | undefined): void {
+  if (typeof window === "undefined") return;
+  try {
+    window.sessionStorage.removeItem(storageKey(formId));
+  } catch {
+    // ignore
+  }
+}
+
+export function migrateAiAssistantStorage(
+  fromFormId: string | undefined,
+  toFormId: string | undefined
+): void {
+  if (typeof window === "undefined") return;
+  if (fromFormId === toFormId) return;
+  try {
+    const fromKey = storageKey(fromFormId);
+    const data = window.sessionStorage.getItem(fromKey);
+    if (data) {
+      window.sessionStorage.setItem(storageKey(toFormId), data);
+      window.sessionStorage.removeItem(fromKey);
+    }
+  } catch {
+    // ignore
+  }
+}
 
 function aiFormToBuilderState(ai: AiFormResponse): FormBuilderState {
   return {
@@ -128,6 +193,11 @@ interface UseAiAssistantOptions {
   userLocale: string;
   initialBusinessName?: string;
   initialBusinessType?: string;
+  /**
+   * Form id used to scope persisted state in sessionStorage. Use `undefined`
+   * for new (unsaved) forms — they share the "new" bucket.
+   */
+  formId?: string;
 }
 
 export function useAiAssistant({
@@ -136,23 +206,43 @@ export function useAiAssistant({
   userLocale,
   initialBusinessName = "",
   initialBusinessType = "",
+  formId,
 }: UseAiAssistantOptions) {
-  const [state, setState] = useState<AiAssistantState>({
-    phase: "wizard",
-    wizard: {
-      step: 1,
-      businessName: initialBusinessName,
-      businessType: initialBusinessType,
-      businessDescription: "",
-      selectedAreas: [],
-      specificRequest: "",
-    },
-    chatMessages: [],
-    currentForm: null,
-    isGenerating: false,
-    isSending: false,
-    error: null,
+  const formIdRef = useRef(formId);
+  formIdRef.current = formId;
+
+  const [state, setState] = useState<AiAssistantState>(() => {
+    const defaults: AiAssistantState = {
+      phase: "wizard",
+      wizard: {
+        step: 1,
+        businessName: initialBusinessName,
+        businessType: initialBusinessType,
+        businessDescription: "",
+        selectedAreas: [],
+        specificRequest: "",
+      },
+      chatMessages: [],
+      currentForm: null,
+      isGenerating: false,
+      isSending: false,
+      error: null,
+    };
+    const saved = loadPersistedState(formId);
+    if (!saved) return defaults;
+    return {
+      ...defaults,
+      ...saved,
+      wizard: { ...defaults.wizard, ...(saved.wizard ?? {}) },
+      isGenerating: false,
+      isSending: false,
+      error: null,
+    };
   });
+
+  useEffect(() => {
+    persistState(formIdRef.current, state);
+  }, [state]);
 
   const updateWizard = useCallback(
     (patch: Partial<AiAssistantState["wizard"]>) => {
