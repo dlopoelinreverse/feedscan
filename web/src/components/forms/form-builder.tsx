@@ -536,7 +536,11 @@ export function FormBuilder({ initialData, userProfile }: FormBuilderProps) {
           &#x270f;&#xfe0f; {tWizard("tabs.manual")}
         </TabsTrigger>
       </TabsList>
-      <TabsContent value="assistant" className="flex-1 overflow-y-auto mt-0">
+      <TabsContent
+        value="assistant"
+        forceMount
+        className="flex-1 overflow-y-auto mt-0 data-[state=inactive]:hidden"
+      >
         <AiAssistant
           currentForm={form}
           onFormGenerated={(f) => setForm((prev) => ({ ...f, id: prev.id, status: prev.status }))}
@@ -545,7 +549,11 @@ export function FormBuilder({ initialData, userProfile }: FormBuilderProps) {
           userProfile={userProfile}
         />
       </TabsContent>
-      <TabsContent value="manual" className="flex-1 overflow-y-auto p-4 mt-0">
+      <TabsContent
+        value="manual"
+        forceMount
+        className="flex-1 overflow-y-auto p-4 mt-0 data-[state=inactive]:hidden"
+      >
         {manualEditorContent}
       </TabsContent>
     </Tabs>
