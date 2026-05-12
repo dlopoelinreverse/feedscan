@@ -26,21 +26,14 @@ const BUSINESS_TYPES = [
 
 interface AiAssistantProps {
   currentForm: FormBuilderState;
-  onFormGenerated: (form: FormBuilderState) => void;
-  onFormUpdated: (form: FormBuilderState) => void;
   onApplyToBuilder: () => void;
-  userProfile?: {
-    businessName?: string | null;
-    businessType?: string | null;
-  };
+  assistant: ReturnType<typeof useAiAssistant>;
 }
 
 export function AiAssistant({
   currentForm,
-  onFormGenerated,
-  onFormUpdated,
   onApplyToBuilder,
-  userProfile,
+  assistant,
 }: AiAssistantProps) {
   const t = useTranslations("aiWizard");
   const tTypes = useTranslations("onboarding.types");
@@ -53,13 +46,7 @@ export function AiAssistant({
     generate,
     sendMessage,
     validate,
-  } = useAiAssistant({
-    onFormGenerated,
-    onFormUpdated,
-    userLocale: locale,
-    initialBusinessName: userProfile?.businessName || "",
-    initialBusinessType: userProfile?.businessType || "",
-  });
+  } = assistant;
 
   if (state.phase === "wizard") {
     return (

@@ -2,7 +2,7 @@
 
 import { useState, useCallback } from "react";
 import { useRouter } from "next/navigation";
-import { useTranslations } from "next-intl";
+import { useTranslations, useLocale } from "next-intl";
 import {
   DndContext,
   closestCenter,
@@ -42,6 +42,7 @@ import { MobilePreview } from "./mobile-preview";
 import { QuestionCard } from "./question-card";
 import { QuestionDialog } from "./question-dialog";
 import { AiAssistant } from "./ai-wizard/ai-assistant";
+import { useAiAssistant } from "./ai-wizard/use-ai-assistant";
 import type {
   FormBuilderState,
   QuestionType,
@@ -62,6 +63,7 @@ export function FormBuilder({ initialData, userProfile }: FormBuilderProps) {
   const t = useTranslations("forms");
   const tWizard = useTranslations("aiWizard");
   const tCommon = useTranslations("common");
+  const locale = useLocale();
   const router = useRouter();
 
   const [form, setForm] = useState<FormBuilderState>(
@@ -85,6 +87,16 @@ export function FormBuilder({ initialData, userProfile }: FormBuilderProps) {
     initialData ? "manual" : "assistant"
   );
   const [previewLocale, setPreviewLocale] = useState<PreviewLocale>("fr");
+
+  const aiAssistant = useAiAssistant({
+    onFormGenerated: (f) =>
+      setForm((prev) => ({ ...f, id: prev.id, status: prev.status })),
+    onFormUpdated: (f) =>
+      setForm((prev) => ({ ...f, id: prev.id, status: prev.status })),
+    userLocale: locale,
+    initialBusinessName: userProfile?.businessName || "",
+    initialBusinessType: userProfile?.businessType || "",
+  });
 
   const sensors = useSensors(
     useSensor(PointerSensor),
@@ -543,10 +555,8 @@ export function FormBuilder({ initialData, userProfile }: FormBuilderProps) {
       >
         <AiAssistant
           currentForm={form}
-          onFormGenerated={(f) => setForm((prev) => ({ ...f, id: prev.id, status: prev.status }))}
-          onFormUpdated={(f) => setForm((prev) => ({ ...f, id: prev.id, status: prev.status }))}
           onApplyToBuilder={handleApplyToBuilder}
-          userProfile={userProfile}
+          assistant={aiAssistant}
         />
       </TabsContent>
       <TabsContent
