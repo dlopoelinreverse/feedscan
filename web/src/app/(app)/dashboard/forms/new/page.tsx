@@ -5,7 +5,7 @@ export default async function NewFormPage() {
   const userProfile = await getUserProfile();
 
   return (
-    <div className="h-[calc(100dvh-57px)] md:h-screen flex flex-col overflow-hidden">
+    <div className="h-full flex flex-col overflow-hidden">
       <FormBuilder userProfile={userProfile ?? undefined} />
     </div>
   );
