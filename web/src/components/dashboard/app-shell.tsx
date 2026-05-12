@@ -73,7 +73,7 @@ export function AppShell({ userEmail, plan, children }: AppShellProps) {
             <SheetContent side="left" className="w-[260px] p-0 flex flex-col"><SheetTitle className="sr-only">Navigation</SheetTitle>{navContent}</SheetContent>
           </Sheet>
         </header>
-        <main className="flex-1 overflow-y-auto">{children}</main>
+        <main className="flex-1 min-h-0 overflow-y-auto">{children}</main>
       </div>
     </div>
   );

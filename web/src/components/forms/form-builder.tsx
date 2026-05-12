@@ -623,18 +623,18 @@ export function FormBuilder({ initialData, userProfile }: FormBuilderProps) {
       </div>
 
       {/* Mobile layout */}
-      <div className="md:hidden flex-1 flex flex-col">
-        <Tabs defaultValue="edit" className="flex-1 flex flex-col">
+      <div className="md:hidden flex-1 min-h-0 flex flex-col">
+        <Tabs defaultValue="edit" className="flex-1 min-h-0 flex flex-col">
           <TabsList className="mx-4 mt-3 mb-0">
             <TabsTrigger value="edit">{t("builder.edit")}</TabsTrigger>
             <TabsTrigger value="preview">{t("builder.preview")}</TabsTrigger>
           </TabsList>
-          <TabsContent value="edit" className="flex-1 overflow-y-auto flex flex-col">
+          <TabsContent value="edit" className="flex-1 min-h-0 overflow-y-auto flex flex-col">
             {leftColumnContent}
           </TabsContent>
           <TabsContent
             value="preview"
-            className="flex-1 overflow-y-auto bg-gray-50 p-4"
+            className="flex-1 min-h-0 overflow-y-auto bg-gray-50 p-4"
           >
             {previewContent}
           </TabsContent>
