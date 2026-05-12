@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useTranslations, useLocale } from "next-intl";
 import {
@@ -51,6 +51,49 @@ import type {
 } from "./types";
 import { QUESTION_TYPE_BADGE } from "./types";
 
+const FORM_STORAGE_PREFIX = "feedscan:form-builder:";
+
+function formStorageKey(formId: string | undefined): string {
+  return `${FORM_STORAGE_PREFIX}${formId ?? "new"}`;
+}
+
+function loadPersistedForm(formId: string | undefined): FormBuilderState | null {
+  if (typeof window === "undefined") return null;
+  try {
+    const raw = window.sessionStorage.getItem(formStorageKey(formId));
+    if (!raw) return null;
+    return JSON.parse(raw) as FormBuilderState;
+  } catch {
+    return null;
+  }
+}
+
+function persistForm(formId: string | undefined, form: FormBuilderState): void {
+  if (typeof window === "undefined") return;
+  try {
+    window.sessionStorage.setItem(formStorageKey(formId), JSON.stringify(form));
+  } catch {
+    // ignore quota / serialization errors
+  }
+}
+
+function migrateFormStorage(
+  from: string | undefined,
+  to: string | undefined
+): void {
+  if (typeof window === "undefined" || from === to) return;
+  try {
+    const fromKey = formStorageKey(from);
+    const data = window.sessionStorage.getItem(fromKey);
+    if (data) {
+      window.sessionStorage.setItem(formStorageKey(to), data);
+      window.sessionStorage.removeItem(fromKey);
+    }
+  } catch {
+    // ignore
+  }
+}
+
 interface FormBuilderProps {
   initialData?: FormBuilderState;
   userProfile?: {
@@ -66,15 +109,32 @@ export function FormBuilder({ initialData, userProfile }: FormBuilderProps) {
   const locale = useLocale();
   const router = useRouter();
 
-  const [form, setForm] = useState<FormBuilderState>(
-    initialData ?? {
-      title: "",
-      description: "",
-      status: "DRAFT",
-      rateLimitMode: "PER_24H",
-      questions: [],
+  const [form, setForm] = useState<FormBuilderState>(() => {
+    const persisted = loadPersistedForm(initialData?.id);
+    if (persisted) {
+      if (initialData) {
+        return {
+          ...persisted,
+          id: initialData.id,
+          status: initialData.status,
+        };
+      }
+      return persisted;
     }
-  );
+    return (
+      initialData ?? {
+        title: "",
+        description: "",
+        status: "DRAFT",
+        rateLimitMode: "PER_24H",
+        questions: [],
+      }
+    );
+  });
+
+  useEffect(() => {
+    persistForm(form.id, form);
+  }, [form]);
 
   const [saving, setSaving] = useState(false);
   const [dialogOpen, setDialogOpen] = useState(false);
@@ -258,6 +318,7 @@ export function FormBuilder({ initialData, userProfile }: FormBuilderProps) {
         setForm((prev) => ({ ...prev, id: result.id, status: "DRAFT" }));
         if (!form.id) {
           migrateAiAssistantStorage(undefined, result.id);
+          migrateFormStorage(undefined, result.id);
           router.replace(`/dashboard/forms/${result.id}/edit`);
         }
       } else {
