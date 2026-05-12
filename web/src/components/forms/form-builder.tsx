@@ -629,12 +629,17 @@ export function FormBuilder({ initialData, userProfile }: FormBuilderProps) {
             <TabsTrigger value="edit">{t("builder.edit")}</TabsTrigger>
             <TabsTrigger value="preview">{t("builder.preview")}</TabsTrigger>
           </TabsList>
-          <TabsContent value="edit" className="flex-1 min-h-0 overflow-y-auto flex flex-col">
+          <TabsContent
+            value="edit"
+            forceMount
+            className="flex-1 min-h-0 overflow-y-auto flex-col data-[state=active]:flex data-[state=inactive]:hidden"
+          >
             {leftColumnContent}
           </TabsContent>
           <TabsContent
             value="preview"
-            className="flex-1 min-h-0 overflow-y-auto bg-gray-50 p-4"
+            forceMount
+            className="flex-1 min-h-0 overflow-y-auto bg-gray-50 p-4 data-[state=inactive]:hidden"
           >
             {previewContent}
           </TabsContent>
