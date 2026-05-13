@@ -4,6 +4,7 @@ import { prisma } from "@/lib/prisma";
 import { getRemainingResponses } from "@/lib/plan-limits";
 import { AnalyticsView } from "@/components/dashboard/analytics-view";
 import { FreePlanBanner } from "@/components/dashboard/free-plan-banner";
+import { RefreshOnFocus } from "@/components/dashboard/refresh-on-focus";
 
 interface DashboardPageProps {
   searchParams: Promise<{ period?: string }>;
@@ -33,6 +34,7 @@ export default async function DashboardPage({ searchParams }: DashboardPageProps
 
   return (
     <div className="p-4 sm:p-6">
+      <RefreshOnFocus />
       {showBanner && (
         <FreePlanBanner used={responseUsage.used} limit={responseUsage.limit} />
       )}

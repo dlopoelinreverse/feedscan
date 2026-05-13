@@ -9,6 +9,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { FormDeleteButton } from "@/components/forms/form-delete-button";
 import { QRCodesTab } from "@/components/forms/qr-codes-tab";
 import { FormStats } from "@/components/dashboard/form-stats";
+import { RefreshOnFocus } from "@/components/dashboard/refresh-on-focus";
 
 const statusColor: Record<string, string> = {
   DRAFT: "bg-gray-100 text-gray-600 hover:bg-gray-100",
@@ -38,6 +39,7 @@ export default async function FormDetailPage({ params, searchParams }: FormDetai
 
   return (
     <div className="p-4 sm:p-6 max-w-6xl">
+      <RefreshOnFocus />
       <div className="flex flex-wrap items-center justify-between gap-3 mb-6">
         <div className="flex items-center gap-2 sm:gap-3 min-w-0 flex-1">
           <Link
