@@ -86,7 +86,14 @@
       "autre": "Autre"
     },
     "getStarted": "Commencer",
-    "settingUp": "Configuration..."
+    "settingUp": "Configuration...",
+    "theme": {
+      "title": "Choisissez un look",
+      "subtitle": "Un point de départ pour vos formulaires. Tout est modifiable plus tard.",
+      "continue": "Continuer",
+      "later": "Plus tard",
+      "reassuring": "Vous pourrez toujours changer plus tard depuis vos paramètres."
+    }
   },
   "dashboard": {
     "title": "Dashboard",
@@ -153,6 +160,13 @@
       "translationMissing": "Traduction manquante — le texte français sera utilisé",
       "autoTranslate": "Traduire automatiquement",
       "buildManually": "ou construisez manuellement"
+    },
+    "appearance": {
+      "tabTitle": "Apparence",
+      "activeTheme": "Thème actif",
+      "changeTheme": "Changer de thème",
+      "editTheme": "Modifier ce thème",
+      "duplicateForForm": "Dupliquer pour ce formulaire"
     },
     "validation": {
       "labelRequired": "Le libellé de la question est requis",
@@ -331,6 +345,112 @@
       "responseLimitReached": "Ce commerçant a atteint sa limite mensuelle.",
       "aiRemaining": "{used}/{limit} générations restantes",
       "aiLimitReached": "Limite de générations IA atteinte. Passez au Pro pour des générations illimitées."
+    }
+  },
+  "themes": {
+    "default": "Défaut",
+    "untitled": "Sans nom",
+    "noThemes": "Aucun thème disponible.",
+    "usedByForms": "Utilisé par {count, plural, =0 {aucun formulaire} one {# formulaire} other {# formulaires}}",
+    "page": {
+      "title": "Thèmes",
+      "subtitle": "Personnalisez l'apparence de vos formulaires. Un thème peut être utilisé par plusieurs formulaires.",
+      "newTheme": "Nouveau thème",
+      "browseTemplates": "Parcourir les modèles"
+    },
+    "actions": {
+      "edit": "Modifier",
+      "rename": "Renommer",
+      "duplicate": "Dupliquer",
+      "delete": "Supprimer",
+      "setDefault": "Définir par défaut"
+    },
+    "editor": {
+      "title": "Nouveau thème",
+      "editTitle": "Modifier le thème",
+      "name": "Nom du thème",
+      "namePlaceholder": "Mon thème principal",
+      "preset": "Modèle de base",
+      "primaryColor": "Couleur principale",
+      "background": "Fond",
+      "font": "Police",
+      "radius": "Coins",
+      "logo": "Logo",
+      "logoHint": "Affichez votre logo en en-tête de vos formulaires.",
+      "comingSoon": "Bientôt disponible",
+      "preview": "Aperçu",
+      "save": "Enregistrer",
+      "saving": "Enregistrement...",
+      "contrastTitle": "Contraste limité",
+      "contrastHint": "Le contraste entre vos couleurs et le fond pourrait gêner la lecture. Ajustez si possible."
+    },
+    "selector": {
+      "title": "Choisir un thème",
+      "subtitle": "Sélectionnez un thème de votre bibliothèque ou démarrez à partir d'un modèle.",
+      "myThemes": "Mes thèmes",
+      "templates": "Modèles",
+      "apply": "Appliquer",
+      "applied": "Appliqué",
+      "use": "Utiliser"
+    },
+    "confirmEdit": {
+      "title": "Thème partagé",
+      "body": "Ce thème est utilisé par {count} formulaires. Vos modifications s'appliqueront à tous.",
+      "continue": "Continuer"
+    },
+    "deleteConfirm": {
+      "title": "Supprimer ce thème ?",
+      "body": "Cette action est irréversible.",
+      "bodyWithForms": "Les {count} formulaires utilisant ce thème seront réassignés au thème par défaut."
+    },
+    "toasts": {
+      "themeSaved": "Thème enregistré ✓",
+      "themeCreated": "Thème créé ✓",
+      "themeDuplicated": "Thème dupliqué ✓",
+      "themeDeleted": "Thème supprimé ✓",
+      "defaultSet": "Thème défini par défaut ✓",
+      "cannotDeleteLast": "Impossible de supprimer votre dernier thème."
+    },
+    "presets": {
+      "minimal": {
+        "name": "Minimal",
+        "description": "Sobre, neutre, polyvalent."
+      },
+      "warm": {
+        "name": "Chaleureux",
+        "description": "Tons doux et accueillants."
+      },
+      "bold": {
+        "name": "Audacieux",
+        "description": "Contraste fort, géométrique."
+      },
+      "elegant": {
+        "name": "Élégant",
+        "description": "Serif raffiné, fond doux."
+      }
+    },
+    "fonts": {
+      "inter": "Inter",
+      "manrope": "Manrope",
+      "poppins": "Poppins",
+      "playfair": "Playfair Display",
+      "lora": "Lora",
+      "crimson": "Crimson"
+    },
+    "radius": {
+      "sm": "Carré",
+      "md": "Doux",
+      "lg": "Rond"
+    },
+    "backgrounds": {
+      "white": "Blanc",
+      "cream": "Crème",
+      "mist": "Brume",
+      "sand": "Sable",
+      "blush": "Pêche",
+      "sage": "Sauge",
+      "lavender": "Lavande",
+      "graphite": "Graphite"
     }
   },
   "pricing": {

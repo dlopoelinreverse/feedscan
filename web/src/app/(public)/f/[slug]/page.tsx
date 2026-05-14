@@ -4,6 +4,8 @@ import { prisma } from "@/lib/prisma";
 import { getRootUrl, getAppUrl } from "@/lib/domains";
 import { PublicForm } from "@/components/public/public-form";
 import type { PublicFormData, PublicQuestion, PublicFollowUpRule } from "@/components/public/types";
+import { parseThemeConfig } from "@/lib/themes/parse";
+import { PRESETS } from "@/lib/themes/presets";
 
 interface PublicFormPageProps {
   params: Promise<{ slug: string }>;
@@ -25,6 +27,7 @@ export default async function PublicFormPage({
         orderBy: { order: "asc" },
         include: { followUpRules: true },
       },
+      theme: true,
     },
   });
 
@@ -64,12 +67,17 @@ export default async function PublicFormPage({
     }
   }
 
+  const themeConfig = form.theme
+    ? parseThemeConfig(form.theme.config)
+    : PRESETS.minimal;
+
   const publicData: PublicFormData = {
     id: form.id,
     title: form.title,
     description: form.description ?? null,
     rateLimitMode: form.rateLimitMode,
     rateLimitHours: form.rateLimitHours ?? null,
+    theme: themeConfig,
     questions: form.questions.map(
       (q): PublicQuestion => ({
         id: q.id,
@@ -102,9 +110,7 @@ export default async function PublicFormPage({
   const apiBase = getAppUrl("");
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-white to-gray-50">
-      <PublicForm form={publicData} qrCodeId={qrCodeId} apiBase={apiBase} />
-    </div>
+    <PublicForm form={publicData} qrCodeId={qrCodeId} apiBase={apiBase} />
   );
 }
 

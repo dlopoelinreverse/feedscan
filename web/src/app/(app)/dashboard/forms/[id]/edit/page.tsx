@@ -1,8 +1,14 @@
 import { notFound } from "next/navigation";
 import { getFormById, getUserProfile } from "@/lib/actions/form-actions";
+import { listThemes } from "@/lib/actions/theme-actions";
 import { FormBuilder } from "@/components/forms/form-builder";
 import { nanoid } from "nanoid";
-import type { FormBuilderState, QuestionState, FollowUpRuleState, QuestionType } from "@/components/forms/types";
+import type {
+  FormBuilderState,
+  QuestionState,
+  FollowUpRuleState,
+  QuestionType,
+} from "@/components/forms/types";
 
 interface FormEditPageProps {
   params: Promise<{ id: string }>;
@@ -10,9 +16,10 @@ interface FormEditPageProps {
 
 export default async function FormEditPage({ params }: FormEditPageProps) {
   const { id } = await params;
-  const [form, userProfile] = await Promise.all([
+  const [form, userProfile, themes] = await Promise.all([
     getFormById(id),
     getUserProfile(),
+    listThemes(),
   ]);
 
   if (!form) {
@@ -95,9 +102,22 @@ export default async function FormEditPage({ params }: FormEditPageProps) {
     ),
   };
 
+  const defaultTheme = themes.find((t) => t.isDefault) ?? themes[0] ?? null;
+  const initialThemeId =
+    (form as { themeId?: string | null }).themeId ?? defaultTheme?.id ?? null;
+  const formCountByTheme = Object.fromEntries(
+    themes.map((t) => [t.id, t.formCount])
+  );
+
   return (
     <div className="h-full flex flex-col overflow-hidden">
-      <FormBuilder initialData={initialData} userProfile={userProfile ?? undefined} />
+      <FormBuilder
+        initialData={initialData}
+        userProfile={userProfile ?? undefined}
+        themes={themes}
+        initialThemeId={initialThemeId}
+        formCountByTheme={formCountByTheme}
+      />
     </div>
   );
 }
