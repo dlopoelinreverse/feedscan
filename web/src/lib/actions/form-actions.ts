@@ -67,7 +67,8 @@ async function getAuthUserId(): Promise<string> {
 export async function saveForm(input: SaveFormInput) {
   const userId = await getAuthUserId();
 
-  const result = await prisma.$transaction(async (tx: Tx) => {
+  const result = await prisma.$transaction(
+    async (tx: Tx) => {
     let form;
 
     if (input.id) {
@@ -167,8 +168,10 @@ export async function saveForm(input: SaveFormInput) {
       }
     }
 
-    return form;
-  });
+      return form;
+    },
+    { maxWait: 5000, timeout: 30000 }
+  );
 
   return { id: result.id, slug: result.slug };
 }
