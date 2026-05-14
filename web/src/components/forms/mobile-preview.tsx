@@ -13,6 +13,32 @@ import { bilingualText, bilingualOptions } from "./types";
 const EMOJIS_5 = ["\ud83d\ude20", "\ud83d\ude10", "\ud83d\ude42", "\ud83d\ude04", "\ud83e\udd29"];
 const EMOJIS_3 = ["\ud83d\ude1e", "\ud83d\ude10", "\ud83d\ude0a"];
 
+const PREVIEW_STRINGS = {
+  fr: {
+    submit: "Envoyer mon avis",
+    subtitle: "Aidez-nous \u00e0 am\u00e9liorer votre exp\u00e9rience. Moins d'une minute.",
+    followUpFallback: "Question de suivi...",
+    specifyPlaceholder: "Pr\u00e9cisez...",
+    textPlaceholder: "Votre avis...",
+    addOptionsHint: "Ajoutez des options...",
+  },
+  en: {
+    submit: "Submit my feedback",
+    subtitle: "Help us improve your experience. Less than a minute.",
+    followUpFallback: "Follow-up question...",
+    specifyPlaceholder: "Tell us more...",
+    textPlaceholder: "Your feedback...",
+    addOptionsHint: "Add options...",
+  },
+} as const;
+
+function previewT(
+  locale: PreviewLocale,
+  key: keyof (typeof PREVIEW_STRINGS)["fr"]
+): string {
+  return PREVIEW_STRINGS[locale][key];
+}
+
 interface MobilePreviewProps {
   form: FormBuilderState;
   previewLocale?: PreviewLocale;
@@ -26,7 +52,6 @@ export function MobilePreview({
   previewLocale = "fr",
   onLocaleChange,
 }: MobilePreviewProps) {
-  const t = useTranslations("publicForm");
   const tPreview = useTranslations("aiWizard.preview");
   const [answers, setAnswers] = useState<Record<string, AnswerValue>>({});
 
@@ -84,7 +109,7 @@ export function MobilePreview({
               {title || "..."}
             </h3>
             <p className="text-[11px] text-muted-foreground mt-1">
-              {description || t("subtitle")}
+              {description || previewT(previewLocale, "subtitle")}
             </p>
           </div>
 
@@ -112,7 +137,7 @@ export function MobilePreview({
               type="button"
               className="w-full py-2.5 rounded-lg bg-[#6C5CE7] text-white text-sm font-medium"
             >
-              {t("submit")}
+              {previewT(previewLocale, "submit")}
             </button>
           )}
         </div>
@@ -175,11 +200,14 @@ function QuestionPreview({
           multiple={question.multipleChoice ?? false}
           value={value}
           onChange={onChange}
+          previewLocale={previewLocale}
         />
       )}
       {question.type === "TEXT" && (
         <TextInput
-          placeholder={question.placeholder || "Votre avis..."}
+          placeholder={
+            question.placeholder || previewT(previewLocale, "textPlaceholder")
+          }
           value={typeof value === "string" ? value : ""}
           onChange={onChange}
         />
@@ -187,7 +215,11 @@ function QuestionPreview({
 
       {/* Follow-up */}
       {matchedRule && (
-        <FollowUpBlock rule={matchedRule} variant={matchedRule.triggerType} />
+        <FollowUpBlock
+          rule={matchedRule}
+          variant={matchedRule.triggerType}
+          previewLocale={previewLocale}
+        />
       )}
     </div>
   );
@@ -274,11 +306,13 @@ function ChoiceInput({
   multiple,
   value,
   onChange,
+  previewLocale,
 }: {
   options: string[];
   multiple: boolean;
   value: AnswerValue | undefined;
   onChange: (v: AnswerValue) => void;
+  previewLocale: PreviewLocale;
 }) {
   const selectedArr = Array.isArray(value) ? value : [];
   const selectedStr = typeof value === "string" ? value : "";
@@ -301,7 +335,7 @@ function ChoiceInput({
   if (options.length === 0) {
     return (
       <p className="text-[10px] text-muted-foreground italic">
-        Ajoutez des options...
+        {previewT(previewLocale, "addOptionsHint")}
       </p>
     );
   }
@@ -349,24 +383,36 @@ function TextInput({
 function FollowUpBlock({
   rule,
   variant,
+  previewLocale,
 }: {
   rule: FollowUpRuleState;
   variant: "LOW" | "HIGH";
+  previewLocale: PreviewLocale;
 }) {
   const borderColor =
     variant === "LOW" ? "border-red-400" : "border-green-400";
   const bgColor = variant === "LOW" ? "bg-red-50/50" : "bg-green-50/50";
+
+  const label =
+    bilingualText(rule.followUpLabelFr, rule.followUpLabelEn, previewLocale) ||
+    rule.followUpLabel;
+  const options = bilingualOptions(
+    rule.followUpOptionsFr,
+    rule.followUpOptionsEn,
+    previewLocale
+  );
+  const displayedOptions = options.length > 0 ? options : rule.followUpOptions;
 
   return (
     <div
       className={`mt-2 border-l-4 ${borderColor} ${bgColor} rounded-r-md p-2 space-y-1.5 animate-in slide-in-from-top-2 duration-200`}
     >
       <p className="text-[10px] font-semibold">
-        {rule.followUpLabel || "Question de suivi..."}
+        {label || previewT(previewLocale, "followUpFallback")}
       </p>
-      {rule.followUpOptions.length > 0 && (
+      {displayedOptions.length > 0 && (
         <div className="flex flex-wrap gap-1">
-          {rule.followUpOptions.map((opt, i) => (
+          {displayedOptions.map((opt, i) => (
             <span
               key={i}
               className="text-[9px] px-1.5 py-0.5 rounded bg-white border border-border"
@@ -379,7 +425,7 @@ function FollowUpBlock({
       {rule.allowFreeText && (
         <textarea
           rows={1}
-          placeholder="Pr\u00e9cisez..."
+          placeholder={previewT(previewLocale, "specifyPlaceholder")}
           className="w-full text-[9px] px-1.5 py-1 rounded border border-border bg-white resize-none focus:outline-none"
         />
       )}
