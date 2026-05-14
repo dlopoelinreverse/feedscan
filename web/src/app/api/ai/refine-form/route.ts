@@ -49,7 +49,13 @@ export async function POST(request: Request) {
     const response = await anthropic.messages.create({
       model: AI_MODEL,
       max_tokens: 2048,
-      system: buildRefineSystemPrompt(userLocale),
+      system: [
+        {
+          type: "text",
+          text: buildRefineSystemPrompt(userLocale),
+          cache_control: { type: "ephemeral" },
+        },
+      ],
       messages: aiMessages,
     });
 
@@ -74,7 +80,10 @@ export async function POST(request: Request) {
       );
     }
 
-    return NextResponse.json(validated.data);
+    return NextResponse.json({
+      ...validated.data,
+      suggestions: validated.data.suggestions ?? [],
+    });
   } catch (err) {
     console.error("AI refine error:", err);
     return NextResponse.json(

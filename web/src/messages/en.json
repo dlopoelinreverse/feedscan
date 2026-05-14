@@ -393,11 +393,19 @@
       "businessType": "Business type",
       "selectType": "Select a type...",
       "description": "Describe your business in one sentence",
-      "descriptionPlaceholder": "e.g. We just changed our menu, I want to know what customers think..."
+      "descriptionPlaceholder": "e.g. We just changed our menu, I want to know what customers think...",
+      "next": "Analyze my business",
+      "analyzing": "Analyzing"
     },
     "step2": {
-      "title": "What do you want to measure?",
-      "subtitle": "Select the areas you want to evaluate. You can refine them later.",
+      "title": "Pick what matters to your customers",
+      "subtitle": "Choose 3 to 5 concrete moments you want to measure. The AI studied your sector to surface precise angles.",
+      "analyzing": "The AI is studying the customer journey for your sector...",
+      "error": "Analysis failed. Please try again.",
+      "retry": "Try again",
+      "generate": "Generate the form",
+      "minAngles": "Select at least 3 angles",
+      "selectedCount": "{count, plural, =0 {No angle selected} one {1 angle selected} other {# angles selected}} (3 to 5)",
       "areasToEvaluate": "Areas to evaluate",
       "specificRequest": "Anything specific to measure?",
       "specificRequestPlaceholder": "e.g. We just changed our menu, I want to know what customers think...",

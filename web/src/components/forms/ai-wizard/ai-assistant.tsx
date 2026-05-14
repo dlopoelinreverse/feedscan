@@ -43,41 +43,42 @@ export function AiAssistant({
     state,
     updateWizard,
     goToStep,
+    analyzeBusiness,
+    toggleAngle,
     generate,
     sendMessage,
     validate,
   } = assistant;
 
-  if (state.phase === "wizard") {
+  const inWizard = state.phase === "wizard" || state.phase === "angles";
+
+  if (inWizard) {
     return (
       <div className="flex flex-col h-full">
-        {/* Progress dots */}
         <ProgressDots currentStep={state.wizard.step} />
 
         {state.wizard.step === 1 && (
           <StepBusinessInfo
             state={state}
             updateWizard={updateWizard}
-            goToStep={goToStep}
+            analyzeBusiness={analyzeBusiness}
             t={t}
             tTypes={tTypes}
           />
         )}
         {state.wizard.step === 2 && (
-          <StepMeasurement
+          <StepAngleSelection
             state={state}
-            updateWizard={updateWizard}
+            toggleAngle={toggleAngle}
             goToStep={goToStep}
             generate={generate}
+            analyzeBusiness={analyzeBusiness}
             t={t}
+            locale={locale}
           />
         )}
         {state.wizard.step === 3 && (
-          <StepGenerating
-            state={state}
-            generate={generate}
-            t={t}
-          />
+          <StepGenerating state={state} generate={generate} t={t} />
         )}
       </div>
     );
@@ -96,8 +97,6 @@ export function AiAssistant({
   );
 }
 
-// --- Progress Dots ---
-
 function ProgressDots({ currentStep }: { currentStep: 1 | 2 | 3 }) {
   return (
     <div className="flex items-center justify-center gap-0 py-4 px-6">
@@ -112,7 +111,7 @@ function ProgressDots({ currentStep }: { currentStep: 1 | 2 | 3 }) {
                 : "bg-gray-200 text-gray-500"
             }`}
           >
-            {step < currentStep ? "\u2713" : step}
+            {step < currentStep ? "✓" : step}
           </div>
           {i < 2 && (
             <div
@@ -127,24 +126,23 @@ function ProgressDots({ currentStep }: { currentStep: 1 | 2 | 3 }) {
   );
 }
 
-// --- Step 1: Business Info ---
-
 function StepBusinessInfo({
   state,
   updateWizard,
-  goToStep,
+  analyzeBusiness,
   t,
   tTypes,
 }: {
   state: ReturnType<typeof useAiAssistant>["state"];
   updateWizard: ReturnType<typeof useAiAssistant>["updateWizard"];
-  goToStep: ReturnType<typeof useAiAssistant>["goToStep"];
+  analyzeBusiness: ReturnType<typeof useAiAssistant>["analyzeBusiness"];
   t: ReturnType<typeof useTranslations>;
   tTypes: ReturnType<typeof useTranslations>;
 }) {
   const canProceed =
     state.wizard.businessName.trim().length > 0 &&
-    state.wizard.businessType.length > 0;
+    state.wizard.businessType.length > 0 &&
+    !state.isAnalyzing;
 
   return (
     <div className="flex-1 flex flex-col px-4 pb-4">
@@ -156,7 +154,6 @@ function StepBusinessInfo({
       </div>
 
       <div className="space-y-4 flex-1">
-        {/* Business Name */}
         <div>
           <label className="text-sm font-medium">{t("step1.businessName")}</label>
           <Input
@@ -167,7 +164,6 @@ function StepBusinessInfo({
           />
         </div>
 
-        {/* Business Type */}
         <div>
           <label className="text-sm font-medium">{t("step1.businessType")}</label>
           <Select
@@ -187,7 +183,6 @@ function StepBusinessInfo({
           </Select>
         </div>
 
-        {/* Description (optional) */}
         <div>
           <label className="text-sm font-medium">
             {t("step1.description")}
@@ -203,205 +198,168 @@ function StepBusinessInfo({
         </div>
       </div>
 
-      {/* Navigation */}
       <div className="flex justify-end pt-4">
         <Button
-          onClick={() => goToStep(2)}
+          onClick={analyzeBusiness}
           disabled={!canProceed}
           className="bg-[#6C5CE7] hover:bg-[#5A4BD5] text-white"
         >
-          {t("step1.businessName") && (
-            <>
-              Suivant <span className="ml-1">&rarr;</span>
-            </>
-          )}
+          {state.isAnalyzing ? t("step1.analyzing") : t("step1.next")}
+          <span className="ml-1">&rarr;</span>
         </Button>
       </div>
     </div>
   );
 }
 
-// --- Step 2: Measurement Areas ---
-
-function StepMeasurement({
+function StepAngleSelection({
   state,
-  updateWizard,
+  toggleAngle,
   goToStep,
   generate,
+  analyzeBusiness,
   t,
+  locale,
 }: {
   state: ReturnType<typeof useAiAssistant>["state"];
-  updateWizard: ReturnType<typeof useAiAssistant>["updateWizard"];
+  toggleAngle: ReturnType<typeof useAiAssistant>["toggleAngle"];
   goToStep: ReturnType<typeof useAiAssistant>["goToStep"];
   generate: ReturnType<typeof useAiAssistant>["generate"];
+  analyzeBusiness: ReturnType<typeof useAiAssistant>["analyzeBusiness"];
   t: ReturnType<typeof useTranslations>;
+  locale: string;
 }) {
-  const businessType = state.wizard.businessType || "autre";
+  const tCommon = useTranslations("common");
+  const selectedCount = state.wizard.selectedAngleIds.length;
+  const canProceed = selectedCount >= 3 && selectedCount <= 5;
 
-  // Get chips for this business type from translations
-  const chipKeys = getChipKeys(businessType);
+  if (state.wizard.anglesLoading || state.isAnalyzing) {
+    return (
+      <div className="flex-1 flex flex-col items-center justify-center px-6">
+        <div className="w-10 h-10 border-4 border-[#EAE6FD] border-t-[#6C5CE7] rounded-full animate-spin mb-6" />
+        <p className="text-sm text-muted-foreground animate-pulse">
+          {t("step2.analyzing")}
+        </p>
+      </div>
+    );
+  }
 
-  const toggleArea = (area: string) => {
-    const current = state.wizard.selectedAreas;
-    if (current.includes(area)) {
-      updateWizard({ selectedAreas: current.filter((a) => a !== area) });
-    } else {
-      updateWizard({ selectedAreas: [...current, area] });
-    }
-  };
+  if (state.error === "AI_LIMIT_REACHED") {
+    return (
+      <div className="flex-1 flex flex-col items-center justify-center px-6 text-center">
+        <div className="text-4xl mb-4">&#x1f512;</div>
+        <p className="text-sm text-muted-foreground mb-4">
+          {t("chat.limitReached")}
+        </p>
+        <Button className="bg-[#6C5CE7] hover:bg-[#5A4BD5] text-white">
+          {t("chat.upgradeCta")}
+        </Button>
+      </div>
+    );
+  }
 
-  const canProceed = state.wizard.selectedAreas.length >= 2;
+  if (state.error === "ANALYZE_FAILED") {
+    return (
+      <div className="flex-1 flex flex-col items-center justify-center px-6 text-center">
+        <div className="text-4xl mb-4">&#x26a0;&#xfe0f;</div>
+        <p className="text-sm text-muted-foreground mb-4">
+          {t("step2.error")}
+        </p>
+        <div className="flex gap-2">
+          <Button variant="outline" onClick={() => goToStep(1)}>
+            {tCommon("back")}
+          </Button>
+          <Button onClick={analyzeBusiness} variant="outline">
+            {t("step2.retry")}
+          </Button>
+        </div>
+      </div>
+    );
+  }
 
   return (
-    <div className="flex-1 flex flex-col px-4 pb-4">
-      <div className="mb-6">
+    <div className="flex-1 flex flex-col px-4 pb-4 min-h-0">
+      <div className="mb-4">
         <h2 className="text-xl font-bold">{t("step2.title")}</h2>
         <p className="text-sm text-muted-foreground mt-1">
           {t("step2.subtitle")}
         </p>
       </div>
 
-      <div className="space-y-4 flex-1">
-        <div>
-          <label className="text-sm font-medium mb-2 block">
-            {t("step2.areasToEvaluate")}
-          </label>
-          <div className="flex flex-wrap gap-2">
-            {chipKeys.map((key) => {
-              const isSelected = state.wizard.selectedAreas.includes(key);
-              const chipLabel = t(`step2.chips.${businessType}.${key}` as Parameters<typeof t>[0]);
-              return (
-                <button
-                  key={key}
-                  type="button"
-                  onClick={() => toggleArea(key)}
-                  className={`px-3 py-1.5 rounded-full text-sm font-medium border transition-colors ${
+      <div className="flex-1 overflow-y-auto space-y-2 pr-1">
+        {state.wizard.proposedAngles.map((angle) => {
+          const isSelected = state.wizard.selectedAngleIds.includes(angle.id);
+          const label = locale === "fr" ? angle.labelFr : angle.labelEn;
+          const rationale = locale === "fr" ? angle.rationaleFr : angle.rationaleEn;
+          const disabled = !isSelected && selectedCount >= 5;
+          return (
+            <button
+              key={angle.id}
+              type="button"
+              onClick={() => toggleAngle(angle.id)}
+              disabled={disabled}
+              className={`w-full text-left p-3 rounded-lg border transition-colors ${
+                isSelected
+                  ? "bg-[#EAE6FD] border-[#6C5CE7]"
+                  : disabled
+                  ? "bg-gray-50 border-gray-200 opacity-50 cursor-not-allowed"
+                  : "bg-white border-border hover:border-[#6C5CE7]/50"
+              }`}
+            >
+              <div className="flex items-start gap-2">
+                <div
+                  className={`mt-0.5 w-4 h-4 rounded border-2 flex items-center justify-center flex-shrink-0 ${
                     isSelected
-                      ? "bg-[#EAE6FD] border-[#6C5CE7] text-[#6C5CE7]"
-                      : "bg-white border-border text-foreground hover:border-[#6C5CE7]/50"
+                      ? "bg-[#6C5CE7] border-[#6C5CE7]"
+                      : "border-gray-300"
                   }`}
                 >
-                  {chipLabel}
-                </button>
-              );
-            })}
-          </div>
-          {state.wizard.selectedAreas.length > 0 &&
-            state.wizard.selectedAreas.length < 2 && (
-              <p className="text-xs text-orange-500 mt-2">
-                {t("step2.minChips")}
-              </p>
-            )}
-        </div>
-
-        {/* Specific request */}
-        <div>
-          <label className="text-sm font-medium">
-            {t("step2.specificRequest")}
-          </label>
-          <Input
-            value={state.wizard.specificRequest}
-            onChange={(e) =>
-              updateWizard({ specificRequest: e.target.value })
-            }
-            placeholder={t("step2.specificRequestPlaceholder")}
-            className="mt-1"
-          />
-        </div>
+                  {isSelected && (
+                    <span className="text-white text-xs leading-none">
+                      &#x2713;
+                    </span>
+                  )}
+                </div>
+                <div className="flex-1">
+                  <p
+                    className={`text-sm font-medium ${
+                      isSelected ? "text-[#6C5CE7]" : "text-foreground"
+                    }`}
+                  >
+                    {label}
+                  </p>
+                  <p className="text-xs text-muted-foreground mt-0.5">
+                    {rationale}
+                  </p>
+                </div>
+              </div>
+            </button>
+          );
+        })}
       </div>
 
-      {/* Navigation */}
-      <div className="flex justify-between pt-4">
+      <div className="pt-3 text-xs text-muted-foreground">
+        {t("step2.selectedCount", { count: selectedCount })}
+        {selectedCount > 0 && selectedCount < 3 && (
+          <span className="text-orange-500 ml-2">{t("step2.minAngles")}</span>
+        )}
+      </div>
+
+      <div className="flex justify-between pt-3">
         <Button variant="outline" onClick={() => goToStep(1)}>
-          &larr; {useBackLabel()}
+          &larr; {tCommon("back")}
         </Button>
         <Button
           onClick={generate}
           disabled={!canProceed}
           className="bg-[#6C5CE7] hover:bg-[#5A4BD5] text-white"
         >
-          Suivant <span className="ml-1">&rarr;</span>
+          {t("step2.generate")} <span className="ml-1">&rarr;</span>
         </Button>
       </div>
     </div>
   );
 }
-
-function useBackLabel() {
-  const t = useTranslations("common");
-  return t("back");
-}
-
-function getChipKeys(businessType: string): string[] {
-  const chipMap: Record<string, string[]> = {
-    restaurant: [
-      "foodQuality",
-      "service",
-      "ambiance",
-      "cleanliness",
-      "valueForMoney",
-      "waitTime",
-      "welcome",
-      "menuVariety",
-    ],
-    cafe: [
-      "coffeeQuality",
-      "service",
-      "ambiance",
-      "cleanliness",
-      "pricing",
-      "waitTime",
-      "pastries",
-      "wifiComfort",
-    ],
-    salon: [
-      "cutQuality",
-      "welcome",
-      "waitTime",
-      "cleanliness",
-      "valueForMoney",
-      "stylistAdvice",
-      "ambiance",
-    ],
-    clinique: [
-      "welcome",
-      "waitTime",
-      "practitionerAttentiveness",
-      "cleanliness",
-      "clarityOfExplanations",
-      "followUpCare",
-    ],
-    gym: [
-      "equipment",
-      "cleanliness",
-      "groupClasses",
-      "availability",
-      "staff",
-      "ambiance",
-      "valueForMoney",
-    ],
-    coworking: [
-      "wifiConnectivity",
-      "comfort",
-      "noiseLevel",
-      "cleanliness",
-      "coffeeKitchen",
-      "space",
-      "valueForMoney",
-    ],
-    autre: [
-      "serviceQuality",
-      "welcome",
-      "cleanliness",
-      "valueForMoney",
-      "waitTime",
-      "ambiance",
-    ],
-  };
-  return chipMap[businessType] || chipMap.autre;
-}
-
-// --- Step 3: Generating ---
 
 function StepGenerating({
   state,
@@ -473,7 +431,6 @@ function StepGenerating({
 
   return (
     <div className="flex-1 flex flex-col items-center justify-center px-6">
-      {/* Spinner */}
       <div className="w-10 h-10 border-4 border-[#EAE6FD] border-t-[#6C5CE7] rounded-full animate-spin mb-6" />
       <p className="text-sm text-muted-foreground animate-pulse">
         {t(
@@ -483,8 +440,6 @@ function StepGenerating({
     </div>
   );
 }
-
-// --- Chat Panel ---
 
 function ChatPanel({
   state,
@@ -507,10 +462,8 @@ function ChatPanel({
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
-  // Build initial message from form data
   const initialMessage = buildInitialMessage(currentForm, t, locale);
 
-  // Auto-scroll on new messages
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [state.chatMessages.length, state.isSending]);
@@ -529,33 +482,31 @@ function ChatPanel({
     }
   };
 
+  const looksGreatLabel = t("chat.suggestions.looksGreat");
   const handleSuggestionClick = (suggestion: string) => {
-    // Check if it's the "looks great" / "c'est parfait" suggestion
-    const looksGreat = t("chat.suggestions.looksGreat");
-    if (suggestion === looksGreat) {
+    if (state.isSending) return;
+    if (suggestion === looksGreatLabel) {
       validate();
       return;
     }
     sendMessage(suggestion);
   };
 
-  // Get initial suggestions
   const initialSuggestions = [
     t("chat.suggestions.addQuestion"),
     t("chat.suggestions.changeOrder"),
     t("chat.suggestions.looksGreat"),
   ];
 
-  // Determine which suggestions to show
-  const lastAssistantMsg = [...state.chatMessages]
-    .reverse()
-    .find((m) => m.role === "assistant");
-  const currentSuggestions =
-    lastAssistantMsg?.suggestions || (state.chatMessages.length === 0 ? initialSuggestions : []);
+  const lastMessage = state.chatMessages[state.chatMessages.length - 1];
+  const showInitialSuggestions = state.chatMessages.length === 0;
+  const showAssistantSuggestions =
+    lastMessage?.role === "assistant" &&
+    Array.isArray(lastMessage.suggestions) &&
+    lastMessage.suggestions.length > 0;
 
   return (
     <div className="flex flex-col h-full">
-      {/* Validation Banner */}
       {state.phase === "validated" && (
         <div className="bg-green-50 border-b border-green-200 px-4 py-3 flex items-center justify-between">
           <span className="text-sm font-medium text-green-700">
@@ -571,7 +522,6 @@ function ChatPanel({
         </div>
       )}
 
-      {/* Top bar */}
       {state.phase === "chat" && (
         <div className="flex items-center justify-between border-b px-4 py-2">
           <span className="text-sm font-medium">&#x2728; {t("tabs.assistant")}</span>
@@ -586,9 +536,7 @@ function ChatPanel({
         </div>
       )}
 
-      {/* Messages */}
       <div className="flex-1 overflow-y-auto p-4 space-y-4">
-        {/* Initial AI message */}
         <div className="flex gap-2">
           <div className="flex-1">
             <div className="bg-[#f0f0f0] rounded-lg rounded-tl-none p-3 max-w-[95%]">
@@ -599,15 +547,15 @@ function ChatPanel({
               </div>
               <p className="text-sm whitespace-pre-line">{initialMessage}</p>
             </div>
-            {/* Initial suggestions */}
-            {state.chatMessages.length === 0 && (
+            {showInitialSuggestions && (
               <div className="flex flex-wrap gap-2 mt-2">
                 {initialSuggestions.map((s) => (
                   <button
                     key={s}
                     type="button"
                     onClick={() => handleSuggestionClick(s)}
-                    className="px-3 py-1.5 text-xs rounded-full border border-[#6C5CE7] text-[#6C5CE7] bg-white hover:bg-[#EAE6FD] transition-colors"
+                    disabled={state.isSending}
+                    className="px-3 py-1.5 text-xs rounded-full border border-[#6C5CE7] text-[#6C5CE7] bg-white hover:bg-[#EAE6FD] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                   >
                     {s}
                   </button>
@@ -617,48 +565,54 @@ function ChatPanel({
           </div>
         </div>
 
-        {/* Chat messages */}
-        {state.chatMessages.map((msg) => (
-          <div
-            key={msg.id}
-            className={`flex ${msg.role === "user" ? "justify-end" : "justify-start"}`}
-          >
-            <div
-              className={`max-w-[85%] rounded-lg p-3 ${
-                msg.role === "user"
-                  ? "bg-[#6C5CE7] text-white rounded-tr-none"
-                  : "bg-[#f0f0f0] rounded-tl-none"
-              }`}
-            >
-              {msg.role === "assistant" && (
-                <div className="flex items-center gap-1.5 mb-2">
-                  <span className="text-xs font-semibold text-[#6C5CE7]">
-                    &#x2728; {t("chat.badge")}
-                  </span>
+        {state.chatMessages.map((msg, idx) => {
+          const isLast = idx === state.chatMessages.length - 1;
+          const showSuggestionsForMsg =
+            msg.role === "assistant" &&
+            isLast &&
+            Array.isArray(msg.suggestions) &&
+            msg.suggestions.length > 0;
+          return (
+            <div key={msg.id} className="space-y-2">
+              <div
+                className={`flex ${msg.role === "user" ? "justify-end" : "justify-start"}`}
+              >
+                <div
+                  className={`max-w-[85%] rounded-lg p-3 ${
+                    msg.role === "user"
+                      ? "bg-[#6C5CE7] text-white rounded-tr-none"
+                      : "bg-[#f0f0f0] rounded-tl-none"
+                  }`}
+                >
+                  {msg.role === "assistant" && (
+                    <div className="flex items-center gap-1.5 mb-2">
+                      <span className="text-xs font-semibold text-[#6C5CE7]">
+                        &#x2728; {t("chat.badge")}
+                      </span>
+                    </div>
+                  )}
+                  <p className="text-sm whitespace-pre-line">{msg.content}</p>
+                </div>
+              </div>
+              {showSuggestionsForMsg && showAssistantSuggestions && (
+                <div className="flex flex-wrap gap-2">
+                  {msg.suggestions!.map((s) => (
+                    <button
+                      key={`${msg.id}-${s}`}
+                      type="button"
+                      onClick={() => handleSuggestionClick(s)}
+                      disabled={state.isSending}
+                      className="px-3 py-1.5 text-xs rounded-full border border-[#6C5CE7] text-[#6C5CE7] bg-white hover:bg-[#EAE6FD] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                      {s}
+                    </button>
+                  ))}
                 </div>
               )}
-              <p className="text-sm whitespace-pre-line">{msg.content}</p>
             </div>
-          </div>
-        ))}
+          );
+        })}
 
-        {/* Suggestions after last assistant message */}
-        {currentSuggestions.length > 0 && state.chatMessages.length > 0 && (
-          <div className="flex flex-wrap gap-2">
-            {currentSuggestions.map((s) => (
-              <button
-                key={s}
-                type="button"
-                onClick={() => handleSuggestionClick(s)}
-                className="px-3 py-1.5 text-xs rounded-full border border-[#6C5CE7] text-[#6C5CE7] bg-white hover:bg-[#EAE6FD] transition-colors"
-              >
-                {s}
-              </button>
-            ))}
-          </div>
-        )}
-
-        {/* Typing indicator */}
         {state.isSending && (
           <div className="flex gap-2">
             <div className="bg-[#f0f0f0] rounded-lg rounded-tl-none p-3">
@@ -674,7 +628,6 @@ function ChatPanel({
         <div ref={messagesEndRef} />
       </div>
 
-      {/* Input */}
       {state.phase !== "validated" && (
         <div className="border-t px-4 py-3">
           <div className="flex gap-2">

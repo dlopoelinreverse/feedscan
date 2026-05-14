@@ -2,11 +2,12 @@
 
 import { useState, useCallback, useEffect, useRef } from "react";
 import { nanoid } from "nanoid";
-import type { AiFormResponse } from "@/lib/ai/schemas";
+import type { AiFormResponse, Angle } from "@/lib/ai/schemas";
 import type { FormBuilderState } from "../types";
-import type { AiAssistantState, ChatMessage } from "./types";
+import type { AiAssistantState, ChatMessage, AiPhase } from "./types";
 
 const STORAGE_PREFIX = "feedscan:ai-assistant:";
+const DB_DEBOUNCE_MS = 500;
 
 function storageKey(formId: string | undefined): string {
   return `${STORAGE_PREFIX}${formId ?? "new"}`;
@@ -31,9 +32,16 @@ function persistState(
 ): void {
   if (typeof window === "undefined") return;
   try {
-    const { isGenerating: _g, isSending: _s, error: _e, ...durable } = state;
+    const {
+      isGenerating: _g,
+      isSending: _s,
+      isAnalyzing: _a,
+      error: _e,
+      ...durable
+    } = state;
     void _g;
     void _s;
+    void _a;
     void _e;
     window.sessionStorage.setItem(
       storageKey(formId),
@@ -193,10 +201,6 @@ interface UseAiAssistantOptions {
   userLocale: string;
   initialBusinessName?: string;
   initialBusinessType?: string;
-  /**
-   * Form id used to scope persisted state in sessionStorage. Use `undefined`
-   * for new (unsaved) forms — they share the "new" bucket.
-   */
   formId?: string;
 }
 
@@ -210,6 +214,7 @@ export function useAiAssistant({
 }: UseAiAssistantOptions) {
   const formIdRef = useRef(formId);
   formIdRef.current = formId;
+  const debounceTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const [state, setState] = useState<AiAssistantState>(() => {
     const defaults: AiAssistantState = {
@@ -219,13 +224,17 @@ export function useAiAssistant({
         businessName: initialBusinessName,
         businessType: initialBusinessType,
         businessDescription: "",
-        selectedAreas: [],
-        specificRequest: "",
+        proposedAngles: [],
+        selectedAngleIds: [],
+        anglesLoading: false,
       },
       chatMessages: [],
       currentForm: null,
+      conversationId: null,
+      formId,
       isGenerating: false,
       isSending: false,
+      isAnalyzing: false,
       error: null,
     };
     const saved = loadPersistedState(formId);
@@ -236,6 +245,7 @@ export function useAiAssistant({
       wizard: { ...defaults.wizard, ...(saved.wizard ?? {}) },
       isGenerating: false,
       isSending: false,
+      isAnalyzing: false,
       error: null,
     };
   });
@@ -243,6 +253,92 @@ export function useAiAssistant({
   useEffect(() => {
     persistState(formIdRef.current, state);
   }, [state]);
+
+  const patchConversation = useCallback(
+    (patch: Record<string, unknown>) => {
+      const fId = formIdRef.current;
+      if (!fId) return;
+      if (debounceTimerRef.current) clearTimeout(debounceTimerRef.current);
+      debounceTimerRef.current = setTimeout(() => {
+        void fetch("/api/ai/conversation", {
+          method: "PATCH",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ formId: fId, ...patch }),
+        }).catch(() => {});
+      }, DB_DEBOUNCE_MS);
+    },
+    []
+  );
+
+  useEffect(() => {
+    const fId = formIdRef.current;
+    if (!fId) return;
+    let cancelled = false;
+    (async () => {
+      try {
+        const res = await fetch(
+          `/api/ai/conversation?formId=${encodeURIComponent(fId)}`,
+          { cache: "no-store" }
+        );
+        if (!res.ok) return;
+        const { conversation } = await res.json();
+        if (!conversation || cancelled) return;
+        setState((prev) => {
+          const ctx = (conversation.businessContext ?? {}) as {
+            businessName?: string;
+            businessType?: string;
+            description?: string;
+          };
+          const proposed = (conversation.proposedAngles ?? []) as Angle[];
+          const selected = (conversation.selectedAngles ?? []) as Angle[];
+          const generated = conversation.generatedForm as
+            | AiFormResponse
+            | null;
+          const dbMessages = (conversation.messages ?? []) as Array<{
+            id: string;
+            role: "user" | "assistant";
+            content: string;
+            suggestions: string[] | null;
+          }>;
+
+          let step: 1 | 2 | 3 = 1;
+          let phase: AiPhase = conversation.phase as AiPhase;
+          if (phase === "angles") step = 2;
+          if (phase === "chat" || phase === "validated") step = 3;
+
+          return {
+            ...prev,
+            phase,
+            conversationId: conversation.id,
+            wizard: {
+              ...prev.wizard,
+              step,
+              businessName:
+                ctx.businessName ?? prev.wizard.businessName,
+              businessType:
+                ctx.businessType ?? prev.wizard.businessType,
+              businessDescription:
+                ctx.description ?? prev.wizard.businessDescription,
+              proposedAngles: proposed,
+              selectedAngleIds: selected.map((a) => a.id),
+            },
+            chatMessages: dbMessages.map((m) => ({
+              id: m.id,
+              role: m.role,
+              content: m.content,
+              suggestions: m.suggestions ?? undefined,
+            })),
+            currentForm: generated,
+          };
+        });
+      } catch {
+        // hydration failure is non-fatal
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   const updateWizard = useCallback(
     (patch: Partial<AiAssistantState["wizard"]>) => {
@@ -262,7 +358,105 @@ export function useAiAssistant({
     }));
   }, []);
 
+  const analyzeBusiness = useCallback(async () => {
+    setState((prev) => ({
+      ...prev,
+      isAnalyzing: true,
+      error: null,
+      wizard: { ...prev.wizard, step: 2, anglesLoading: true },
+    }));
+
+    try {
+      const res = await fetch("/api/ai/analyze-business", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          formId: formIdRef.current,
+          businessName: state.wizard.businessName,
+          businessType: state.wizard.businessType,
+          description: state.wizard.businessDescription || undefined,
+          locale: userLocale,
+        }),
+      });
+
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}));
+        if (data.error === "AI_LIMIT_REACHED") {
+          setState((prev) => ({
+            ...prev,
+            isAnalyzing: false,
+            error: "AI_LIMIT_REACHED",
+            wizard: { ...prev.wizard, anglesLoading: false },
+          }));
+          return;
+        }
+        throw new Error(data.error || "Analyze failed");
+      }
+
+      const data: {
+        formId: string;
+        conversationId: string;
+        angles: Angle[];
+      } = await res.json();
+
+      formIdRef.current = data.formId;
+
+      setState((prev) => ({
+        ...prev,
+        phase: "angles",
+        formId: data.formId,
+        conversationId: data.conversationId,
+        wizard: {
+          ...prev.wizard,
+          step: 2,
+          anglesLoading: false,
+          proposedAngles: data.angles,
+          selectedAngleIds: [],
+        },
+        isAnalyzing: false,
+      }));
+    } catch {
+      setState((prev) => ({
+        ...prev,
+        isAnalyzing: false,
+        error: "ANALYZE_FAILED",
+        wizard: { ...prev.wizard, anglesLoading: false },
+      }));
+    }
+  }, [state.wizard.businessName, state.wizard.businessType, state.wizard.businessDescription, userLocale]);
+
+  const toggleAngle = useCallback(
+    (id: string) => {
+      setState((prev) => {
+        const current = prev.wizard.selectedAngleIds;
+        let next: string[];
+        if (current.includes(id)) {
+          next = current.filter((x) => x !== id);
+        } else {
+          if (current.length >= 5) return prev;
+          next = [...current, id];
+        }
+        return {
+          ...prev,
+          wizard: { ...prev.wizard, selectedAngleIds: next },
+        };
+      });
+    },
+    []
+  );
+
   const generate = useCallback(async () => {
+    const selected = state.wizard.proposedAngles.filter((a) =>
+      state.wizard.selectedAngleIds.includes(a.id)
+    );
+    if (selected.length < 3) return;
+
+    const fId = formIdRef.current;
+    if (!fId) {
+      setState((prev) => ({ ...prev, error: "GENERATION_FAILED" }));
+      return;
+    }
+
     setState((prev) => ({
       ...prev,
       wizard: { ...prev.wizard, step: 3 },
@@ -275,11 +469,8 @@ export function useAiAssistant({
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          businessName: state.wizard.businessName,
-          businessType: state.wizard.businessType,
-          targetAreas: state.wizard.selectedAreas,
-          description: state.wizard.businessDescription || undefined,
-          specificRequest: state.wizard.specificRequest || undefined,
+          formId: fId,
+          selectedAngles: selected,
         }),
       });
 
@@ -315,7 +506,7 @@ export function useAiAssistant({
         error: "GENERATION_FAILED",
       }));
     }
-  }, [state.wizard, onFormGenerated]);
+  }, [state.wizard.proposedAngles, state.wizard.selectedAngleIds, onFormGenerated]);
 
   const sendMessage = useCallback(
     async (message: string) => {
@@ -335,7 +526,6 @@ export function useAiAssistant({
       }));
 
       try {
-        // Build conversation history for API (only text content, not suggestions)
         const history = state.chatMessages.map((m) => ({
           role: m.role,
           content: m.content,
@@ -355,12 +545,15 @@ export function useAiAssistant({
         if (!res.ok) throw new Error("Refinement failed");
 
         const data = await res.json();
+        const suggestions: string[] = Array.isArray(data.suggestions)
+          ? data.suggestions
+          : [];
 
         const assistantMsg: ChatMessage = {
           id: nanoid(),
           role: "assistant",
           content: data.message,
-          suggestions: data.suggestions,
+          suggestions,
         };
 
         const updatedAiForm: AiFormResponse = data.form;
@@ -373,6 +566,25 @@ export function useAiAssistant({
           isSending: false,
         }));
 
+        const convId = state.conversationId;
+        if (convId) {
+          void fetch(`/api/ai/conversation/${convId}/messages`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              messages: [
+                { role: "user", content: userMsg.content },
+                {
+                  role: "assistant",
+                  content: assistantMsg.content,
+                  suggestions,
+                },
+              ],
+            }),
+          }).catch(() => {});
+        }
+        patchConversation({ generatedForm: updatedAiForm });
+
         onFormUpdated(builderForm);
       } catch {
         setState((prev) => ({
@@ -382,12 +594,20 @@ export function useAiAssistant({
         }));
       }
     },
-    [state.currentForm, state.chatMessages, userLocale, onFormUpdated]
+    [
+      state.currentForm,
+      state.chatMessages,
+      state.conversationId,
+      userLocale,
+      onFormUpdated,
+      patchConversation,
+    ]
   );
 
   const validate = useCallback(() => {
     setState((prev) => ({ ...prev, phase: "validated" }));
-  }, []);
+    patchConversation({ phase: "validated" });
+  }, [patchConversation]);
 
   const applyToBuilder = useCallback(() => {
     if (!state.currentForm) return;
@@ -399,6 +619,8 @@ export function useAiAssistant({
     state,
     updateWizard,
     goToStep,
+    analyzeBusiness,
+    toggleAngle,
     generate,
     sendMessage,
     validate,

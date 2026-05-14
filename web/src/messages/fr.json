@@ -393,11 +393,19 @@
       "businessType": "Type d'activité",
       "selectType": "Sélectionnez un type...",
       "description": "Décrivez votre commerce en une phrase",
-      "descriptionPlaceholder": "Ex : On vient de changer notre menu, je veux savoir ce que les clients en pensent..."
+      "descriptionPlaceholder": "Ex : On vient de changer notre menu, je veux savoir ce que les clients en pensent...",
+      "next": "Analyser mon commerce",
+      "analyzing": "Analyse en cours"
     },
     "step2": {
-      "title": "Que voulez-vous mesurer ?",
-      "subtitle": "Sélectionnez les aspects de l'expérience client que vous souhaitez évaluer. Vous pourrez affiner ensuite.",
+      "title": "Choisissez ce qui compte pour vos clients",
+      "subtitle": "Sélectionnez entre 3 et 5 moments concrets que vous voulez mesurer. L'IA a analysé votre secteur pour vous proposer des angles précis.",
+      "analyzing": "L'IA étudie le parcours client de votre secteur...",
+      "error": "L'analyse a échoué. Veuillez réessayer.",
+      "retry": "Réessayer",
+      "generate": "Générer le formulaire",
+      "minAngles": "Sélectionnez au moins 3 angles",
+      "selectedCount": "{count, plural, =0 {Aucun angle sélectionné} one {1 angle sélectionné} other {# angles sélectionnés}} (3 à 5)",
       "areasToEvaluate": "Points à évaluer",
       "specificRequest": "Quelque chose de spécifique à mesurer ?",
       "specificRequestPlaceholder": "Ex : On vient de changer notre menu, je veux savoir ce que les clients en pensent...",

@@ -1,12 +1,38 @@
 import { z } from "zod/v4";
 
+// --- Analyze Business (Étape A) ---
+
+export const analyzeBusinessRequestSchema = z.object({
+  formId: z.string().optional(),
+  businessName: z.string().min(1),
+  businessType: z.string().min(1),
+  description: z.string().optional(),
+  locale: z.enum(["fr", "en"]),
+});
+
+export type AnalyzeBusinessRequest = z.infer<typeof analyzeBusinessRequestSchema>;
+
+export const angleSchema = z.object({
+  id: z.string(),
+  labelFr: z.string(),
+  labelEn: z.string(),
+  rationaleFr: z.string(),
+  rationaleEn: z.string(),
+});
+
+export type Angle = z.infer<typeof angleSchema>;
+
+export const analyzeBusinessResponseSchema = z.object({
+  angles: z.array(angleSchema).min(6).max(14),
+});
+
+export type AnalyzeBusinessResponse = z.infer<typeof analyzeBusinessResponseSchema>;
+
 // --- Generate Form ---
 
 export const generateFormRequestSchema = z.object({
-  businessName: z.string().min(1),
-  businessType: z.string().min(1),
-  targetAreas: z.array(z.string()).min(1),
-  description: z.string().optional(),
+  formId: z.string().min(1),
+  selectedAngles: z.array(angleSchema).min(3).max(5),
   specificRequest: z.string().optional(),
 });
 
