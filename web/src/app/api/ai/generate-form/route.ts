@@ -68,7 +68,7 @@ export async function POST(request: Request) {
   try {
     const response = await anthropic.messages.create({
       model: AI_MODEL,
-      max_tokens: 2048,
+      max_tokens: 8192,
       system: [
         {
           type: "text",
@@ -88,6 +88,14 @@ export async function POST(request: Request) {
         },
       ],
     });
+
+    if (response.stop_reason === "max_tokens") {
+      console.error("AI generation truncated by max_tokens");
+      return NextResponse.json(
+        { error: "AI response truncated" },
+        { status: 500 }
+      );
+    }
 
     const text =
       response.content[0].type === "text" ? response.content[0].text : "";
