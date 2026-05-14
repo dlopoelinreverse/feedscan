@@ -37,7 +37,17 @@ export async function updateSession(request: NextRequest) {
   // Refresh session — do not remove this!
   const {
     data: { user },
+    error,
   } = await supabase.auth.getUser();
+
+  if (!user && error) {
+    const hasSupabaseCookie = request.cookies
+      .getAll()
+      .some((c) => c.name.startsWith("sb-"));
+    if (hasSupabaseCookie) {
+      await supabase.auth.signOut();
+    }
+  }
 
   return { supabaseResponse, user };
 }
