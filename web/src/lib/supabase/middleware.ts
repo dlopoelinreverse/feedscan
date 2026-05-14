@@ -41,10 +41,10 @@ export async function updateSession(request: NextRequest) {
   } = await supabase.auth.getUser();
 
   if (!user && error) {
-    const hasSupabaseCookie = request.cookies
+    const hasAuthTokenCookie = request.cookies
       .getAll()
-      .some((c) => c.name.startsWith("sb-"));
-    if (hasSupabaseCookie) {
+      .some((c) => /^sb-.*-auth-token(\.\d+)?$/.test(c.name));
+    if (hasAuthTokenCookie) {
       await supabase.auth.signOut();
     }
   }
