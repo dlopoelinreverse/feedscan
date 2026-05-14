@@ -22,8 +22,15 @@ export default function LoginPage() {
     const reason = params.get("reason");
     const error = params.get("error");
     if (reason === "please_login") setNotice(t("pleaseLogin"));
-    else if (error === "auth_callback_error") setServerError(t("sessionExpired"));
-    else if (error === "missing_code") setServerError(t("sessionExpired"));
+    else if (
+      error === "auth_callback_error" ||
+      error === "missing_code" ||
+      error === "stale_session"
+    ) {
+      setServerError(t("sessionExpired"));
+      const supabase = createClient();
+      supabase.auth.signOut().catch(() => {});
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
