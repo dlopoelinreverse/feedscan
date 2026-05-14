@@ -1,7 +1,6 @@
 "use client";
 
 import { useState } from "react";
-import { useTranslations } from "next-intl";
 import type {
   FormBuilderState,
   FollowUpRuleState,
@@ -21,6 +20,8 @@ const PREVIEW_STRINGS = {
     specifyPlaceholder: "Pr\u00e9cisez...",
     textPlaceholder: "Votre avis...",
     addOptionsHint: "Ajoutez des options...",
+    buildingQuestions: "Les questions appara\u00eetront ici au fur et \u00e0 mesure",
+    missingTranslation: "(traduction manquante)",
   },
   en: {
     submit: "Submit my feedback",
@@ -29,6 +30,8 @@ const PREVIEW_STRINGS = {
     specifyPlaceholder: "Tell us more...",
     textPlaceholder: "Your feedback...",
     addOptionsHint: "Add options...",
+    buildingQuestions: "Questions will appear here as you build the form",
+    missingTranslation: "(missing translation)",
   },
 } as const;
 
@@ -52,7 +55,6 @@ export function MobilePreview({
   previewLocale = "fr",
   onLocaleChange,
 }: MobilePreviewProps) {
-  const tPreview = useTranslations("aiWizard.preview");
   const [answers, setAnswers] = useState<Record<string, AnswerValue>>({});
 
   const setAnswer = (clientId: string, value: AnswerValue) => {
@@ -116,7 +118,7 @@ export function MobilePreview({
           {/* Questions */}
           {form.questions.length === 0 && (
             <p className="text-xs text-muted-foreground italic text-center py-8">
-              {tPreview("buildingQuestions")}
+              {previewT(previewLocale, "buildingQuestions")}
             </p>
           )}
 
@@ -127,7 +129,7 @@ export function MobilePreview({
               value={answers[q.clientId]}
               onChange={(v) => setAnswer(q.clientId, v)}
               previewLocale={previewLocale}
-              missingTranslationLabel={tPreview("missingTranslation")}
+              missingTranslationLabel={previewT(previewLocale, "missingTranslation")}
             />
           ))}
 
