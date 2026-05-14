@@ -16,9 +16,19 @@ function isLocalhost(hostname: string): boolean {
   );
 }
 
-function redirectTo(domain: string, path: string): NextResponse {
+function redirectTo(
+  domain: string,
+  path: string,
+  source?: NextResponse
+): NextResponse {
   const protocol = domain.includes("localhost") ? "http" : "https";
-  return NextResponse.redirect(`${protocol}://${domain}${path}`);
+  const response = NextResponse.redirect(`${protocol}://${domain}${path}`);
+  if (source) {
+    source.cookies.getAll().forEach((c) => {
+      response.cookies.set(c.name, c.value, c);
+    });
+  }
+  return response;
 }
 
 export async function proxy(request: NextRequest) {
@@ -36,7 +46,7 @@ export async function proxy(request: NextRequest) {
       hostname !== ROOT_DOMAIN)
   ) {
     if (pathname.startsWith("/dashboard") && !user) {
-      return redirectTo(hostname, "/login");
+      return redirectTo(hostname, "/login", supabaseResponse);
     }
     return supabaseResponse;
   }
@@ -55,7 +65,7 @@ export async function proxy(request: NextRequest) {
     }
     // /dashboard/* → app.
     if (pathname.startsWith("/dashboard")) {
-      return redirectTo(APP_DOMAIN, pathname);
+      return redirectTo(APP_DOMAIN, pathname, supabaseResponse);
     }
     // /login, /register, /onboarding → auth.
     if (
@@ -63,14 +73,14 @@ export async function proxy(request: NextRequest) {
       pathname === "/register" ||
       pathname.startsWith("/onboarding")
     ) {
-      return redirectTo(AUTH_DOMAIN, pathname);
+      return redirectTo(AUTH_DOMAIN, pathname, supabaseResponse);
     }
     // /api/* (except auth callback) → app.
     if (pathname.startsWith("/api/") && !pathname.startsWith("/api/auth/")) {
-      return redirectTo(APP_DOMAIN, pathname);
+      return redirectTo(APP_DOMAIN, pathname, supabaseResponse);
     }
     // Everything else → root home
-    return redirectTo(ROOT_DOMAIN, "/");
+    return redirectTo(ROOT_DOMAIN, "/", supabaseResponse);
   }
 
   // ── AUTH DOMAIN ──────────────────────────────────────────────────────────
@@ -78,7 +88,7 @@ export async function proxy(request: NextRequest) {
   if (hostname === AUTH_DOMAIN) {
     // Redirect authenticated users to app
     if (user && (pathname === "/login" || pathname === "/register")) {
-      return redirectTo(APP_DOMAIN, "/dashboard");
+      return redirectTo(APP_DOMAIN, "/dashboard", supabaseResponse);
     }
     // Authorised paths
     if (
@@ -91,14 +101,14 @@ export async function proxy(request: NextRequest) {
     }
     // / → root
     if (pathname === "/") {
-      return redirectTo(ROOT_DOMAIN, "/");
+      return redirectTo(ROOT_DOMAIN, "/", supabaseResponse);
     }
     // /dashboard/* → app.
     if (pathname.startsWith("/dashboard")) {
-      return redirectTo(APP_DOMAIN, pathname);
+      return redirectTo(APP_DOMAIN, pathname, supabaseResponse);
     }
     // Everything else → root
-    return redirectTo(ROOT_DOMAIN, "/");
+    return redirectTo(ROOT_DOMAIN, "/", supabaseResponse);
   }
 
   // ── APP DOMAIN ───────────────────────────────────────────────────────────
@@ -106,16 +116,16 @@ export async function proxy(request: NextRequest) {
   if (hostname === APP_DOMAIN) {
     // / → root
     if (pathname === "/") {
-      return redirectTo(ROOT_DOMAIN, "/");
+      return redirectTo(ROOT_DOMAIN, "/", supabaseResponse);
     }
     // /login, /register → auth.
     if (pathname === "/login" || pathname === "/register") {
-      return redirectTo(AUTH_DOMAIN, pathname);
+      return redirectTo(AUTH_DOMAIN, pathname, supabaseResponse);
     }
     // /dashboard/* — check session
     if (pathname.startsWith("/dashboard")) {
       if (!user) {
-        return redirectTo(AUTH_DOMAIN, "/login");
+        return redirectTo(AUTH_DOMAIN, "/login", supabaseResponse);
       }
       return supabaseResponse;
     }
@@ -124,7 +134,7 @@ export async function proxy(request: NextRequest) {
       return supabaseResponse;
     }
     // Everything else → root
-    return redirectTo(ROOT_DOMAIN, "/");
+    return redirectTo(ROOT_DOMAIN, "/", supabaseResponse);
   }
 
   return supabaseResponse;
