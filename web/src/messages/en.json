@@ -400,7 +400,7 @@
     "step2": {
       "title": "Pick what matters to your customers",
       "subtitle": "Choose 3 to 5 concrete moments you want to measure. The AI studied your sector to surface precise angles.",
-      "analyzing": "The AI is studying the customer journey for your sector...",
+      "analyzing": "The assistant is studying the customer journey for your sector...",
       "error": "Analysis failed. Please try again.",
       "retry": "Try again",
       "generate": "Generate the form",

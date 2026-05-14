@@ -400,7 +400,7 @@
     "step2": {
       "title": "Choisissez ce qui compte pour vos clients",
       "subtitle": "Sélectionnez entre 3 et 5 moments concrets que vous voulez mesurer. L'IA a analysé votre secteur pour vous proposer des angles précis.",
-      "analyzing": "L'IA étudie le parcours client de votre secteur...",
+      "analyzing": "L'assistant étudie le parcours client de votre secteur...",
       "error": "L'analyse a échoué. Veuillez réessayer.",
       "retry": "Réessayer",
       "generate": "Générer le formulaire",
