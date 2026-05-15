@@ -66,12 +66,17 @@ ENV NODE_ENV=production
 
 RUN apk add --no-cache libc6-compat openssl
 
+# Prisma CLI is needed at startup to sync the schema (db push).
+# Pinned to match the version in package.json.
+RUN npm install -g prisma@5.22.0
+
 RUN addgroup --system --gid 1001 nodejs
 RUN adduser --system --uid 1001 nextjs
 
 COPY --from=builder /app/public ./public
 COPY --from=builder --chown=nextjs:nodejs /app/.next/standalone ./
 COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
+COPY --from=builder --chown=nextjs:nodejs /app/prisma ./prisma
 
 USER nextjs
 
@@ -79,4 +84,6 @@ EXPOSE 3000
 ENV PORT=3000
 ENV HOSTNAME="0.0.0.0"
 
-CMD ["node", "server.js"]
+# Sync schema before serving. No --accept-data-loss: a destructive change will
+# fail the start instead of silently dropping data.
+CMD ["sh", "-c", "prisma db push --skip-generate && node server.js"]
