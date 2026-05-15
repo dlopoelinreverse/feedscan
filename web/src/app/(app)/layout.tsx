@@ -18,17 +18,11 @@ export default async function AppLayout({
     redirect(getAuthUrl("/login"));
   }
 
-  // Fetch plan from Prisma
-  let plan: string = "FREE";
-  try {
-    const dbUser = await prisma.user.findUnique({
-      where: { id: user.id },
-      select: { plan: true },
-    });
-    if (dbUser) plan = dbUser.plan;
-  } catch {
-    // Prisma not connected yet — ignore
-  }
+  const dbUser = await prisma.user.findUnique({
+    where: { id: user.id },
+    select: { plan: true },
+  });
+  const plan: string = dbUser?.plan ?? "FREE";
 
   return (
     <AppShell
