@@ -6,78 +6,7 @@ import type { AiFormResponse, Angle } from "@/lib/ai/schemas";
 import type { FormBuilderState } from "../types";
 import type { AiAssistantState, ChatMessage, AiPhase } from "./types";
 
-const STORAGE_PREFIX = "feedscan:ai-assistant:";
 const DB_DEBOUNCE_MS = 500;
-
-function storageKey(formId: string | undefined): string {
-  return `${STORAGE_PREFIX}${formId ?? "new"}`;
-}
-
-function loadPersistedState(
-  formId: string | undefined
-): Partial<AiAssistantState> | null {
-  if (typeof window === "undefined") return null;
-  try {
-    const raw = window.sessionStorage.getItem(storageKey(formId));
-    if (!raw) return null;
-    return JSON.parse(raw) as Partial<AiAssistantState>;
-  } catch {
-    return null;
-  }
-}
-
-function persistState(
-  formId: string | undefined,
-  state: AiAssistantState
-): void {
-  if (typeof window === "undefined") return;
-  try {
-    const {
-      isGenerating: _g,
-      isSending: _s,
-      isAnalyzing: _a,
-      error: _e,
-      ...durable
-    } = state;
-    void _g;
-    void _s;
-    void _a;
-    void _e;
-    window.sessionStorage.setItem(
-      storageKey(formId),
-      JSON.stringify(durable)
-    );
-  } catch {
-    // ignore quota / serialization errors
-  }
-}
-
-export function clearAiAssistantStorage(formId: string | undefined): void {
-  if (typeof window === "undefined") return;
-  try {
-    window.sessionStorage.removeItem(storageKey(formId));
-  } catch {
-    // ignore
-  }
-}
-
-export function migrateAiAssistantStorage(
-  fromFormId: string | undefined,
-  toFormId: string | undefined
-): void {
-  if (typeof window === "undefined") return;
-  if (fromFormId === toFormId) return;
-  try {
-    const fromKey = storageKey(fromFormId);
-    const data = window.sessionStorage.getItem(fromKey);
-    if (data) {
-      window.sessionStorage.setItem(storageKey(toFormId), data);
-      window.sessionStorage.removeItem(fromKey);
-    }
-  } catch {
-    // ignore
-  }
-}
 
 function aiFormToBuilderState(ai: AiFormResponse): FormBuilderState {
   return {
@@ -216,43 +145,26 @@ export function useAiAssistant({
   formIdRef.current = formId;
   const debounceTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  const [state, setState] = useState<AiAssistantState>(() => {
-    const defaults: AiAssistantState = {
-      phase: "wizard",
-      wizard: {
-        step: 1,
-        businessName: initialBusinessName,
-        businessType: initialBusinessType,
-        businessDescription: "",
-        proposedAngles: [],
-        selectedAngleIds: [],
-        anglesLoading: false,
-      },
-      chatMessages: [],
-      currentForm: null,
-      conversationId: null,
-      formId,
-      isGenerating: false,
-      isSending: false,
-      isAnalyzing: false,
-      error: null,
-    };
-    const saved = loadPersistedState(formId);
-    if (!saved) return defaults;
-    return {
-      ...defaults,
-      ...saved,
-      wizard: { ...defaults.wizard, ...(saved.wizard ?? {}) },
-      isGenerating: false,
-      isSending: false,
-      isAnalyzing: false,
-      error: null,
-    };
-  });
-
-  useEffect(() => {
-    persistState(formIdRef.current, state);
-  }, [state]);
+  const [state, setState] = useState<AiAssistantState>(() => ({
+    phase: "wizard",
+    wizard: {
+      step: 1,
+      businessName: initialBusinessName,
+      businessType: initialBusinessType,
+      businessDescription: "",
+      proposedAngles: [],
+      selectedAngleIds: [],
+      anglesLoading: false,
+    },
+    chatMessages: [],
+    currentForm: null,
+    conversationId: null,
+    formId,
+    isGenerating: false,
+    isSending: false,
+    isAnalyzing: false,
+    error: null,
+  }));
 
   const patchConversation = useCallback(
     (patch: Record<string, unknown>) => {
