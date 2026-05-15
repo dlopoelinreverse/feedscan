@@ -37,7 +37,7 @@ export async function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
   // ── DEV / UNKNOWN HOST ───────────────────────────────────────────────────
-  // Allow everything; just protect /dashboard/* if no session
+  // Single-origin: apply landing-gate + dashboard guard on the same host
   if (
     isLocalhost(hostname) ||
     (!hostname.endsWith(ROOT_DOMAIN) &&
@@ -45,6 +45,15 @@ export async function proxy(request: NextRequest) {
       hostname !== APP_DOMAIN &&
       hostname !== ROOT_DOMAIN)
   ) {
+    if (pathname === "/") {
+      if (user) {
+        return redirectTo(hostname, "/dashboard", supabaseResponse);
+      }
+      if (sessionExpired) {
+        return redirectTo(hostname, "/login?error=stale_session", supabaseResponse);
+      }
+      return supabaseResponse;
+    }
     if (pathname.startsWith("/dashboard") && !user) {
       return redirectTo(hostname, "/login", supabaseResponse);
     }
