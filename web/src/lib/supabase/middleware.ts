@@ -40,14 +40,16 @@ export async function updateSession(request: NextRequest) {
     error,
   } = await supabase.auth.getUser();
 
+  let sessionExpired = false;
   if (!user && error) {
     const hasAuthTokenCookie = request.cookies
       .getAll()
       .some((c) => /^sb-.*-auth-token(\.\d+)?$/.test(c.name));
     if (hasAuthTokenCookie) {
       await supabase.auth.signOut();
+      sessionExpired = true;
     }
   }
 
-  return { supabaseResponse, user };
+  return { supabaseResponse, user, sessionExpired };
 }

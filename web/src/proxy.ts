@@ -32,7 +32,7 @@ function redirectTo(
 }
 
 export async function proxy(request: NextRequest) {
-  const { supabaseResponse, user } = await updateSession(request);
+  const { supabaseResponse, user, sessionExpired } = await updateSession(request);
   const hostname = (request.headers.get("host") ?? "").toLowerCase();
   const { pathname } = request.nextUrl;
 
@@ -54,9 +54,18 @@ export async function proxy(request: NextRequest) {
   // ── ROOT DOMAIN ──────────────────────────────────────────────────────────
   // feedscan.leopoldev → /, /privacy, /terms, /f/*
   if (hostname === ROOT_DOMAIN) {
+    // Landing: authenticated → dashboard, expired session → login, else show
+    if (pathname === "/") {
+      if (user) {
+        return redirectTo(APP_DOMAIN, "/dashboard", supabaseResponse);
+      }
+      if (sessionExpired) {
+        return redirectTo(AUTH_DOMAIN, "/login?error=stale_session", supabaseResponse);
+      }
+      return supabaseResponse;
+    }
     // Authorised paths
     if (
-      pathname === "/" ||
       pathname.startsWith("/privacy") ||
       pathname.startsWith("/terms") ||
       pathname.startsWith("/f/")
