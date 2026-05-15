@@ -8,19 +8,22 @@ import type {
   PreviewLocale,
 } from "./types";
 import { bilingualText, bilingualOptions } from "./types";
+import { ThemedFormShell } from "@/components/public/themed-form-shell";
+import { PRESETS } from "@/lib/themes/presets";
+import type { ThemeConfig } from "@/lib/themes/types";
 
-const EMOJIS_5 = ["\ud83d\ude20", "\ud83d\ude10", "\ud83d\ude42", "\ud83d\ude04", "\ud83e\udd29"];
-const EMOJIS_3 = ["\ud83d\ude1e", "\ud83d\ude10", "\ud83d\ude0a"];
+const EMOJIS_5 = ["😠", "😐", "🙂", "😄", "🤩"];
+const EMOJIS_3 = ["😞", "😐", "😊"];
 
 const PREVIEW_STRINGS = {
   fr: {
     submit: "Envoyer mon avis",
-    subtitle: "Aidez-nous \u00e0 am\u00e9liorer votre exp\u00e9rience. Moins d'une minute.",
+    subtitle: "Aidez-nous à améliorer votre expérience. Moins d'une minute.",
     followUpFallback: "Question de suivi...",
-    specifyPlaceholder: "Pr\u00e9cisez...",
+    specifyPlaceholder: "Précisez...",
     textPlaceholder: "Votre avis...",
     addOptionsHint: "Ajoutez des options...",
-    buildingQuestions: "Les questions appara\u00eetront ici au fur et \u00e0 mesure",
+    buildingQuestions: "Les questions apparaîtront ici au fur et à mesure",
     missingTranslation: "(traduction manquante)",
   },
   en: {
@@ -46,6 +49,7 @@ interface MobilePreviewProps {
   form: FormBuilderState;
   previewLocale?: PreviewLocale;
   onLocaleChange?: (locale: PreviewLocale) => void;
+  theme?: ThemeConfig;
 }
 
 type AnswerValue = number | string | string[];
@@ -54,8 +58,10 @@ export function MobilePreview({
   form,
   previewLocale = "fr",
   onLocaleChange,
+  theme,
 }: MobilePreviewProps) {
   const [answers, setAnswers] = useState<Record<string, AnswerValue>>({});
+  const activeTheme = theme ?? PRESETS.minimal;
 
   const setAnswer = (clientId: string, value: AnswerValue) => {
     setAnswers((prev) => ({ ...prev, [clientId]: value }));
@@ -68,7 +74,6 @@ export function MobilePreview({
 
   return (
     <div className="relative">
-      {/* FR/EN toggle */}
       {onLocaleChange && (
         <div className="flex justify-center mb-2">
           <div className="inline-flex rounded-full border border-border bg-white text-xs overflow-hidden">
@@ -98,51 +103,49 @@ export function MobilePreview({
         </div>
       )}
 
-      <div className="bg-white rounded-[28px] border border-border shadow-sm w-[260px] mx-auto overflow-hidden">
-        {/* Notch */}
-        <div className="flex justify-center pt-3 pb-2">
-          <div className="w-20 h-1.5 bg-gray-300 rounded-full" />
-        </div>
-
-        <div className="px-4 pb-5 space-y-4 max-h-[520px] overflow-y-auto">
-          {/* Title */}
-          <div>
-            <h3 className="font-bold text-[16px] leading-tight">
-              {title || "..."}
-            </h3>
-            <p className="text-[11px] text-muted-foreground mt-1">
-              {description || previewT(previewLocale, "subtitle")}
-            </p>
+      <div className="rounded-[28px] border border-border shadow-sm w-[260px] mx-auto overflow-hidden bg-white">
+        <ThemedFormShell theme={activeTheme} fillParent className="fs-themed">
+          <div className="flex justify-center pt-3 pb-2" style={{ background: "var(--fs-bg)" }}>
+            <div className="w-20 h-1.5 bg-gray-300 rounded-full" />
           </div>
 
-          {/* Questions */}
-          {form.questions.length === 0 && (
-            <p className="text-xs text-muted-foreground italic text-center py-8">
-              {previewT(previewLocale, "buildingQuestions")}
-            </p>
-          )}
+          <div className="px-4 pb-5 space-y-4 max-h-[520px] overflow-y-auto" style={{ background: "var(--fs-bg)" }}>
+            <div>
+              <h3 className="font-bold text-[16px] leading-tight">
+                {title || "..."}
+              </h3>
+              <p className="text-[11px] mt-1" style={{ color: "var(--fs-text-muted)" }}>
+                {description || previewT(previewLocale, "subtitle")}
+              </p>
+            </div>
 
-          {form.questions.map((q) => (
-            <QuestionPreview
-              key={q.clientId}
-              question={q}
-              value={answers[q.clientId]}
-              onChange={(v) => setAnswer(q.clientId, v)}
-              previewLocale={previewLocale}
-              missingTranslationLabel={previewT(previewLocale, "missingTranslation")}
-            />
-          ))}
+            {form.questions.length === 0 && (
+              <p className="text-xs italic text-center py-8" style={{ color: "var(--fs-text-muted)" }}>
+                {previewT(previewLocale, "buildingQuestions")}
+              </p>
+            )}
 
-          {/* Submit button */}
-          {form.questions.length > 0 && (
-            <button
-              type="button"
-              className="w-full py-2.5 rounded-lg bg-[#6C5CE7] text-white text-sm font-medium"
-            >
-              {previewT(previewLocale, "submit")}
-            </button>
-          )}
-        </div>
+            {form.questions.map((q) => (
+              <QuestionPreview
+                key={q.clientId}
+                question={q}
+                value={answers[q.clientId]}
+                onChange={(v) => setAnswer(q.clientId, v)}
+                previewLocale={previewLocale}
+                missingTranslationLabel={previewT(previewLocale, "missingTranslation")}
+              />
+            ))}
+
+            {form.questions.length > 0 && (
+              <button
+                type="button"
+                className="fs-submit w-full py-2.5 text-sm font-medium"
+              >
+                {previewT(previewLocale, "submit")}
+              </button>
+            )}
+          </div>
+        </ThemedFormShell>
       </div>
     </div>
   );
@@ -173,7 +176,10 @@ function QuestionPreview({
 
   return (
     <div className="space-y-2">
-      <p className={`text-xs font-semibold leading-snug ${isMissing ? "text-muted-foreground italic" : ""}`}>
+      <p
+        className={`text-xs font-semibold leading-snug ${isMissing ? "italic" : ""}`}
+        style={isMissing ? { color: "var(--fs-text-muted)" } : undefined}
+      >
         {label || "..."}{" "}
         {question.required && <span className="text-red-500">*</span>}
         {isMissing && (
@@ -215,7 +221,6 @@ function QuestionPreview({
         />
       )}
 
-      {/* Follow-up */}
       {matchedRule && (
         <FollowUpBlock
           rule={matchedRule}
@@ -256,10 +261,8 @@ function StarsInput({
           key={i}
           type="button"
           onClick={() => onChange(i)}
-          className={`w-7 h-7 rounded-full flex items-center justify-center text-sm transition-colors ${
-            i <= value
-              ? "bg-[#FEF3E2] text-[#FDCB6E]"
-              : "bg-gray-100 text-gray-300 hover:bg-gray-200"
+          className={`fs-star w-7 h-7 rounded-full flex items-center justify-center text-sm transition-colors ${
+            i <= value ? "fs-star-on" : "fs-star-off"
           }`}
         >
           &#x2605;
@@ -289,10 +292,8 @@ function EmojiInput({
             key={i}
             type="button"
             onClick={() => onChange(level)}
-            className={`w-9 h-9 rounded-lg flex items-center justify-center text-base transition-all ${
-              selected
-                ? "border-2 border-[#00B894] bg-[#E1F5EE]"
-                : "bg-gray-50 hover:bg-gray-100"
+            className={`fs-emoji w-9 h-9 flex items-center justify-center text-base transition-all ${
+              selected ? "fs-emoji-on" : "fs-emoji-off"
             }`}
           >
             {emoji}
@@ -336,7 +337,7 @@ function ChoiceInput({
 
   if (options.length === 0) {
     return (
-      <p className="text-[10px] text-muted-foreground italic">
+      <p className="text-[10px] italic" style={{ color: "var(--fs-text-muted)" }}>
         {previewT(previewLocale, "addOptionsHint")}
       </p>
     );
@@ -349,10 +350,8 @@ function ChoiceInput({
           key={i}
           type="button"
           onClick={() => handleClick(opt)}
-          className={`w-full text-left text-[10px] px-2.5 py-1.5 rounded-md border transition-colors ${
-            isSelected(opt)
-              ? "border-[#6C5CE7] bg-[#EAE6FD] text-[#6C5CE7]"
-              : "border-border hover:border-[#6C5CE7]/50"
+          className={`fs-choice w-full text-left text-[10px] px-2.5 py-1.5 border transition-colors ${
+            isSelected(opt) ? "fs-choice-on" : "fs-choice-off"
           }`}
         >
           {opt}
@@ -377,7 +376,7 @@ function TextInput({
       onChange={(e) => onChange(e.target.value)}
       placeholder={placeholder}
       rows={2}
-      className="w-full text-[10px] px-2 py-1.5 rounded-md border border-border bg-gray-50 resize-none focus:outline-none focus:border-[#6C5CE7]"
+      className="fs-input w-full text-[10px] px-2 py-1.5 border resize-none focus:outline-none"
     />
   );
 }
@@ -391,9 +390,9 @@ function FollowUpBlock({
   variant: "LOW" | "HIGH";
   previewLocale: PreviewLocale;
 }) {
-  const borderColor =
-    variant === "LOW" ? "border-red-400" : "border-green-400";
-  const bgColor = variant === "LOW" ? "bg-red-50/50" : "bg-green-50/50";
+  const borderColor = variant === "LOW" ? "#E24B4A" : "#1D9E75";
+  const bgColor =
+    variant === "LOW" ? "rgba(248, 113, 113, 0.08)" : "rgba(34, 197, 94, 0.08)";
 
   const label =
     bilingualText(rule.followUpLabelFr, rule.followUpLabelEn, previewLocale) ||
@@ -407,7 +406,13 @@ function FollowUpBlock({
 
   return (
     <div
-      className={`mt-2 border-l-4 ${borderColor} ${bgColor} rounded-r-md p-2 space-y-1.5 animate-in slide-in-from-top-2 duration-200`}
+      className="mt-2 border-l-4 p-2 space-y-1.5 animate-in slide-in-from-top-2 duration-200"
+      style={{
+        borderLeftColor: borderColor,
+        background: bgColor,
+        borderTopRightRadius: "var(--fs-radius)",
+        borderBottomRightRadius: "var(--fs-radius)",
+      }}
     >
       <p className="text-[10px] font-semibold">
         {label || previewT(previewLocale, "followUpFallback")}
@@ -428,7 +433,7 @@ function FollowUpBlock({
         <textarea
           rows={1}
           placeholder={previewT(previewLocale, "specifyPlaceholder")}
-          className="w-full text-[9px] px-1.5 py-1 rounded border border-border bg-white resize-none focus:outline-none"
+          className="fs-input w-full text-[9px] px-1.5 py-1 border resize-none focus:outline-none"
         />
       )}
     </div>

@@ -3,6 +3,7 @@
 import { useState, useEffect, useRef } from "react";
 import { useTranslations } from "next-intl";
 import { ThankYouScreen } from "./thank-you-screen";
+import { ThemedFormShell } from "./themed-form-shell";
 import type {
   AnswerState,
   AnswerValue,
@@ -31,7 +32,6 @@ export function PublicForm({ form, qrCodeId, apiBase }: PublicFormProps) {
   const [identifying, setIdentifying] = useState(true);
   const formRef = useRef<HTMLFormElement>(null);
 
-  // Identify visitor on mount
   useEffect(() => {
     (async () => {
       try {
@@ -49,7 +49,6 @@ export function PublicForm({ form, qrCodeId, apiBase }: PublicFormProps) {
           const data = (await res.json()) as { visitorId: string };
           setVisitorId(data.visitorId);
 
-          // Check session-based rate limit
           if (form.rateLimitMode === "PER_SESSION") {
             const key = SESSION_KEY_PREFIX + form.id;
             if (sessionStorage.getItem(key) === "1") {
@@ -70,7 +69,6 @@ export function PublicForm({ form, qrCodeId, apiBase }: PublicFormProps) {
       const next = { ...prev };
       const existing = next[questionId];
 
-      // Determine if branching applies → compute matched rule
       const question = form.questions.find((q) => q.id === questionId);
       let followUp: AnswerState["followUp"] = undefined;
 
@@ -79,7 +77,6 @@ export function PublicForm({ form, qrCodeId, apiBase }: PublicFormProps) {
           (r) => value >= r.triggerMin && value <= r.triggerMax
         );
         if (matched) {
-          // Preserve existing follow-up data only if the rule id matches
           if (existing?.followUp?.ruleId === matched.id) {
             followUp = existing.followUp;
           } else {
@@ -96,7 +93,6 @@ export function PublicForm({ form, qrCodeId, apiBase }: PublicFormProps) {
       return next;
     });
 
-    // Clear error on change
     setErrors((prev) => {
       if (!prev[questionId]) return prev;
       const next = { ...prev };
@@ -210,56 +206,79 @@ export function PublicForm({ form, qrCodeId, apiBase }: PublicFormProps) {
   };
 
   if (submitted) {
-    return <ThankYouScreen />;
+    return (
+      <ThemedFormShell theme={form.theme}>
+        <ThankYouScreen />
+      </ThemedFormShell>
+    );
   }
 
   if (alreadyResponded) {
-    return <AlreadyResponded />;
+    return (
+      <ThemedFormShell theme={form.theme}>
+        <AlreadyResponded />
+      </ThemedFormShell>
+    );
   }
 
   return (
-    <div className="w-full max-w-[480px] mx-auto px-4 py-8">
-      {/* Header */}
-      <div className="flex items-center gap-2 mb-6">
-        <div className="w-5 h-5 rounded bg-gradient-to-br from-[#6C5CE7] to-[#00B894]" />
-        <span className="text-xs text-muted-foreground">{t("viaBrand")}</span>
-      </div>
-
-      <h1 className="text-xl font-bold leading-tight mb-2">{form.title}</h1>
-      {form.description && (
-        <p className="text-[13px] text-muted-foreground leading-relaxed mb-6">
-          {form.description}
-        </p>
-      )}
-
-      <form ref={formRef} onSubmit={handleSubmit} className="space-y-6">
-        {form.questions.map((q) => (
-          <QuestionBlock
-            key={q.id}
-            question={q}
-            answer={answers[q.id]}
-            error={errors[q.id]}
-            onChange={(v) => setAnswer(q.id, v)}
-            onFollowUpSelectedChange={(selected) =>
-              setFollowUpSelected(q.id, selected)
-            }
-            onFollowUpTextChange={(text) => setFollowUpText(q.id, text)}
+    <ThemedFormShell theme={form.theme}>
+      <div className="fs-themed w-full max-w-[480px] mx-auto px-4 py-8">
+        <div className="flex items-center gap-2 mb-6">
+          <div
+            className="w-5 h-5 rounded"
+            style={{
+              background: "var(--fs-primary)",
+              borderRadius: "var(--fs-radius-sm)",
+            }}
           />
-        ))}
+          <span className="text-xs" style={{ color: "var(--fs-text-muted)" }}>
+            {t("viaBrand")}
+          </span>
+        </div>
 
-        <button
-          type="submit"
-          disabled={submitting || identifying || !visitorId}
-          className="w-full py-3.5 rounded-lg bg-[#6C5CE7] text-white font-medium text-[15px] hover:bg-[#5A4BD5] transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
+        <h1 className="text-xl font-bold leading-tight mb-2">{form.title}</h1>
+        {form.description && (
+          <p
+            className="text-[13px] leading-relaxed mb-6"
+            style={{ color: "var(--fs-text-muted)" }}
+          >
+            {form.description}
+          </p>
+        )}
+
+        <form ref={formRef} onSubmit={handleSubmit} className="space-y-6">
+          {form.questions.map((q) => (
+            <QuestionBlock
+              key={q.id}
+              question={q}
+              answer={answers[q.id]}
+              error={errors[q.id]}
+              onChange={(v) => setAnswer(q.id, v)}
+              onFollowUpSelectedChange={(selected) =>
+                setFollowUpSelected(q.id, selected)
+              }
+              onFollowUpTextChange={(text) => setFollowUpText(q.id, text)}
+            />
+          ))}
+
+          <button
+            type="submit"
+            disabled={submitting || identifying || !visitorId}
+            className="fs-submit w-full py-3.5 font-medium text-[15px] transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
+          >
+            {submitting ? t("sending") : t("submit")}
+          </button>
+        </form>
+
+        <p
+          className="text-center text-xs mt-6"
+          style={{ color: "var(--fs-text-muted)" }}
         >
-          {submitting ? t("sending") : t("submit")}
-        </button>
-      </form>
-
-      <p className="text-center text-xs text-muted-foreground mt-6">
-        {t("poweredBy")}
-      </p>
-    </div>
+          {t("poweredBy")}
+        </p>
+      </div>
+    </ThemedFormShell>
   );
 }
 
@@ -334,8 +353,6 @@ function QuestionBlock({
   );
 }
 
-/* --- Input components --- */
-
 function StarRating({
   value,
   onChange,
@@ -350,10 +367,8 @@ function StarRating({
           key={i}
           type="button"
           onClick={() => onChange(i)}
-          className={`w-12 h-12 rounded-full flex items-center justify-center text-xl transition-all active:scale-95 ${
-            i <= value
-              ? "bg-[#FEF3E2] text-[#FDCB6E]"
-              : "bg-gray-100 text-gray-300 hover:bg-gray-200"
+          className={`fs-star w-12 h-12 rounded-full flex items-center justify-center text-xl transition-all active:scale-95 ${
+            i <= value ? "fs-star-on" : "fs-star-off"
           }`}
           aria-label={`${i} star${i > 1 ? "s" : ""}`}
         >
@@ -374,9 +389,7 @@ function EmojiScale({
   onChange: (v: number) => void;
 }) {
   const emojis =
-    levels === 3
-      ? ["😞", "😐", "😊"]
-      : ["😠", "😐", "🙂", "😄", "🤩"];
+    levels === 3 ? ["😞", "😐", "😊"] : ["😠", "😐", "🙂", "😄", "🤩"];
 
   return (
     <div className="flex gap-2">
@@ -388,10 +401,8 @@ function EmojiScale({
             key={i}
             type="button"
             onClick={() => onChange(level)}
-            className={`w-12 h-12 rounded-xl flex items-center justify-center text-2xl transition-all active:scale-95 ${
-              selected
-                ? "border-2 border-[#00B894] bg-[#E1F5EE]"
-                : "bg-gray-100 hover:bg-gray-200"
+            className={`fs-emoji w-12 h-12 flex items-center justify-center text-2xl transition-all active:scale-95 ${
+              selected ? "fs-emoji-on" : "fs-emoji-off"
             }`}
           >
             {emoji}
@@ -440,13 +451,9 @@ function ChoiceSelector({
           key={i}
           type="button"
           onClick={() => handleClick(opt)}
-          className={`w-full text-left rounded-lg border transition-colors ${
+          className={`fs-choice w-full text-left border transition-colors ${
             compact ? "px-2 py-2 text-xs" : "px-4 py-3 text-sm"
-          } ${
-            isSelected(opt)
-              ? "border-[#6C5CE7] bg-[#EAE6FD] text-[#6C5CE7] font-medium"
-              : "border-gray-200 hover:border-[#6C5CE7]/50"
-          }`}
+          } ${isSelected(opt) ? "fs-choice-on" : "fs-choice-off"}`}
         >
           {opt}
         </button>
@@ -471,7 +478,7 @@ function FreeText({
       onChange={(e) => onChange(e.target.value)}
       placeholder={placeholder || t("textPlaceholder")}
       rows={3}
-      className="w-full px-4 py-3 rounded-lg border border-gray-200 text-sm resize-y min-h-[60px] max-h-[200px] focus:outline-none focus:border-[#6C5CE7]"
+      className="fs-input w-full px-4 py-3 border text-sm resize-y min-h-[60px] max-h-[200px] focus:outline-none"
     />
   );
 }
@@ -491,15 +498,21 @@ function FollowUpBlock({
 }) {
   const t = useTranslations("publicForm");
   const isLow = rule.triggerType === "LOW";
-  const borderColor = isLow ? "border-l-[#E24B4A]" : "border-l-[#1D9E75]";
-  const bgColor = isLow ? "bg-red-50/50" : "bg-green-50/50";
+  const borderColor = isLow ? "#E24B4A" : "#1D9E75";
+  const bgColor = isLow ? "rgba(248, 113, 113, 0.08)" : "rgba(34, 197, 94, 0.08)";
   const badgeColor = isLow
     ? "bg-red-100 text-red-700"
     : "bg-green-100 text-green-700";
 
   return (
     <div
-      className={`mt-2 border-l-[3px] ${borderColor} ${bgColor} rounded-r-lg p-3 space-y-2 animate-in slide-in-from-top-1 duration-200`}
+      className="mt-2 border-l-[3px] p-3 space-y-2 animate-in slide-in-from-top-1 duration-200"
+      style={{
+        borderLeftColor: borderColor,
+        background: bgColor,
+        borderTopRightRadius: "var(--fs-radius)",
+        borderBottomRightRadius: "var(--fs-radius)",
+      }}
     >
       <div className="flex items-center gap-2">
         <span
@@ -515,7 +528,9 @@ function FollowUpBlock({
           options={rule.followUpOptions}
           multiple={true}
           value={selected}
-          onChange={(v) => onSelectedChange(Array.isArray(v) ? v : [String(v)])}
+          onChange={(v) =>
+            onSelectedChange(Array.isArray(v) ? v : [String(v)])
+          }
           compact
         />
       )}
@@ -526,7 +541,8 @@ function FollowUpBlock({
           onChange={(e) => onTextChange(e.target.value)}
           placeholder={t("followUpPlaceholder")}
           rows={2}
-          className="w-full px-2 py-1.5 rounded-md border border-gray-200 text-xs resize-none focus:outline-none focus:border-[#6C5CE7] bg-white"
+          className="fs-input w-full px-2 py-1.5 border text-xs resize-none focus:outline-none"
+          style={{ background: "var(--fs-bg)" }}
         />
       )}
     </div>
@@ -536,17 +552,20 @@ function FollowUpBlock({
 function AlreadyResponded() {
   const t = useTranslations("publicForm");
   return (
-    <div className="min-h-screen flex items-center justify-center px-4">
+    <div className="min-h-[60vh] flex items-center justify-center px-4">
       <div className="text-center max-w-sm space-y-4">
         <div className="text-5xl">🙏</div>
         <p className="text-lg font-semibold">{t("alreadyResponded")}</p>
-        <p className="text-xs text-muted-foreground pt-4">{t("poweredBy")}</p>
+        <p
+          className="text-xs pt-4"
+          style={{ color: "var(--fs-text-muted)" }}
+        >
+          {t("poweredBy")}
+        </p>
       </div>
     </div>
   );
 }
-
-/* --- Helpers --- */
 
 function readCookie(name: string): string | null {
   if (typeof document === "undefined") return null;

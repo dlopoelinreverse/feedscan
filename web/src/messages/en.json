@@ -86,7 +86,14 @@
       "autre": "Other"
     },
     "getStarted": "Get started",
-    "settingUp": "Setting up..."
+    "settingUp": "Setting up...",
+    "theme": {
+      "title": "Pick a look",
+      "subtitle": "A starting point for your forms. Everything stays editable later.",
+      "continue": "Continue",
+      "later": "Maybe later",
+      "reassuring": "You can always change this later from your settings."
+    }
   },
   "dashboard": {
     "title": "Dashboard",
@@ -153,6 +160,13 @@
       "translationMissing": "Translation missing — the French text will be used",
       "autoTranslate": "Auto-translate",
       "buildManually": "or build manually"
+    },
+    "appearance": {
+      "tabTitle": "Appearance",
+      "activeTheme": "Active theme",
+      "changeTheme": "Change theme",
+      "editTheme": "Edit this theme",
+      "duplicateForForm": "Duplicate for this form"
     },
     "validation": {
       "labelRequired": "Question label is required",
@@ -331,6 +345,112 @@
       "responseLimitReached": "This merchant has reached their monthly limit.",
       "aiRemaining": "{used}/{limit} generations remaining",
       "aiLimitReached": "AI generation limit reached. Upgrade to Pro for unlimited."
+    }
+  },
+  "themes": {
+    "default": "Default",
+    "untitled": "Untitled",
+    "noThemes": "No themes available.",
+    "usedByForms": "Used by {count, plural, =0 {no forms} one {# form} other {# forms}}",
+    "page": {
+      "title": "Themes",
+      "subtitle": "Customize how your forms look. A theme can be used by multiple forms.",
+      "newTheme": "New theme",
+      "browseTemplates": "Browse templates"
+    },
+    "actions": {
+      "edit": "Edit",
+      "rename": "Rename",
+      "duplicate": "Duplicate",
+      "delete": "Delete",
+      "setDefault": "Set as default"
+    },
+    "editor": {
+      "title": "New theme",
+      "editTitle": "Edit theme",
+      "name": "Theme name",
+      "namePlaceholder": "My main theme",
+      "preset": "Base preset",
+      "primaryColor": "Primary color",
+      "background": "Background",
+      "font": "Font",
+      "radius": "Corners",
+      "logo": "Logo",
+      "logoHint": "Show your logo at the top of your forms.",
+      "comingSoon": "Coming soon",
+      "preview": "Preview",
+      "save": "Save",
+      "saving": "Saving...",
+      "contrastTitle": "Low contrast",
+      "contrastHint": "Contrast between your colors and the background may impact readability. Tweak if possible."
+    },
+    "selector": {
+      "title": "Pick a theme",
+      "subtitle": "Choose one from your library or start from a template.",
+      "myThemes": "My themes",
+      "templates": "Templates",
+      "apply": "Apply",
+      "applied": "Applied",
+      "use": "Use"
+    },
+    "confirmEdit": {
+      "title": "Shared theme",
+      "body": "This theme is used by {count} forms. Your changes will apply to all of them.",
+      "continue": "Continue"
+    },
+    "deleteConfirm": {
+      "title": "Delete this theme?",
+      "body": "This can't be undone.",
+      "bodyWithForms": "The {count} forms using this theme will be reassigned to the default theme."
+    },
+    "toasts": {
+      "themeSaved": "Theme saved ✓",
+      "themeCreated": "Theme created ✓",
+      "themeDuplicated": "Theme duplicated ✓",
+      "themeDeleted": "Theme deleted ✓",
+      "defaultSet": "Default theme set ✓",
+      "cannotDeleteLast": "You can't delete your last theme."
+    },
+    "presets": {
+      "minimal": {
+        "name": "Minimal",
+        "description": "Clean, neutral, versatile."
+      },
+      "warm": {
+        "name": "Warm",
+        "description": "Soft and welcoming tones."
+      },
+      "bold": {
+        "name": "Bold",
+        "description": "High-contrast, geometric."
+      },
+      "elegant": {
+        "name": "Elegant",
+        "description": "Refined serif, soft background."
+      }
+    },
+    "fonts": {
+      "inter": "Inter",
+      "manrope": "Manrope",
+      "poppins": "Poppins",
+      "playfair": "Playfair Display",
+      "lora": "Lora",
+      "crimson": "Crimson"
+    },
+    "radius": {
+      "sm": "Square",
+      "md": "Soft",
+      "lg": "Round"
+    },
+    "backgrounds": {
+      "white": "White",
+      "cream": "Cream",
+      "mist": "Mist",
+      "sand": "Sand",
+      "blush": "Blush",
+      "sage": "Sage",
+      "lavender": "Lavender",
+      "graphite": "Graphite"
     }
   },
   "pricing": {

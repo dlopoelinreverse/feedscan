@@ -4,6 +4,7 @@ import { prisma } from "@/lib/prisma";
 import { createClient } from "@/lib/supabase/server";
 import { generateSlug } from "@/lib/utils";
 import { canCreateForm } from "@/lib/plan-limits";
+import { PRESETS } from "@/lib/themes/presets";
 import type { Prisma } from "@prisma/client";
 
 type FormStatus = "DRAFT" | "ACTIVE" | "ARCHIVED";
@@ -52,7 +53,44 @@ export interface SaveFormInput {
   status: FormStatus;
   rateLimitMode: RateLimitMode;
   rateLimitHours?: number;
+  themeId?: string | null;
   questions: QuestionInput[];
+}
+
+async function ensureDefaultThemeTx(
+  tx: Tx,
+  userId: string
+): Promise<{ id: string }> {
+  const existing = await tx.theme.findFirst({
+    where: { userId, isDefault: true },
+    orderBy: { createdAt: "asc" },
+    select: { id: true },
+  });
+  if (existing) return existing;
+
+  const any = await tx.theme.findFirst({
+    where: { userId },
+    orderBy: { createdAt: "asc" },
+    select: { id: true },
+  });
+  if (any) {
+    await tx.theme.update({
+      where: { id: any.id },
+      data: { isDefault: true },
+    });
+    return any;
+  }
+
+  const created = await tx.theme.create({
+    data: {
+      userId,
+      name: "Mon premier thème",
+      config: PRESETS.minimal as unknown as object,
+      isDefault: true,
+    },
+    select: { id: true },
+  });
+  return created;
 }
 
 async function getAuthUserId(): Promise<string> {
@@ -81,6 +119,22 @@ export async function saveForm(input: SaveFormInput) {
         throw new Error("Form not found");
       }
 
+      let themeIdToApply: string | undefined | null = undefined;
+      if (input.themeId !== undefined) {
+        if (input.themeId === null) {
+          themeIdToApply = null;
+        } else {
+          const t = await tx.theme.findUnique({
+            where: { id: input.themeId },
+            select: { userId: true },
+          });
+          if (!t || t.userId !== userId) {
+            throw new Error("Theme not found");
+          }
+          themeIdToApply = input.themeId;
+        }
+      }
+
       form = await tx.form.update({
         where: { id: input.id },
         data: {
@@ -97,6 +151,7 @@ export async function saveForm(input: SaveFormInput) {
             input.status === "ACTIVE" && !existing.slug
               ? generateSlug()
               : existing.slug,
+          ...(themeIdToApply !== undefined ? { themeId: themeIdToApply } : {}),
         },
       });
 
@@ -115,9 +170,25 @@ export async function saveForm(input: SaveFormInput) {
         }
       }
 
+      const defaultTheme = await ensureDefaultThemeTx(tx, userId);
+      const requestedThemeId =
+        input.themeId !== undefined && input.themeId !== null
+          ? await (async () => {
+              const t = await tx.theme.findUnique({
+                where: { id: input.themeId as string },
+                select: { userId: true },
+              });
+              if (!t || t.userId !== userId) {
+                throw new Error("Theme not found");
+              }
+              return input.themeId as string;
+            })()
+          : defaultTheme.id;
+
       form = await tx.form.create({
         data: {
           userId,
+          themeId: requestedThemeId,
           title: input.title,
           titleFr: input.titleFr || input.title,
           titleEn: input.titleEn || undefined,

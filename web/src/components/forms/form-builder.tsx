@@ -43,6 +43,7 @@ import { QuestionCard } from "./question-card";
 import { QuestionDialog } from "./question-dialog";
 import { AiAssistant } from "./ai-wizard/ai-assistant";
 import { useAiAssistant, migrateAiAssistantStorage } from "./ai-wizard/use-ai-assistant";
+import { AppearancePanel } from "@/components/themes/appearance-panel";
 import type {
   FormBuilderState,
   QuestionType,
@@ -50,6 +51,7 @@ import type {
   PreviewLocale,
 } from "./types";
 import { QUESTION_TYPE_BADGE } from "./types";
+import type { ThemeRecord } from "@/lib/themes/types";
 
 const FORM_STORAGE_PREFIX = "feedscan:form-builder:";
 
@@ -100,9 +102,18 @@ interface FormBuilderProps {
     businessName?: string | null;
     businessType?: string | null;
   };
+  themes: ThemeRecord[];
+  initialThemeId: string | null;
+  formCountByTheme?: Record<string, number>;
 }
 
-export function FormBuilder({ initialData, userProfile }: FormBuilderProps) {
+export function FormBuilder({
+  initialData,
+  userProfile,
+  themes: initialThemes,
+  initialThemeId,
+  formCountByTheme,
+}: FormBuilderProps) {
   const t = useTranslations("forms");
   const tWizard = useTranslations("aiWizard");
   const tCommon = useTranslations("common");
@@ -147,6 +158,12 @@ export function FormBuilder({ initialData, userProfile }: FormBuilderProps) {
     initialData ? "manual" : "assistant"
   );
   const [previewLocale, setPreviewLocale] = useState<PreviewLocale>("fr");
+  const [themes, setThemes] = useState<ThemeRecord[]>(initialThemes);
+  const [selectedThemeId, setSelectedThemeId] = useState<string | null>(
+    initialThemeId
+  );
+  const selectedTheme =
+    themes.find((th) => th.id === selectedThemeId) ?? themes[0] ?? null;
 
   const aiAssistant = useAiAssistant({
     onFormGenerated: (f) =>
@@ -289,6 +306,7 @@ export function FormBuilder({ initialData, userProfile }: FormBuilderProps) {
         status,
         rateLimitMode: form.rateLimitMode,
         rateLimitHours: form.rateLimitHours,
+        themeId: selectedThemeId ?? undefined,
         questions: form.questions.map((q) => ({
           id: q.id,
           type: q.type,
@@ -603,12 +621,15 @@ export function FormBuilder({ initialData, userProfile }: FormBuilderProps) {
 
   const leftColumnContent = (
     <Tabs value={activeTab} onValueChange={setActiveTab} className="flex-1 flex flex-col">
-      <TabsList className="mx-4 mt-3 mb-0 grid grid-cols-2">
+      <TabsList className="mx-4 mt-3 mb-0 grid grid-cols-3">
         <TabsTrigger value="assistant" className="text-xs">
-          &#x2728; {tWizard("tabs.assistant")}
+          {tWizard("tabs.assistant")}
         </TabsTrigger>
         <TabsTrigger value="manual" className="text-xs">
-          &#x270f;&#xfe0f; {tWizard("tabs.manual")}
+          {tWizard("tabs.manual")}
+        </TabsTrigger>
+        <TabsTrigger value="appearance" className="text-xs">
+          {t("appearance.tabTitle")}
         </TabsTrigger>
       </TabsList>
       <TabsContent
@@ -629,6 +650,24 @@ export function FormBuilder({ initialData, userProfile }: FormBuilderProps) {
       >
         {manualEditorContent}
       </TabsContent>
+      <TabsContent
+        value="appearance"
+        forceMount
+        className="flex-1 overflow-y-auto p-4 mt-0 data-[state=inactive]:hidden"
+      >
+        <AppearancePanel
+          formId={form.id}
+          formState={form}
+          themes={themes}
+          selectedThemeId={selectedThemeId}
+          onThemeChange={(id) => setSelectedThemeId(id)}
+          onThemesUpdated={(next, selectedId) => {
+            setThemes(next);
+            setSelectedThemeId(selectedId);
+          }}
+          formCountByTheme={formCountByTheme}
+        />
+      </TabsContent>
     </Tabs>
   );
 
@@ -638,6 +677,7 @@ export function FormBuilder({ initialData, userProfile }: FormBuilderProps) {
         form={form}
         previewLocale={previewLocale}
         onLocaleChange={setPreviewLocale}
+        theme={selectedTheme?.config}
       />
     </div>
   );

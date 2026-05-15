@@ -1,3 +1,5 @@
+import type { ThemeConfig } from "@/lib/themes/types";
+
 export interface PublicFollowUpRule {
   id: string;
   triggerType: "LOW" | "HIGH";
@@ -28,6 +30,7 @@ export interface PublicFormData {
   rateLimitMode: "NONE" | "PER_SESSION" | "PER_24H" | "PER_WEEK" | "CUSTOM";
   rateLimitHours: number | null;
   questions: PublicQuestion[];
+  theme: ThemeConfig;
 }
 
 export type AnswerValue = number | string | string[];

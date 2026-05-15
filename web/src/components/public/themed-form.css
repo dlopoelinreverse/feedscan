@@ -1,0 +1,94 @@
+.fs-theme-root {
+  background: var(--fs-bg);
+  color: var(--fs-text);
+  font-family: var(--fs-font);
+}
+
+.fs-min-screen {
+  min-height: 100vh;
+}
+
+.fs-fill-parent {
+  width: 100%;
+  height: 100%;
+}
+
+.fs-themed,
+.fs-themed * {
+  font-family: var(--fs-font);
+}
+
+.fs-submit {
+  background: var(--fs-primary);
+  color: var(--fs-primary-on);
+  border-radius: var(--fs-radius);
+}
+
+.fs-submit:hover:not(:disabled) {
+  background: var(--fs-primary-hover);
+}
+
+.fs-input {
+  border-radius: var(--fs-radius);
+  border-color: var(--fs-border);
+  background: var(--fs-bg);
+  color: var(--fs-text);
+}
+
+.fs-input:focus {
+  border-color: var(--fs-primary);
+  box-shadow: 0 0 0 3px var(--fs-ring);
+}
+
+.fs-choice {
+  border-radius: var(--fs-radius);
+  background: var(--fs-bg);
+  color: var(--fs-text);
+}
+
+.fs-choice-off {
+  border-color: var(--fs-border);
+}
+
+.fs-choice-off:hover {
+  border-color: var(--fs-primary);
+}
+
+.fs-choice-on {
+  border-color: var(--fs-primary);
+  background: var(--fs-primary-soft);
+  color: var(--fs-primary);
+  font-weight: 500;
+}
+
+.fs-emoji {
+  border-radius: var(--fs-radius);
+  border: 2px solid transparent;
+}
+
+.fs-emoji-off {
+  background: var(--fs-soft);
+}
+
+.fs-emoji-off:hover {
+  filter: brightness(0.97);
+}
+
+.fs-emoji-on {
+  background: var(--fs-primary-soft);
+  border-color: var(--fs-primary);
+}
+
+.fs-star-on {
+  background: var(--fs-primary-soft);
+  color: var(--fs-primary);
+}
+
+.fs-star-off {
+  background: var(--fs-soft);
+  color: var(--fs-text-muted);
+}
+
+.fs-star-off:hover {
+  filter: brightness(0.97);
+}
