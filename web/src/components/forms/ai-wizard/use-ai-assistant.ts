@@ -142,7 +142,7 @@ export function useAiAssistant({
   formId,
 }: UseAiAssistantOptions) {
   const formIdRef = useRef(formId);
-  formIdRef.current = formId;
+  if (formId) formIdRef.current = formId;
   const debounceTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const [state, setState] = useState<AiAssistantState>(() => ({
