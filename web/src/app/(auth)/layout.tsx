@@ -10,7 +10,7 @@ export default async function AuthLayout({
 
   return (
     <div className="min-h-screen bg-muted/30 flex flex-col">
-      <main className="flex-1">{children}</main>
+      <main className="flex-1 flex flex-col">{children}</main>
       <footer className="py-4 text-center">
         <a
           href={getRootUrl()}

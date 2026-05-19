@@ -122,7 +122,7 @@ export default function OnboardingPage() {
 
   if (checking) {
     return (
-      <div className="flex min-h-screen items-center justify-center">
+      <div className="flex flex-1 items-center justify-center">
         <div className="text-muted-foreground text-sm animate-pulse">
           {tCommon("loading")}
         </div>
@@ -132,7 +132,7 @@ export default function OnboardingPage() {
 
   if (step === "theme") {
     return (
-      <div className="flex min-h-screen items-center justify-center px-4 py-8">
+      <div className="flex flex-1 items-center justify-center px-4 py-8">
         <div className="w-full max-w-2xl">
           <div className="rounded-xl border border-border bg-card p-6 sm:p-8 shadow-sm space-y-6">
             <div className="text-center">
@@ -208,7 +208,7 @@ export default function OnboardingPage() {
   }
 
   return (
-    <div className="flex min-h-screen items-center justify-center px-4">
+    <div className="flex flex-1 items-center justify-center px-4 py-8">
       <div className="w-full max-w-md">
         <div className="rounded-xl border border-border bg-card p-8 shadow-sm space-y-6">
           <div className="text-center">

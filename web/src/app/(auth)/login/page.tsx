@@ -82,7 +82,7 @@ export default function LoginPage() {
 
   if (showReset) {
     return (
-      <div className="flex min-h-screen items-center justify-center px-4">
+      <div className="flex flex-1 items-center justify-center px-4 py-8">
         <div className="w-full max-w-md">
           <div className="rounded-xl border border-border bg-card p-8 shadow-sm space-y-6">
             <div className="flex justify-end"><LanguageSwitcher /></div>
@@ -128,7 +128,7 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="flex min-h-screen items-center justify-center px-4">
+    <div className="flex flex-1 items-center justify-center px-4 py-8">
       <div className="w-full max-w-md">
         <div className="rounded-xl border border-border bg-card p-8 shadow-sm space-y-6">
           <div className="flex justify-end"><LanguageSwitcher /></div>
