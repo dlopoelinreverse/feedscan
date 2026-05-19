@@ -478,7 +478,7 @@ function RuleEditor({
             value={rule.triggerMin}
             disabled={disabled}
             onChange={(e) => setMin(Number(e.target.value))}
-            className="w-10 h-6 text-xs p-1 border-0 bg-white/60 text-center"
+            className="w-10 h-6 text-base sm:text-xs p-1 border-0 bg-white/60 text-center"
           />
           <span>{t("and")}</span>
           <Input
@@ -488,7 +488,7 @@ function RuleEditor({
             value={rule.triggerMax}
             disabled={disabled}
             onChange={(e) => setMax(Number(e.target.value))}
-            className="w-10 h-6 text-xs p-1 border-0 bg-white/60 text-center"
+            className="w-10 h-6 text-base sm:text-xs p-1 border-0 bg-white/60 text-center"
           />
           <span className="ml-0.5">{unit}</span>
         </div>
@@ -529,7 +529,7 @@ function RuleEditor({
                           setEditingValue("");
                         }
                       }}
-                      className="px-2 py-1 rounded-full border border-[#6C5CE7] bg-white text-xs outline-none min-w-[80px]"
+                      className="px-2 py-1 rounded-full border border-[#6C5CE7] bg-white text-base sm:text-xs outline-none min-w-[80px]"
                     />
                   ) : (
                     <span
@@ -576,7 +576,7 @@ function RuleEditor({
                     }
                   }}
                   placeholder="Nouvelle option..."
-                  className="flex-1 px-2 py-1 rounded-md border border-dashed border-[#6C5CE7]/50 bg-background text-xs outline-none focus:border-[#6C5CE7]"
+                  className="flex-1 px-2 py-1 rounded-md border border-dashed border-[#6C5CE7]/50 bg-background text-base sm:text-xs outline-none focus:border-[#6C5CE7]"
                 />
                 <button
                   type="button"
