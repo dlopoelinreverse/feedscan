@@ -106,7 +106,7 @@ export default function LoginPage() {
                   {(field) => (
                     <div className="space-y-2">
                       <label htmlFor="resetEmail" className="text-sm font-medium">{t("email")}</label>
-                      <input id="resetEmail" type="email" value={field.state.value} onChange={(e) => field.handleChange(e.target.value)} onBlur={field.handleBlur} className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-ring" placeholder={t("emailPlaceholder")} />
+                      <input id="resetEmail" type="email" value={field.state.value} onChange={(e) => field.handleChange(e.target.value)} onBlur={field.handleBlur} className="w-full rounded-md border border-input bg-background px-3 py-2 text-base sm:text-sm focus:outline-none focus:ring-2 focus:ring-ring" placeholder={t("emailPlaceholder")} />
                       {field.state.meta.isTouched && field.state.meta.errors.length > 0 && <p className="text-xs text-destructive">{field.state.meta.errors.join(", ")}</p>}
                     </div>
                   )}
@@ -143,7 +143,7 @@ export default function LoginPage() {
               {(field) => (
                 <div className="space-y-2">
                   <label htmlFor="email" className="text-sm font-medium">{t("email")}</label>
-                  <input id="email" type="email" value={field.state.value} onChange={(e) => field.handleChange(e.target.value)} onBlur={field.handleBlur} className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-ring" placeholder={t("emailPlaceholder")} />
+                  <input id="email" type="email" value={field.state.value} onChange={(e) => field.handleChange(e.target.value)} onBlur={field.handleBlur} className="w-full rounded-md border border-input bg-background px-3 py-2 text-base sm:text-sm focus:outline-none focus:ring-2 focus:ring-ring" placeholder={t("emailPlaceholder")} />
                   {field.state.meta.isTouched && field.state.meta.errors.length > 0 && <p className="text-xs text-destructive">{field.state.meta.errors.join(", ")}</p>}
                 </div>
               )}
@@ -155,7 +155,7 @@ export default function LoginPage() {
                     <label htmlFor="password" className="text-sm font-medium">{t("password")}</label>
                     <button type="button" onClick={() => { setShowReset(true); setServerError(null); }} className="text-xs text-primary hover:underline">{t("forgotPassword")}</button>
                   </div>
-                  <input id="password" type="password" value={field.state.value} onChange={(e) => field.handleChange(e.target.value)} onBlur={field.handleBlur} className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-ring" placeholder="••••••••" />
+                  <input id="password" type="password" value={field.state.value} onChange={(e) => field.handleChange(e.target.value)} onBlur={field.handleBlur} className="w-full rounded-md border border-input bg-background px-3 py-2 text-base sm:text-sm focus:outline-none focus:ring-2 focus:ring-ring" placeholder="••••••••" />
                   {field.state.meta.isTouched && field.state.meta.errors.length > 0 && <p className="text-xs text-destructive">{field.state.meta.errors.join(", ")}</p>}
                 </div>
               )}

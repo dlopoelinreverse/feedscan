@@ -48,7 +48,7 @@ export function ProfileSection({ user, authProvider }: ProfileSectionProps) {
                 type="text"
                 value={businessName}
                 onChange={(e) => setBusinessName(e.target.value)}
-                className="mt-1 w-full rounded-md border border-border bg-background px-3 py-2 text-sm"
+                className="mt-1 w-full rounded-md border border-border bg-background px-3 py-2 text-base sm:text-sm"
               />
             ) : (
               <p className="mt-1 text-sm font-medium">
@@ -65,7 +65,7 @@ export function ProfileSection({ user, authProvider }: ProfileSectionProps) {
                 type="text"
                 value={businessType}
                 onChange={(e) => setBusinessType(e.target.value)}
-                className="mt-1 w-full rounded-md border border-border bg-background px-3 py-2 text-sm"
+                className="mt-1 w-full rounded-md border border-border bg-background px-3 py-2 text-base sm:text-sm"
               />
             ) : (
               <p className="mt-1 text-sm font-medium">

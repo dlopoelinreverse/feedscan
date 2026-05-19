@@ -478,7 +478,7 @@ function FreeText({
       onChange={(e) => onChange(e.target.value)}
       placeholder={placeholder || t("textPlaceholder")}
       rows={3}
-      className="fs-input w-full px-4 py-3 border text-sm resize-y min-h-[60px] max-h-[200px] focus:outline-none"
+      className="fs-input w-full px-4 py-3 border text-base sm:text-sm resize-y min-h-[60px] max-h-[200px] focus:outline-none"
     />
   );
 }
@@ -541,7 +541,7 @@ function FollowUpBlock({
           onChange={(e) => onTextChange(e.target.value)}
           placeholder={t("followUpPlaceholder")}
           rows={2}
-          className="fs-input w-full px-2 py-1.5 border text-xs resize-none focus:outline-none"
+          className="fs-input w-full px-2 py-1.5 border text-base sm:text-xs resize-none focus:outline-none"
           style={{ background: "var(--fs-bg)" }}
         />
       )}
