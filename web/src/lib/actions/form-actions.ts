@@ -3,7 +3,7 @@
 import { prisma } from "@/lib/prisma";
 import { createClient } from "@/lib/supabase/server";
 import { generateSlug } from "@/lib/utils";
-import { canCreateForm } from "@/lib/plan-limits";
+import { canPublishForm } from "@/lib/plan-limits";
 import { PRESETS } from "@/lib/themes/presets";
 import type { Prisma } from "@prisma/client";
 
@@ -113,10 +113,24 @@ export async function saveForm(input: SaveFormInput) {
       // Verify ownership
       const existing = await tx.form.findUnique({
         where: { id: input.id },
-        select: { userId: true, slug: true },
+        select: { userId: true, slug: true, status: true },
       });
       if (!existing || existing.userId !== userId) {
         throw new Error("Form not found");
+      }
+
+      // Plan limit check on publish transition (non-ACTIVE -> ACTIVE).
+      if (input.status === "ACTIVE" && existing.status !== "ACTIVE") {
+        const user = await tx.user.findUnique({
+          where: { id: userId },
+          select: { id: true, plan: true, aiGenerationsUsed: true },
+        });
+        if (user) {
+          const allowed = await canPublishForm(user);
+          if (!allowed) {
+            throw new Error("PLAN_LIMIT");
+          }
+        }
       }
 
       let themeIdToApply: string | undefined | null = undefined;
@@ -158,15 +172,18 @@ export async function saveForm(input: SaveFormInput) {
       // Delete existing questions (cascade deletes followUpRules)
       await tx.question.deleteMany({ where: { formId: form.id } });
     } else {
-      // Check plan limit
-      const user = await tx.user.findUnique({
-        where: { id: userId },
-        select: { id: true, plan: true, aiGenerationsUsed: true },
-      });
-      if (user) {
-        const allowed = await canCreateForm(user);
-        if (!allowed) {
-          throw new Error("PLAN_LIMIT");
+      // Plan limit only applies when creating a form already in ACTIVE.
+      // DRAFT creation is always allowed; the gate moves to the publish step.
+      if (input.status === "ACTIVE") {
+        const user = await tx.user.findUnique({
+          where: { id: userId },
+          select: { id: true, plan: true, aiGenerationsUsed: true },
+        });
+        if (user) {
+          const allowed = await canPublishForm(user);
+          if (!allowed) {
+            throw new Error("PLAN_LIMIT");
+          }
         }
       }
 

@@ -1,15 +1,9 @@
 import Link from "next/link";
 import { getTranslations } from "next-intl/server";
-import { getUserForms, getUserPlan } from "@/lib/actions/form-actions";
+import { getUserForms } from "@/lib/actions/form-actions";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
 
 const statusColor: Record<string, string> = {
   DRAFT: "bg-gray-100 text-gray-600 hover:bg-gray-100",
@@ -19,9 +13,7 @@ const statusColor: Record<string, string> = {
 
 export default async function FormsListPage() {
   const t = await getTranslations("forms");
-  const [forms, plan] = await Promise.all([getUserForms(), getUserPlan()]);
-
-  const canCreate = plan !== "FREE" || forms.length < 1;
+  const forms = await getUserForms();
 
   return (
     <div className="p-4 sm:p-6 max-w-4xl">
@@ -32,34 +24,9 @@ export default async function FormsListPage() {
             {t("manageForms")}
           </p>
         </div>
-        <TooltipProvider>
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <span className="shrink-0">
-                {canCreate ? (
-                  <Button asChild size="sm" className="sm:h-10 sm:px-4">
-                    <Link href="/dashboard/forms/new">{t("createNew")}</Link>
-                  </Button>
-                ) : (
-                  <Button disabled size="sm" className="sm:h-10 sm:px-4">{t("createNew")}</Button>
-                )}
-              </span>
-            </TooltipTrigger>
-            {!canCreate && (
-              <TooltipContent>
-                <p>
-                  {t("planLimit")}{" "}
-                  <Link
-                    href="/dashboard/settings"
-                    className="underline text-primary"
-                  >
-                    &rarr;
-                  </Link>
-                </p>
-              </TooltipContent>
-            )}
-          </Tooltip>
-        </TooltipProvider>
+        <Button asChild size="sm" className="shrink-0 sm:h-10 sm:px-4">
+          <Link href="/dashboard/forms/new">{t("createNew")}</Link>
+        </Button>
       </div>
 
       {forms.length === 0 ? (

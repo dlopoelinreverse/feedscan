@@ -1,5 +1,5 @@
 import { prisma } from "@/lib/prisma";
-import type { PlanType } from "@prisma/client";
+import type { FormStatus, PlanType } from "@prisma/client";
 
 interface UserWithPlan {
   id: string;
@@ -7,9 +7,19 @@ interface UserWithPlan {
   aiGenerationsUsed: number;
 }
 
-export async function canCreateForm(user: UserWithPlan): Promise<boolean> {
+// Statuses that occupy a slot against the plan's form quota.
+// DRAFT and ARCHIVED do not consume a slot.
+export const COUNTED_FORM_STATUSES: FormStatus[] = ["ACTIVE"];
+
+async function countCountedForms(userId: string): Promise<number> {
+  return prisma.form.count({
+    where: { userId, status: { in: COUNTED_FORM_STATUSES } },
+  });
+}
+
+export async function canPublishForm(user: UserWithPlan): Promise<boolean> {
   if (user.plan !== "FREE") return true;
-  const count = await prisma.form.count({ where: { userId: user.id } });
+  const count = await countCountedForms(user.id);
   return count < 1;
 }
 
@@ -62,7 +72,7 @@ export function getRemainingAI(
 export async function getFormCount(
   user: UserWithPlan
 ): Promise<{ count: number; limit: number | null }> {
-  const count = await prisma.form.count({ where: { userId: user.id } });
+  const count = await countCountedForms(user.id);
   return {
     count,
     limit: user.plan === "FREE" ? 1 : null,

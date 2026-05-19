@@ -253,7 +253,7 @@
       "customHours": "Duration in hours",
       "duplicateMessage": "Duplicate message"
     },
-    "planLimit": "Upgrade to Pro to create more forms"
+    "planLimit": "Upgrade to Pro to publish more forms"
   },
   "qrCodes": {
     "title": "QR Codes",
