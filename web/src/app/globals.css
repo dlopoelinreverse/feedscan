@@ -65,7 +65,10 @@
   }
   html, body {
     @apply bg-background text-foreground;
-    overflow-x: hidden;
+    /* `clip` keeps horizontal clipping without making html/body a scroll
+       container — `hidden` forces overflow-y to compute to `auto`, which
+       breaks viewport scroll on long pages (e.g. marketing landing). */
+    overflow-x: clip;
     overscroll-behavior-y: none;
   }
 }
