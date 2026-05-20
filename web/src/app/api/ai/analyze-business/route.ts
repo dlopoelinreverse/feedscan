@@ -13,8 +13,12 @@ import {
 } from "@/lib/ai/prompts";
 import { canUseAI } from "@/lib/plan-limits";
 import { generateSlug } from "@/lib/utils";
+import { aiGuard } from "@/lib/ai/guard";
 
 export async function POST(request: Request) {
+  const guard = await aiGuard(request, "analyze-business");
+  if (!guard.allowed) return guard.response;
+
   const supabase = await createClient();
   const {
     data: { user },

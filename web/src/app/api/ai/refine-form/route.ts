@@ -6,8 +6,12 @@ import {
   refineFormResponseSchema,
 } from "@/lib/ai/schemas";
 import { buildRefineSystemPrompt } from "@/lib/ai/prompts";
+import { aiGuard } from "@/lib/ai/guard";
 
 export async function POST(request: Request) {
+  const guard = await aiGuard(request, "refine-form");
+  if (!guard.allowed) return guard.response;
+
   const supabase = await createClient();
   const {
     data: { user },

@@ -11,8 +11,12 @@ import {
   buildGenerateUserMessage,
 } from "@/lib/ai/prompts";
 import { canUseAI } from "@/lib/plan-limits";
+import { aiGuard } from "@/lib/ai/guard";
 
 export async function POST(request: Request) {
+  const guard = await aiGuard(request, "generate-form");
+  if (!guard.allowed) return guard.response;
+
   const supabase = await createClient();
   const {
     data: { user },
