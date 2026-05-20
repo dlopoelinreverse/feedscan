@@ -642,7 +642,11 @@
       "titleLine2": "before it's too late",
       "subtitle": "Collect customer feedback in under a minute via QR code. Find out what works — and what doesn't — before it ends up on Google Reviews.",
       "cta": "Get started for free",
-      "demo": "Watch the demo"
+      "demo": "Watch the demo",
+      "tryDemo": "Try demo · no signup",
+      "tryDemoLoading": "Creating demo…",
+      "tryDemoError": "Something went wrong, please try again.",
+      "tryDemoRateLimited": "Demo recently created from your IP. Try again in 10 minutes."
     },
     "howItWorks": {
       "title": "How it works",

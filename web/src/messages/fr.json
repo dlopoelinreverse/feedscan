@@ -642,7 +642,11 @@
       "titleLine2": "avant qu'il soit trop tard",
       "subtitle": "Collectez l'avis de vos clients en moins d'une minute via QR code. Découvrez ce qui marche — et ce qui cloche — avant que ça finisse sur Google Reviews.",
       "cta": "Commencer gratuitement",
-      "demo": "Voir la démo"
+      "demo": "Voir la démo",
+      "tryDemo": "Essayer la démo · sans inscription",
+      "tryDemoLoading": "Création de la démo…",
+      "tryDemoError": "Une erreur est survenue, réessayez.",
+      "tryDemoRateLimited": "Démo récemment créée depuis votre IP. Réessayez dans 10 minutes."
     },
     "howItWorks": {
       "title": "Comment ça marche",
