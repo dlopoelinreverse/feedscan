@@ -3,6 +3,7 @@ import { createClient } from "@/lib/supabase/server";
 import { getAuthUrl } from "@/lib/domains";
 import { prisma } from "@/lib/prisma";
 import { AppShell } from "@/components/dashboard/app-shell";
+import { DemoBanner } from "@/components/dashboard/demo-banner";
 
 export default async function AppLayout({
   children,
@@ -20,7 +21,7 @@ export default async function AppLayout({
 
   const dbUser = await prisma.user.findUnique({
     where: { id: user.id },
-    select: { plan: true },
+    select: { plan: true, isDemo: true, expiresAt: true },
   });
   const plan: string = dbUser?.plan ?? "FREE";
 
@@ -29,6 +30,9 @@ export default async function AppLayout({
       userEmail={user.email ?? ""}
       plan={plan}
     >
+      {dbUser?.isDemo && dbUser.expiresAt && (
+        <DemoBanner expiresAt={dbUser.expiresAt} />
+      )}
       {children}
     </AppShell>
   );
