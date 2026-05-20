@@ -35,6 +35,8 @@ interface SettingsClientProps {
   proPriceId: string;
   businessPriceId: string;
   authProvider: string;
+  checkoutSuccess?: boolean;
+  checkoutCanceled?: boolean;
 }
 
 export function SettingsClient({
@@ -42,24 +44,35 @@ export function SettingsClient({
   proPriceId,
   businessPriceId,
   authProvider,
+  checkoutSuccess = false,
+  checkoutCanceled = false,
 }: SettingsClientProps) {
   const t = useTranslations("settings");
   const searchParams = useSearchParams();
   const router = useRouter();
-  const [successBanner, setSuccessBanner] = useState(false);
+  const [successBanner, setSuccessBanner] = useState(checkoutSuccess);
+  const [canceledBanner, setCanceledBanner] = useState(checkoutCanceled);
 
   useEffect(() => {
-    if (searchParams.get("success") === "true") {
+    const stripeSessionId = searchParams.get("stripe_session_id");
+    const stripeCanceled = searchParams.get("stripe_canceled");
+    const legacySuccess = searchParams.get("success");
+    const legacyCanceled = searchParams.get("canceled");
+
+    if (stripeSessionId || legacySuccess === "true") {
       toast({ title: t("subscriptionActive") });
       setSuccessBanner(true);
       const url = new URL(window.location.href);
+      url.searchParams.delete("stripe_session_id");
       url.searchParams.delete("success");
-      router.replace(url.pathname, { scroll: false });
-    } else if (searchParams.get("canceled") === "true") {
+      router.replace(url.pathname + (url.search || ""), { scroll: false });
+    } else if (stripeCanceled === "1" || legacyCanceled === "true") {
       toast({ title: t("subscriptionCanceled"), variant: "destructive" });
+      setCanceledBanner(true);
       const url = new URL(window.location.href);
+      url.searchParams.delete("stripe_canceled");
       url.searchParams.delete("canceled");
-      router.replace(url.pathname, { scroll: false });
+      router.replace(url.pathname + (url.search || ""), { scroll: false });
     }
   }, [searchParams, router, t]);
 
@@ -68,6 +81,11 @@ export function SettingsClient({
       {successBanner && (
         <div className="bg-green-50 border border-green-200 text-green-800 px-4 py-3 rounded-lg text-sm font-medium">
           {t("subscriptionActive")}
+        </div>
+      )}
+      {canceledBanner && (
+        <div className="bg-amber-50 border border-amber-200 text-amber-800 px-4 py-3 rounded-lg text-sm font-medium">
+          {t("subscriptionCanceled")}
         </div>
       )}
 

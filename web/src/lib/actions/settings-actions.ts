@@ -25,6 +25,8 @@ export async function getSettingsData() {
       businessType: true,
       plan: true,
       stripeCustomerId: true,
+      stripeSubscriptionId: true,
+      stripeCurrentPeriodEnd: true,
       aiGenerationsUsed: true,
     },
   });
@@ -35,25 +37,28 @@ export async function getSettingsData() {
     getRemainingAI(user),
   ]);
 
-  let subscription: {
+  const subscription: {
     renewalDate: string | null;
     cardLast4: string | null;
-  } = { renewalDate: null, cardLast4: null };
+  } = {
+    renewalDate: user.stripeCurrentPeriodEnd
+      ? user.stripeCurrentPeriodEnd.toISOString()
+      : null,
+    cardLast4: null,
+  };
 
+  // Card last4 is not stored locally — fetch lazily from Stripe when we have
+  // an active subscription. Failure is non-fatal: the page must still render.
   if (user.stripeCustomerId && user.plan !== "FREE") {
     try {
       const sub = await getSubscription(user.stripeCustomerId);
-      if (sub) {
-        subscription.renewalDate = sub.current_period_end
-          ? new Date(sub.current_period_end * 1000).toISOString()
-          : null;
-        const pm = sub.default_payment_method;
-        if (pm && typeof pm === "object" && "card" in pm) {
-          subscription.cardLast4 = (pm as { card?: { last4?: string } }).card?.last4 ?? null;
-        }
+      const pm = sub?.default_payment_method;
+      if (pm && typeof pm === "object" && "card" in pm) {
+        subscription.cardLast4 =
+          (pm as { card?: { last4?: string } }).card?.last4 ?? null;
       }
     } catch {
-      // Stripe not configured or error — ignore
+      // Stripe not configured or transient error — ignore.
     }
   }
 

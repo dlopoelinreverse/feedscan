@@ -2,9 +2,14 @@ import { getTranslations } from "next-intl/server";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { getSettingsData } from "@/lib/actions/settings-actions";
+import { syncUserFromCheckoutSession } from "@/lib/billing-sync";
 import { SettingsClient } from "@/components/settings/settings-client";
 
-export default async function SettingsPage() {
+interface SettingsPageProps {
+  searchParams: Promise<Record<string, string | string[] | undefined>>;
+}
+
+export default async function SettingsPage({ searchParams }: SettingsPageProps) {
   const t = await getTranslations("settings");
 
   const supabase = await createClient();
@@ -14,9 +19,21 @@ export default async function SettingsPage() {
 
   if (!user) redirect("/login");
 
+  const params = await searchParams;
+  const sessionIdParam = params.stripe_session_id;
+  const sessionId = Array.isArray(sessionIdParam)
+    ? sessionIdParam[0]
+    : sessionIdParam;
+  const canceled = params.stripe_canceled === "1";
+
+  // Defensive sync: if the user is bouncing back from Stripe Checkout, make
+  // sure the DB row reflects the new subscription even if the webhook is late.
+  if (sessionId) {
+    await syncUserFromCheckoutSession({ userId: user.id, sessionId });
+  }
+
   const data = await getSettingsData();
 
-  // Determine auth provider
   const provider = user.app_metadata?.provider;
   const authProvider =
     provider === "google" ? "Google OAuth" : "Email / Password";
@@ -30,6 +47,8 @@ export default async function SettingsPage() {
         proPriceId={process.env.STRIPE_PRO_PRICE_ID ?? ""}
         businessPriceId={process.env.STRIPE_BUSINESS_PRICE_ID ?? ""}
         authProvider={authProvider}
+        checkoutSuccess={Boolean(sessionId)}
+        checkoutCanceled={canceled}
       />
     </div>
   );

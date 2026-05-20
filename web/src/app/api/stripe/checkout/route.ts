@@ -20,11 +20,18 @@ export async function POST(request: Request) {
 
   const dbUser = await prisma.user.findUnique({
     where: { id: user.id },
-    select: { id: true, email: true, stripeCustomerId: true },
+    select: { id: true, email: true, stripeCustomerId: true, isDemo: true },
   });
 
   if (!dbUser) {
     return NextResponse.json({ error: "User not found" }, { status: 404 });
+  }
+
+  if (dbUser.isDemo) {
+    return NextResponse.json(
+      { error: "Demo accounts cannot subscribe" },
+      { status: 403 }
+    );
   }
 
   let customerId = dbUser.stripeCustomerId;

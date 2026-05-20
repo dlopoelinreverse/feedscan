@@ -11,6 +11,19 @@ interface UserWithPlan {
 // DRAFT and ARCHIVED do not consume a slot.
 export const COUNTED_FORM_STATUSES: FormStatus[] = ["ACTIVE"];
 
+export interface PlanLimits {
+  maxForms: number | null;
+  maxResponsesPerMonth: number | null;
+  maxAiGenerations: number | null;
+}
+
+export function getPlanLimits(plan: PlanType): PlanLimits {
+  if (plan === "FREE") {
+    return { maxForms: 1, maxResponsesPerMonth: 50, maxAiGenerations: 3 };
+  }
+  return { maxForms: null, maxResponsesPerMonth: null, maxAiGenerations: null };
+}
+
 async function countCountedForms(userId: string): Promise<number> {
   return prisma.form.count({
     where: { userId, status: { in: COUNTED_FORM_STATUSES } },

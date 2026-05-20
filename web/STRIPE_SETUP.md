@@ -25,18 +25,41 @@ Go to **Developers > API Keys**:
 Go to **Developers > Webhooks** and add an endpoint:
 
 - **URL**: `https://app.feedscan.leopoldev/api/stripe/webhook`
-- **Events** to listen for:
-  - `checkout.session.completed`
-  - `customer.subscription.updated`
-  - `customer.subscription.deleted`
-  - `invoice.payment_failed`
+- **Events** to listen for (exactly these — the handler is a no-op for anything else):
+  - `checkout.session.completed` → initial subscription creation after payment
+  - `customer.subscription.created` → safety net if the session event is missed
+  - `customer.subscription.updated` → plan changes, status transitions (incl. cancel-at-period-end)
+  - `customer.subscription.deleted` → final cancellation → downgrade to FREE
+  - `invoice.payment_failed` → renewal failure → immediate downgrade to FREE (no grace period)
 - Copy the **Webhook signing secret** (`whsec_...`)
 
-For local development, use the Stripe CLI:
+### Local testing
+
+In one terminal, forward Stripe events to your dev server:
 
 ```bash
 stripe listen --forward-to localhost:3001/api/stripe/webhook
 ```
+
+Then trigger events from another terminal:
+
+```bash
+# Full happy path — checkout completes, plan goes to PRO/BUSINESS
+stripe trigger checkout.session.completed
+
+# Renewal failure — plan should drop back to FREE
+stripe trigger invoice.payment_failed
+
+# Cancellation from the Customer Portal — plan should drop back to FREE
+stripe trigger customer.subscription.deleted
+```
+
+### Defensive sync
+
+The settings page (`/dashboard/settings?stripe_session_id={CHECKOUT_SESSION_ID}`)
+re-reads the Checkout Session from Stripe on the success redirect and
+reconciles the user row if the webhook hasn't landed yet. This means the UI
+reflects the new plan even when the webhook is delayed or temporarily down.
 
 ## 5. Configure Environment Variables
 
