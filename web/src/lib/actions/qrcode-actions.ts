@@ -1,5 +1,6 @@
 "use server";
 
+import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/prisma";
 import { createClient } from "@/lib/supabase/server";
 import { generateUniqueCode } from "@/lib/utils";
@@ -84,6 +85,8 @@ export async function createQRCode(
     },
   });
 
+  revalidatePath(`/dashboard/forms/${formId}/qr-codes`);
+
   return {
     id: qrCode.id,
     label: qrCode.label,
@@ -106,5 +109,7 @@ export async function deleteQRCode(qrCodeId: string) {
     throw new Error("Not found");
   }
 
+  const formId = qrCode.formId;
   await prisma.qRCode.delete({ where: { id: qrCodeId } });
+  revalidatePath(`/dashboard/forms/${formId}/qr-codes`);
 }
