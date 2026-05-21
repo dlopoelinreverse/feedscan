@@ -36,7 +36,9 @@ export default async function SettingsPage({ searchParams }: SettingsPageProps) 
 
   const provider = user.app_metadata?.provider;
   const authProvider =
-    provider === "google" ? "Google OAuth" : "Email / Password";
+    provider === "google"
+      ? t("authProvider.googleOAuth")
+      : t("authProvider.emailPassword");
 
   return (
     <div className="p-4 sm:p-6">

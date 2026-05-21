@@ -7,6 +7,9 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
+    "check:i18n": "bun scripts/check-i18n.ts",
+    "check:i18n:keys": "bun scripts/check-i18n-keys.ts",
+    "check:i18n:all": "bun scripts/check-i18n-keys.ts && bun scripts/check-i18n.ts",
     "db:push": "prisma db push",
     "db:generate": "prisma generate",
     "db:studio": "prisma studio"

@@ -19,7 +19,11 @@
     "poweredBy": "Propulsé par FeedScan",
     "or": "ou",
     "copy": "Copier",
-    "moreActions": "Plus d'actions"
+    "moreActions": "Plus d'actions",
+    "none": "Aucun",
+    "lastUpdated": "Dernière mise à jour : {date}",
+    "close": "Fermer",
+    "navigation": "Navigation"
   },
   "nav": {
     "dashboard": "Dashboard",
@@ -110,24 +114,52 @@
       "activeForms": "Formulaires actifs",
       "completionRate": "Taux de complétion",
       "vsLastPeriod": "vs période précédente",
-      "outOf": "sur {count} créés"
+      "outOf": "sur {count} créés",
+      "activeForm": "Formulaire actif",
+      "publishForm": "Publier un formulaire",
+      "shareQrToCollect": "Partagez votre QR code pour recevoir des réponses",
+      "thisMonth": "ce mois",
+      "thisWeek": "cette semaine",
+      "questionsCount": "{count, plural, one {# question} other {# questions}}"
     },
     "charts": {
       "responseTrend": "Tendance des réponses",
       "thisMonth": "Ce mois",
       "lastMonth": "Mois dernier",
-      "scoresByCategory": "Scores par critère"
+      "scoresByCategory": "Scores par critère",
+      "responseTrendWithDays": "Tendance des réponses ({days} jours)",
+      "noData": "Pas encore de données",
+      "topReasons": "Top raisons",
+      "previousPeriod": "Période précédente"
     },
     "recentResponses": {
       "title": "Dernières réponses",
       "source": "Source",
       "ago": "il y a {time}",
-      "viewDetail": "Voir le détail"
+      "viewDetail": "Voir le détail",
+      "emptyShort": "Pas encore de réponses.",
+      "reasonsPrefix": "Raisons :"
     },
     "empty": {
       "noForms": "Créez votre premier formulaire pour voir vos stats ici",
       "noResponses": "Pas encore de réponses. Placez vos QR codes pour commencer à collecter du feedback.",
-      "createFirst": "Créer votre premier formulaire"
+      "createFirst": "Créer votre premier formulaire",
+      "noActiveForm": "Aucun formulaire actif. Publiez un formulaire pour commencer à collecter du feedback.",
+      "createForm": "Créer un formulaire"
+    },
+    "formNotFound": "Formulaire introuvable.",
+    "timeAgo": {
+      "seconds": "il y a {n}s",
+      "minutes": "il y a {n} min",
+      "hours": "il y a {n}h",
+      "days": "il y a {n}j"
+    },
+    "stats": {
+      "branchingInsights": "Insights branching",
+      "lowScoreHeading": "{label} — Score bas (1-2) · {count, plural, one {# réponse} other {# réponses}}",
+      "highScoreHeading": "{label} — Score haut (4-5) · {count, plural, one {# réponse} other {# réponses}}",
+      "noComments": "Aucun commentaire",
+      "scoresByCriterion": "Scores par critère"
     }
   },
   "forms": {
@@ -219,7 +251,11 @@
       "followUpPlaceholder": "Ex : Qu'est-ce qui n'a pas été à la hauteur ?",
       "followUpOptions": "Options de réponse",
       "allowFreeText": "Autoriser un commentaire libre",
-      "neutralNote": "Les scores neutres ne déclenchent pas de suivi."
+      "neutralNote": "Les scores neutres ne déclenchent pas de suivi.",
+      "lowFollowUpPlaceholder": "Qu'est-ce qui n'a pas été à la hauteur ?",
+      "highFollowUpPlaceholder": "Qu'est-ce qui vous a le plus plu ?",
+      "newOption": "Nouvelle option...",
+      "allowOptionsToggle": "Options"
     },
     "ai": {
       "generate": "Générer avec l'IA",
@@ -254,7 +290,14 @@
       "customHours": "Durée en heures",
       "duplicateMessage": "Message si doublon"
     },
-    "planLimit": "Passez au Pro pour publier plus de formulaires"
+    "planLimit": "Passez au Pro pour publier plus de formulaires",
+    "defaultQuestion": {
+      "stars": "Comment évaluez-vous la qualité du service ?",
+      "emoji": "Comment était votre expérience ?",
+      "choice": "Qu'est-ce qui vous a le plus plu ?",
+      "text": "Un commentaire ou une suggestion ?",
+      "textPlaceholder": "Dites-nous ce qui pourrait être amélioré..."
+    }
   },
   "qrCodes": {
     "title": "QR Codes",
@@ -346,6 +389,10 @@
       "responseLimitReached": "Ce commerçant a atteint sa limite mensuelle.",
       "aiRemaining": "{used}/{limit} générations restantes",
       "aiLimitReached": "Limite de générations IA atteinte. Passez au Pro pour des générations illimitées."
+    },
+    "authProvider": {
+      "emailPassword": "Email / Mot de passe",
+      "googleOAuth": "Google OAuth"
     }
   },
   "themes": {
@@ -452,6 +499,14 @@
       "sage": "Sauge",
       "lavender": "Lavande",
       "graphite": "Graphite"
+    },
+    "preview": {
+      "sampleTitle": "Aperçu",
+      "q1Label": "Globalement, comment évaluez-vous votre expérience ?",
+      "q2Label": "Qu'avez-vous préféré ?",
+      "q2OptionService": "Le service",
+      "q2OptionProducts": "Les produits",
+      "q2OptionAtmosphere": "L'ambiance"
     }
   },
   "pricing": {
@@ -610,10 +665,10 @@
     "chat": {
       "badge": "FeedScan IA",
       "formCreated": "J'ai créé un formulaire de {count} questions basé sur vos critères. Voici ce que j'ai préparé :",
-      "questionStar": "{index}. \u2b50 {label} (étoiles 1-5)",
-      "questionEmoji": "{index}. \ud83d\ude0a {label} (emoji {levels} niveaux)",
-      "questionChoice": "{index}. \u2611\ufe0f {label} (choix multiples)",
-      "questionText": "{index}. \ud83d\udcac {label}",
+      "questionStar": "{index}. ⭐ {label} (étoiles 1-5)",
+      "questionEmoji": "{index}. 😊 {label} (emoji {levels} niveaux)",
+      "questionChoice": "{index}. ☑️ {label} (choix multiples)",
+      "questionText": "{index}. 💬 {label}",
       "branchingNote": "J'ai aussi ajouté des questions de suivi automatiques pour les scores bas et hauts.\nVoulez-vous modifier quelque chose ?",
       "placeholder": "Demandez une modification...",
       "iteratePlaceholder": "Demande à l'assistant d'affiner le formulaire…",
@@ -624,7 +679,7 @@
         "changeOrder": "Changer l'ordre",
         "looksGreat": "C'est parfait !"
       },
-      "validated": "Formulaire prêt \u2014 {count} questions avec suivi conditionnel",
+      "validated": "Formulaire prêt — {count} questions avec suivi conditionnel",
       "applyToBuilder": "Appliquer au builder",
       "translationsGenerated": "Traductions générées ! Vérifiez avant de publier.",
       "limitReached": "Vous avez atteint la limite de 3 générations IA. Passez au Pro pour des générations illimitées.",
@@ -700,6 +755,18 @@
       "privacy": "Confidentialité",
       "terms": "Conditions",
       "contact": "Contact"
+    },
+    "metadata": {
+      "title": "FeedScan - Collectez du feedback avec des QR codes",
+      "description": "Créez des formulaires de feedback intelligents et collectez des réponses via QR codes. Propulsé par IA.",
+      "privacyTitle": "Politique de confidentialité — FeedScan",
+      "termsTitle": "Conditions d'utilisation — FeedScan"
+    }
+  },
+  "demo": {
+    "banner": {
+      "mode": "Mode démo",
+      "expires": "ce compte expire dans {hours}h. Les données sont supprimées après expiration."
     }
   }
 }

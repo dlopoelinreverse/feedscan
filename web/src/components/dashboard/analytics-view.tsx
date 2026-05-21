@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { getTranslations } from "next-intl/server";
 import { prisma } from "@/lib/prisma";
 import {
   calculateAverageScore,
@@ -36,6 +37,8 @@ export async function AnalyticsView({
   showHeader?: boolean;
   title?: string;
 }) {
+  const t = await getTranslations("dashboard");
+  const tCommon = await getTranslations("common");
   // Resolve form: explicit or active
   const form = explicitFormId
     ? await prisma.form.findFirst({
@@ -141,7 +144,7 @@ export async function AnalyticsView({
     <div className="space-y-6">
       {showHeader && (
         <div className="flex flex-wrap items-center justify-between gap-3">
-          <h1 className="text-xl sm:text-2xl font-bold">{title ?? "Dashboard"}</h1>
+          <h1 className="text-xl sm:text-2xl font-bold">{title ?? t("title")}</h1>
           <PeriodSelector current={period} />
         </div>
       )}
@@ -149,44 +152,46 @@ export async function AnalyticsView({
       {/* Metric cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         <MetricCard
-          title="Réponses totales"
+          title={t("metrics.totalResponses")}
           value={totalCurrent}
           delta={
             totalCurrent > 0 || totalPrevious > 0
-              ? { ...responsesDelta, label: "vs période précédente" }
+              ? { ...responsesDelta, label: t("metrics.vsLastPeriod") }
               : null
           }
           emptyMessage={
             totalCurrent === 0 && totalPrevious === 0
-              ? "Partagez votre QR code pour recevoir des réponses"
+              ? t("metrics.shareQrToCollect")
               : undefined
           }
         />
         <MetricCard
-          title="Score moyen"
+          title={t("metrics.averageScore")}
           value={scoreCurrent > 0 ? `${scoreCurrent.toFixed(1)} / 5` : "—"}
           delta={
             scoreCurrent > 0 && scorePrevious > 0
               ? {
                   value: scoreDeltaVal,
                   isPositive: scoreDeltaVal >= 0,
-                  label: "ce mois",
+                  label: t("metrics.thisMonth"),
                 }
               : null
           }
         />
         <MetricCard
-          title="Formulaire actif"
-          value={form ? form.titleFr || form.title : "Aucun"}
-          description={form ? `${form.questions.length} questions` : undefined}
-          emptyMessage={!form ? "Publier un formulaire" : undefined}
+          title={t("metrics.activeForm")}
+          value={form ? form.titleFr || form.title : tCommon("none")}
+          description={
+            form ? t("metrics.questionsCount", { count: form.questions.length }) : undefined
+          }
+          emptyMessage={!form ? t("metrics.publishForm") : undefined}
         />
         <MetricCard
-          title="Taux de complétion"
+          title={t("metrics.completionRate")}
           value={`${completionRate}%`}
           delta={
             totalScans > 0
-              ? { ...completionDelta, label: "cette semaine" }
+              ? { ...completionDelta, label: t("metrics.thisWeek") }
               : null
           }
         />
@@ -195,10 +200,10 @@ export async function AnalyticsView({
       {!form && (
         <div className="rounded-lg border border-dashed p-8 text-center">
           <p className="text-muted-foreground mb-4">
-            Aucun formulaire actif. Publiez un formulaire pour commencer à collecter du feedback.
+            {t("empty.noActiveForm")}
           </p>
           <Button asChild>
-            <Link href="/dashboard/forms/new">Créer un formulaire</Link>
+            <Link href="/dashboard/forms/new">{t("empty.createForm")}</Link>
           </Button>
         </div>
       )}
@@ -208,27 +213,27 @@ export async function AnalyticsView({
           {/* Trend chart */}
           <div className="rounded-lg border border-border bg-card p-4 sm:p-6">
             <h3 className="text-sm font-semibold mb-4">
-              Tendance des réponses ({period} jours)
+              {t("charts.responseTrendWithDays", { days: period })}
             </h3>
             <TrendChart
               data={trendData}
-              currentLabel="Ce mois"
-              previousLabel="Période précédente"
-              emptyMessage="Pas encore de données"
+              currentLabel={t("charts.thisMonth")}
+              previousLabel={t("charts.previousPeriod")}
+              emptyMessage={t("charts.noData")}
             />
           </div>
 
           {/* Scores by criterion */}
           {criteria.length > 0 && (
             <div className="rounded-lg border border-border bg-card p-4 sm:p-6">
-              <h3 className="text-sm font-semibold mb-4">Scores par critère</h3>
-              <ScoresByCriterion items={criteria} topReasonsLabel="Top raisons" />
+              <h3 className="text-sm font-semibold mb-4">{t("stats.scoresByCriterion")}</h3>
+              <ScoresByCriterion items={criteria} topReasonsLabel={t("charts.topReasons")} />
             </div>
           )}
 
           {/* Recent responses */}
           <div className="rounded-lg border border-border bg-card p-4 sm:p-6">
-            <h3 className="text-sm font-semibold mb-2">Dernières réponses</h3>
+            <h3 className="text-sm font-semibold mb-2">{t("recentResponses.title")}</h3>
             <RecentResponses items={recent} />
           </div>
         </>

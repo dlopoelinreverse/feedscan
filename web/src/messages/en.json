@@ -19,7 +19,11 @@
     "poweredBy": "Powered by FeedScan",
     "or": "or",
     "copy": "Copy",
-    "moreActions": "More actions"
+    "moreActions": "More actions",
+    "none": "None",
+    "lastUpdated": "Last updated: {date}",
+    "close": "Close",
+    "navigation": "Navigation"
   },
   "nav": {
     "dashboard": "Dashboard",
@@ -110,24 +114,52 @@
       "activeForms": "Active forms",
       "completionRate": "Completion rate",
       "vsLastPeriod": "vs previous period",
-      "outOf": "out of {count} created"
+      "outOf": "out of {count} created",
+      "activeForm": "Active form",
+      "publishForm": "Publish a form",
+      "shareQrToCollect": "Share your QR code to receive responses",
+      "thisMonth": "this month",
+      "thisWeek": "this week",
+      "questionsCount": "{count, plural, one {# question} other {# questions}}"
     },
     "charts": {
       "responseTrend": "Response trend",
       "thisMonth": "This month",
       "lastMonth": "Last month",
-      "scoresByCategory": "Scores by category"
+      "scoresByCategory": "Scores by category",
+      "responseTrendWithDays": "Response trend ({days} days)",
+      "noData": "No data yet",
+      "topReasons": "Top reasons",
+      "previousPeriod": "Previous period"
     },
     "recentResponses": {
       "title": "Recent responses",
       "source": "Source",
       "ago": "{time} ago",
-      "viewDetail": "View details"
+      "viewDetail": "View details",
+      "emptyShort": "No responses yet.",
+      "reasonsPrefix": "Reasons:"
     },
     "empty": {
       "noForms": "Create your first form to see your stats here",
       "noResponses": "No responses yet. Place your QR codes to start collecting feedback.",
-      "createFirst": "Create your first form"
+      "createFirst": "Create your first form",
+      "noActiveForm": "No active form. Publish a form to start collecting feedback.",
+      "createForm": "Create a form"
+    },
+    "formNotFound": "Form not found.",
+    "timeAgo": {
+      "seconds": "{n}s ago",
+      "minutes": "{n} min ago",
+      "hours": "{n}h ago",
+      "days": "{n}d ago"
+    },
+    "stats": {
+      "branchingInsights": "Branching insights",
+      "lowScoreHeading": "{label} — Low score (1-2) · {count, plural, one {# response} other {# responses}}",
+      "highScoreHeading": "{label} — High score (4-5) · {count, plural, one {# response} other {# responses}}",
+      "noComments": "No comments",
+      "scoresByCriterion": "Scores by criterion"
     }
   },
   "forms": {
@@ -219,7 +251,11 @@
       "followUpPlaceholder": "e.g. What didn't meet your expectations?",
       "followUpOptions": "Answer options",
       "allowFreeText": "Allow free text",
-      "neutralNote": "Neutral scores don't trigger a follow-up."
+      "neutralNote": "Neutral scores don't trigger a follow-up.",
+      "lowFollowUpPlaceholder": "What didn't meet your expectations?",
+      "highFollowUpPlaceholder": "What did you like most?",
+      "newOption": "New option...",
+      "allowOptionsToggle": "Options"
     },
     "ai": {
       "generate": "Generate with AI",
@@ -254,7 +290,14 @@
       "customHours": "Duration in hours",
       "duplicateMessage": "Duplicate message"
     },
-    "planLimit": "Upgrade to Pro to publish more forms"
+    "planLimit": "Upgrade to Pro to publish more forms",
+    "defaultQuestion": {
+      "stars": "How would you rate the service quality?",
+      "emoji": "How was your experience?",
+      "choice": "What did you like most?",
+      "text": "Any comments or suggestions?",
+      "textPlaceholder": "Tell us what could be improved..."
+    }
   },
   "qrCodes": {
     "title": "QR Codes",
@@ -346,6 +389,10 @@
       "responseLimitReached": "This merchant has reached their monthly limit.",
       "aiRemaining": "{used}/{limit} generations remaining",
       "aiLimitReached": "AI generation limit reached. Upgrade to Pro for unlimited."
+    },
+    "authProvider": {
+      "emailPassword": "Email / Password",
+      "googleOAuth": "Google OAuth"
     }
   },
   "themes": {
@@ -452,6 +499,14 @@
       "sage": "Sage",
       "lavender": "Lavender",
       "graphite": "Graphite"
+    },
+    "preview": {
+      "sampleTitle": "Preview",
+      "q1Label": "Overall, how would you rate your experience?",
+      "q2Label": "What did you like most?",
+      "q2OptionService": "Service",
+      "q2OptionProducts": "Products",
+      "q2OptionAtmosphere": "Atmosphere"
     }
   },
   "pricing": {
@@ -610,10 +665,10 @@
     "chat": {
       "badge": "FeedScan AI",
       "formCreated": "I've created a {count}-question form based on your criteria. Here's what I prepared:",
-      "questionStar": "{index}. \u2b50 {label} (stars 1-5)",
-      "questionEmoji": "{index}. \ud83d\ude0a {label} (emoji {levels} levels)",
-      "questionChoice": "{index}. \u2611\ufe0f {label} (multiple choice)",
-      "questionText": "{index}. \ud83d\udcac {label}",
+      "questionStar": "{index}. ⭐ {label} (stars 1-5)",
+      "questionEmoji": "{index}. 😊 {label} (emoji {levels} levels)",
+      "questionChoice": "{index}. ☑️ {label} (multiple choice)",
+      "questionText": "{index}. 💬 {label}",
       "branchingNote": "I also added automatic follow-up questions for low and high scores.\nWant to change anything?",
       "placeholder": "Ask for a modification...",
       "iteratePlaceholder": "Ask the assistant to refine the form…",
@@ -624,7 +679,7 @@
         "changeOrder": "Change the order",
         "looksGreat": "Looks great!"
       },
-      "validated": "Form ready \u2014 {count} questions with conditional follow-up",
+      "validated": "Form ready — {count} questions with conditional follow-up",
       "applyToBuilder": "Apply to builder",
       "translationsGenerated": "Translations generated! Please review before publishing.",
       "limitReached": "You've reached the 3 AI generation limit. Upgrade to Pro for unlimited generations.",
@@ -700,6 +755,18 @@
       "privacy": "Privacy",
       "terms": "Terms",
       "contact": "Contact"
+    },
+    "metadata": {
+      "title": "FeedScan - Collect Feedback with QR Codes",
+      "description": "Create smart feedback forms and collect responses via QR codes. Powered by AI.",
+      "privacyTitle": "Privacy Policy — FeedScan",
+      "termsTitle": "Terms of Service — FeedScan"
+    }
+  },
+  "demo": {
+    "banner": {
+      "mode": "Demo mode",
+      "expires": "this account expires in {hours}h. Data is cleared after expiry."
     }
   }
 }

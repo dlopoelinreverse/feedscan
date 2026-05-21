@@ -1,3 +1,4 @@
+import { getTranslations } from "next-intl/server";
 import { prisma } from "@/lib/prisma";
 import {
   calculateAverageScore,
@@ -32,13 +33,14 @@ export async function FormStats({
   formId: string;
   period: number;
 }) {
+  const t = await getTranslations("dashboard");
   const form = await prisma.form.findFirst({
     where: { id: formId, userId },
     include: {
       questions: { include: { followUpRules: true }, orderBy: { order: "asc" } },
     },
   });
-  if (!form) return <p className="text-muted-foreground">Formulaire introuvable.</p>;
+  if (!form) return <p className="text-muted-foreground">{t("formNotFound")}</p>;
 
   const responses = await getResponsesByPeriod(form.id, period);
   const prevResponses = await getPreviousPeriodResponses(form.id, period);
@@ -111,16 +113,16 @@ export async function FormStats({
 
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
         <MetricCard
-          title="Réponses totales"
+          title={t("metrics.totalResponses")}
           value={totalCurrent}
           delta={
             totalCurrent > 0 || totalPrevious > 0
-              ? { ...responsesDelta, label: "vs période précédente" }
+              ? { ...responsesDelta, label: t("metrics.vsLastPeriod") }
               : null
           }
         />
         <MetricCard
-          title="Score moyen"
+          title={t("metrics.averageScore")}
           value={scoreCurrent > 0 ? `${scoreCurrent.toFixed(1)} / 5` : "—"}
           delta={
             scoreCurrent > 0 && scorePrevious > 0
@@ -132,18 +134,18 @@ export async function FormStats({
               : null
           }
         />
-        <MetricCard title="Taux de complétion" value={`${completionRate}%`} />
+        <MetricCard title={t("metrics.completionRate")} value={`${completionRate}%`} />
       </div>
 
       <div className="rounded-lg border border-border bg-card p-4 sm:p-6">
         <h3 className="text-sm font-semibold mb-4">
-          Tendance des réponses ({period} jours)
+          {t("charts.responseTrendWithDays", { days: period })}
         </h3>
         <TrendChart
           data={trendData}
-          currentLabel="Ce mois"
-          previousLabel="Période précédente"
-          emptyMessage="Pas encore de données"
+          currentLabel={t("charts.thisMonth")}
+          previousLabel={t("charts.previousPeriod")}
+          emptyMessage={t("charts.noData")}
         />
       </div>
 
@@ -185,7 +187,7 @@ export async function FormStats({
                 <h4 className="text-sm font-semibold mb-3">{label}</h4>
                 <div className="space-y-2 max-h-[200px] overflow-y-auto">
                   {texts.length === 0 ? (
-                    <p className="text-sm text-muted-foreground">Aucun commentaire</p>
+                    <p className="text-sm text-muted-foreground">{t("stats.noComments")}</p>
                   ) : (
                     texts.map((t, i) => (
                       <div key={i} className="rounded-md bg-muted/50 p-2 text-sm">
@@ -207,7 +209,7 @@ export async function FormStats({
       {/* Branching insights */}
       {branchingQuestions.length > 0 && (
         <div className="space-y-4">
-          <h3 className="text-sm font-semibold">Insights branching</h3>
+          <h3 className="text-sm font-semibold">{t("stats.branchingInsights")}</h3>
           {branchingQuestions.map((q: PrismaQuestion) => {
             const low = getTopFollowUpReasons(responses, q.id, "LOW");
             const high = getTopFollowUpReasons(responses, q.id, "HIGH");
@@ -224,7 +226,10 @@ export async function FormStats({
               <div key={q.id} className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="rounded-lg border border-border border-l-4 border-l-[#E24B4A] bg-card p-4 sm:p-5">
                   <h4 className="text-sm font-semibold">
-                    {q.labelFr || q.label} — Score bas (1-2) · {lowCount} réponses
+                    {t("stats.lowScoreHeading", {
+                      label: q.labelFr || q.label,
+                      count: lowCount,
+                    })}
                   </h4>
                   <div className="space-y-2 mt-3">
                     {low.length === 0 ? (
@@ -249,7 +254,10 @@ export async function FormStats({
                 </div>
                 <div className="rounded-lg border border-border border-l-4 border-l-[#00B894] bg-card p-4 sm:p-5">
                   <h4 className="text-sm font-semibold">
-                    {q.labelFr || q.label} — Score haut (4-5) · {highCount} réponses
+                    {t("stats.highScoreHeading", {
+                      label: q.labelFr || q.label,
+                      count: highCount,
+                    })}
                   </h4>
                   <div className="space-y-2 mt-3">
                     {high.length === 0 ? (
@@ -279,7 +287,7 @@ export async function FormStats({
       )}
 
       <div className="rounded-lg border border-border bg-card p-4 sm:p-6">
-        <h3 className="text-sm font-semibold mb-2">Dernières réponses</h3>
+        <h3 className="text-sm font-semibold mb-2">{t("recentResponses.title")}</h3>
         <RecentResponses items={recent} />
       </div>
     </div>

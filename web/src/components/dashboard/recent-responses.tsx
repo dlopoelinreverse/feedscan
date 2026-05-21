@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useTranslations } from "next-intl";
 import {
   Dialog,
   DialogContent,
@@ -23,12 +24,14 @@ export interface RecentResponseItem {
   metadata?: { device?: string; lang?: string };
 }
 
-function timeAgo(iso: string): string {
+type TimeAgoFn = (key: "seconds" | "minutes" | "hours" | "days", values: { n: number }) => string;
+
+function timeAgo(iso: string, t: TimeAgoFn): string {
   const diff = (Date.now() - new Date(iso).getTime()) / 1000;
-  if (diff < 60) return `il y a ${Math.floor(diff)}s`;
-  if (diff < 3600) return `il y a ${Math.floor(diff / 60)} min`;
-  if (diff < 86400) return `il y a ${Math.floor(diff / 3600)}h`;
-  return `il y a ${Math.floor(diff / 86400)}j`;
+  if (diff < 60) return t("seconds", { n: Math.floor(diff) });
+  if (diff < 3600) return t("minutes", { n: Math.floor(diff / 60) });
+  if (diff < 86400) return t("hours", { n: Math.floor(diff / 3600) });
+  return t("days", { n: Math.floor(diff / 86400) });
 }
 
 function StarRow({ score }: { score: number }) {
@@ -48,12 +51,14 @@ function scoreColor(score: number): string {
 }
 
 export function RecentResponses({ items }: { items: RecentResponseItem[] }) {
+  const t = useTranslations("dashboard");
+  const tTime = useTranslations("dashboard.timeAgo");
   const [open, setOpen] = useState<RecentResponseItem | null>(null);
 
   if (items.length === 0) {
     return (
       <p className="text-sm text-muted-foreground py-8 text-center">
-        Pas encore de réponses.
+        {t("recentResponses.emptyShort")}
       </p>
     );
   }
@@ -70,7 +75,7 @@ export function RecentResponses({ items }: { items: RecentResponseItem[] }) {
             >
               <div>
                 <p className="font-semibold text-sm">{item.formTitle}</p>
-                <p className="text-xs text-muted-foreground">{timeAgo(item.createdAt)}</p>
+                <p className="text-xs text-muted-foreground">{timeAgo(item.createdAt, tTime)}</p>
               </div>
               <div className="flex items-center gap-3 text-right">
                 <StarRow score={item.avgScore} />
@@ -104,7 +109,7 @@ export function RecentResponses({ items }: { items: RecentResponseItem[] }) {
                   {d.followUp && (
                     <div className="mt-1.5 text-xs bg-muted/50 rounded p-2">
                       {d.followUp.selected.length > 0 && (
-                        <p>Raisons : {d.followUp.selected.join(", ")}</p>
+                        <p>{t("recentResponses.reasonsPrefix")} {d.followUp.selected.join(", ")}</p>
                       )}
                       {d.followUp.freeText && (
                         <p className="italic mt-1">« {d.followUp.freeText} »</p>
