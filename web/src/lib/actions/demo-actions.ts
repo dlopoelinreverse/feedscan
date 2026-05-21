@@ -7,6 +7,12 @@ import { prisma } from "@/lib/prisma";
 import { createClient } from "@/lib/supabase/server";
 import { getSupabaseAdmin } from "@/lib/supabase/admin";
 import { seedDemoAccount } from "@/lib/demo/seed-demo-account";
+import {
+  isDemoStripeConfigured,
+  provisionDemoStripeSubscription,
+  teardownDemoStripe,
+  type DemoStripeProvision,
+} from "@/lib/demo/provision-stripe";
 
 const RATE_LIMIT_WINDOW_MS = 10 * 60 * 1000;
 const DEMO_TTL_HOURS = 24;
@@ -57,6 +63,37 @@ export async function createAndSignInDemoAccount(): Promise<void> {
 
   const authUserId = created.user.id;
 
+  // Provision a real (test-mode) Stripe customer + Pro subscription before we
+  // persist the DB row, so the demo lands with a fully working billing state
+  // (Stripe Customer Portal accessible, plan = Pro). Skipped silently if Stripe
+  // is not configured in this environment — the demo still works, just without
+  // a portal session.
+  let stripeProvision: DemoStripeProvision | null = null;
+  if (isDemoStripeConfigured()) {
+    try {
+      stripeProvision = await provisionDemoStripeSubscription({
+        email,
+        name: "Demo user",
+        expiresAt,
+      });
+      console.log(
+        `[demo] provisioned Stripe customer ${stripeProvision.customerId} + subscription ${stripeProvision.subscriptionId} for ${email}`
+      );
+    } catch (stripeErr) {
+      console.error("[demo] Stripe provisioning failed:", stripeErr);
+      try {
+        await admin.auth.admin.deleteUser(authUserId);
+      } catch (cleanupErr) {
+        console.error("[demo] cleanup deleteUser failed:", cleanupErr);
+      }
+      throw new Error("demo_stripe_failed");
+    }
+  } else {
+    console.warn(
+      "[demo] Stripe not configured (sk_test_ key + STRIPE_PRO_PRICE_ID required); demo will have no Stripe customer"
+    );
+  }
+
   try {
     await prisma.$transaction(
       async (tx) => {
@@ -70,6 +107,9 @@ export async function createAndSignInDemoAccount(): Promise<void> {
             plan: "PRO",
             isDemo: true,
             expiresAt,
+            stripeCustomerId: stripeProvision?.customerId ?? null,
+            stripeSubscriptionId: stripeProvision?.subscriptionId ?? null,
+            stripeCurrentPeriodEnd: stripeProvision?.currentPeriodEnd ?? null,
           },
         });
         await seedDemoAccount(authUserId, tx);
@@ -82,6 +122,13 @@ export async function createAndSignInDemoAccount(): Promise<void> {
       await admin.auth.admin.deleteUser(authUserId);
     } catch (cleanupErr) {
       console.error("[demo] cleanup deleteUser failed:", cleanupErr);
+    }
+    if (stripeProvision) {
+      await teardownDemoStripe({
+        stripeCustomerId: stripeProvision.customerId,
+        stripeSubscriptionId: stripeProvision.subscriptionId,
+        userIdForLogs: authUserId,
+      });
     }
     throw new Error("demo_seed_failed");
   }

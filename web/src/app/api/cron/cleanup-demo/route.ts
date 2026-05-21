@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { getSupabaseAdmin } from "@/lib/supabase/admin";
+import { teardownDemoStripe } from "@/lib/demo/provision-stripe";
 
 export const dynamic = "force-dynamic";
 
@@ -21,13 +22,26 @@ export async function GET(request: Request) {
       isDemo: true,
       expiresAt: { lt: new Date() },
     },
-    select: { id: true, email: true },
+    select: {
+      id: true,
+      email: true,
+      stripeCustomerId: true,
+      stripeSubscriptionId: true,
+    },
   });
 
   const admin = getSupabaseAdmin();
   let deleted = 0;
   for (const user of expired) {
     try {
+      // Tear down Stripe first. Idempotent — failures are logged but never
+      // block DB cleanup (the cron will retry the user otherwise).
+      await teardownDemoStripe({
+        stripeCustomerId: user.stripeCustomerId,
+        stripeSubscriptionId: user.stripeSubscriptionId,
+        userIdForLogs: user.id,
+      });
+
       const { error: authErr } = await admin.auth.admin.deleteUser(user.id);
       if (authErr && !/not found/i.test(authErr.message)) {
         console.error(
