@@ -163,6 +163,7 @@ export function useAiAssistant({
     isGenerating: false,
     isSending: false,
     isAnalyzing: false,
+    isHydrating: Boolean(formId),
     error: null,
   }));
 
@@ -186,6 +187,12 @@ export function useAiAssistant({
     const fId = formIdRef.current;
     if (!fId) return;
     let cancelled = false;
+    const finish = () => {
+      if (cancelled) return;
+      setState((prev) =>
+        prev.isHydrating ? { ...prev, isHydrating: false } : prev
+      );
+    };
     (async () => {
       try {
         const res = await fetch(
@@ -241,10 +248,14 @@ export function useAiAssistant({
               suggestions: m.suggestions ?? undefined,
             })),
             currentForm: generated,
+            isHydrating: false,
           };
         });
+        return;
       } catch {
         // hydration failure is non-fatal
+      } finally {
+        finish();
       }
     })();
     return () => {

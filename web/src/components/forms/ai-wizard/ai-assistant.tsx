@@ -50,6 +50,17 @@ export function AiAssistant({
     validate,
   } = assistant;
 
+  if (state.isHydrating) {
+    return (
+      <div className="flex-1 flex flex-col items-center justify-center px-6 py-12">
+        <div className="w-10 h-10 border-4 border-[#EAE6FD] border-t-[#6C5CE7] rounded-full animate-spin mb-6" />
+        <p className="text-sm text-muted-foreground animate-pulse">
+          {t("chat.restoring")}
+        </p>
+      </div>
+    );
+  }
+
   const inWizard = state.phase === "wizard" || state.phase === "angles";
 
   if (inWizard) {
@@ -645,7 +656,11 @@ function ChatPanel({
               value={input}
               onChange={(e) => setInput(e.target.value)}
               onKeyDown={handleKeyDown}
-              placeholder={t("chat.placeholder")}
+              placeholder={
+                state.currentForm
+                  ? t("chat.iteratePlaceholder")
+                  : t("chat.placeholder")
+              }
               disabled={state.isSending}
               className="flex-1"
             />

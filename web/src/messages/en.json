@@ -616,6 +616,8 @@
       "questionText": "{index}. \ud83d\udcac {label}",
       "branchingNote": "I also added automatic follow-up questions for low and high scores.\nWant to change anything?",
       "placeholder": "Ask for a modification...",
+      "iteratePlaceholder": "Ask the assistant to refine the form…",
+      "restoring": "Restoring conversation…",
       "send": "Send",
       "suggestions": {
         "addQuestion": "Add a question",

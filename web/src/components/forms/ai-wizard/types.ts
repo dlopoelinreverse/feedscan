@@ -31,5 +31,6 @@ export interface AiAssistantState {
   isGenerating: boolean;
   isSending: boolean;
   isAnalyzing: boolean;
+  isHydrating: boolean;
   error: string | null;
 }
