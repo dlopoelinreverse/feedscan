@@ -162,23 +162,36 @@ export function defaultFollowUpRules(
   return [];
 }
 
-/** Returns smart default values for a brand new question of the given type. */
-export function defaultQuestionLabel(type: QuestionType): string {
+/**
+ * Returns smart default values for a brand new question of the given type.
+ * The translator must be scoped to `forms.defaultQuestion`.
+ */
+export type DefaultQuestionTranslator = (
+  key: "stars" | "emoji" | "choice" | "text" | "textPlaceholder"
+) => string;
+
+export function defaultQuestionLabel(
+  type: QuestionType,
+  t: DefaultQuestionTranslator
+): string {
   switch (type) {
     case "STARS":
-      return "Comment \u00e9valuez-vous la qualit\u00e9 du service ?";
+      return t("stars");
     case "EMOJI":
-      return "Comment \u00e9tait votre exp\u00e9rience ?";
+      return t("emoji");
     case "CHOICE":
-      return "Qu'est-ce qui vous a le plus plu ?";
+      return t("choice");
     case "TEXT":
-      return "Un commentaire ou une suggestion ?";
+      return t("text");
   }
 }
 
-export function defaultQuestionPlaceholder(type: QuestionType): string {
+export function defaultQuestionPlaceholder(
+  type: QuestionType,
+  t: DefaultQuestionTranslator
+): string {
   if (type === "TEXT") {
-    return "Dites-nous ce qui pourrait \u00eatre am\u00e9lior\u00e9...";
+    return t("textPlaceholder");
   }
   return "";
 }

@@ -52,6 +52,7 @@ export function QuestionDialog({
   const t = useTranslations("forms");
   const tCommon = useTranslations("common");
   const tBranch = useTranslations("forms.branching");
+  const tDefault = useTranslations("forms.defaultQuestion");
 
   const [label, setLabel] = useState("");
   const [required, setRequired] = useState(true);
@@ -100,12 +101,12 @@ export function QuestionDialog({
       });
       setFollowUpRules(merged);
     } else {
-      setLabel(defaultQuestionLabel(type));
+      setLabel(defaultQuestionLabel(type, tDefault));
       setRequired(defaultRequired(type));
       setEmojiLevels(5);
       setMultipleChoice(false);
       setOptions(type === "CHOICE" ? ["", ""] : []);
-      setPlaceholder(defaultQuestionPlaceholder(type));
+      setPlaceholder(defaultQuestionPlaceholder(type, tDefault));
       setHasBranching(false);
       setFollowUpRules(defaultFollowUpRules(type));
     }
@@ -501,8 +502,8 @@ function RuleEditor({
             onChange={(e) => onChange({ followUpLabel: e.target.value })}
             placeholder={
               variant === "low"
-                ? "Qu'est-ce qui n'a pas été à la hauteur ?"
-                : "Qu'est-ce qui vous a le plus plu ?"
+                ? t("lowFollowUpPlaceholder")
+                : t("highFollowUpPlaceholder")
             }
             className="text-sm"
           />
@@ -575,7 +576,7 @@ function RuleEditor({
                       commitNewOption();
                     }
                   }}
-                  placeholder="Nouvelle option..."
+                  placeholder={t("newOption")}
                   className="flex-1 px-2 py-1 rounded-md border border-dashed border-[#6C5CE7]/50 bg-background text-base sm:text-xs outline-none focus:border-[#6C5CE7]"
                 />
                 <button
@@ -597,7 +598,7 @@ function RuleEditor({
                 checked={rule.allowOptions}
                 onCheckedChange={(v) => onChange({ allowOptions: v })}
               />
-              <span className="text-xs">Options</span>
+              <span className="text-xs">{t("allowOptionsToggle")}</span>
             </label>
             <label className="flex items-center gap-1.5 cursor-pointer">
               <Switch

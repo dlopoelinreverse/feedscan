@@ -1,6 +1,28 @@
 import { getRequestConfig } from "next-intl/server";
 import { cookies, headers } from "next/headers";
 
+const isDev = process.env.NODE_ENV !== "production";
+
+function onError(error: { code: string; message: string }) {
+  if (isDev) {
+    // In development, surface missing/invalid i18n keys to the console so they
+    // are caught during local work rather than silently falling back.
+    // eslint-disable-next-line no-console
+    console.error(`[i18n] ${error.code}: ${error.message}`);
+  }
+}
+
+function getMessageFallback({
+  namespace,
+  key,
+}: {
+  namespace?: string;
+  key: string;
+}) {
+  const path = [namespace, key].filter(Boolean).join(".");
+  return isDev ? `⚠️ MISSING(${path})` : path;
+}
+
 export default getRequestConfig(async () => {
   // 1. Check NEXT_LOCALE cookie
   const cookieStore = await cookies();
@@ -16,5 +38,7 @@ export default getRequestConfig(async () => {
   return {
     locale,
     messages: (await import(`@/messages/${locale}.json`)).default,
+    onError,
+    getMessageFallback,
   };
 });

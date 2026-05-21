@@ -33,38 +33,56 @@ interface ThemesClientProps {
   initialThemes: Theme[];
 }
 
-const SAMPLE_FORM: FormBuilderState = {
-  title: "Aperçu",
-  description: "",
-  status: "DRAFT",
-  rateLimitMode: "PER_24H",
-  questions: [
-    {
-      clientId: "q1",
-      type: "STARS",
-      label: "Globalement, comment évaluez-vous votre expérience ?",
-      options: [],
-      order: 0,
-      required: true,
-      hasBranching: false,
-      followUpRules: [],
-    },
-    {
-      clientId: "q2",
-      type: "CHOICE",
-      label: "Qu'avez-vous préféré ?",
-      options: ["Le service", "Les produits", "L'ambiance"],
-      order: 1,
-      required: false,
-      hasBranching: false,
-      followUpRules: [],
-    },
-  ],
-};
+type ThemesPreviewTranslator = (
+  key:
+    | "sampleTitle"
+    | "q1Label"
+    | "q2Label"
+    | "q2OptionService"
+    | "q2OptionProducts"
+    | "q2OptionAtmosphere"
+) => string;
+
+function buildSampleForm(tPreview: ThemesPreviewTranslator): FormBuilderState {
+  return {
+    title: tPreview("sampleTitle"),
+    description: "",
+    status: "DRAFT",
+    rateLimitMode: "PER_24H",
+    questions: [
+      {
+        clientId: "q1",
+        type: "STARS",
+        label: tPreview("q1Label"),
+        options: [],
+        order: 0,
+        required: true,
+        hasBranching: false,
+        followUpRules: [],
+      },
+      {
+        clientId: "q2",
+        type: "CHOICE",
+        label: tPreview("q2Label"),
+        options: [
+          tPreview("q2OptionService"),
+          tPreview("q2OptionProducts"),
+          tPreview("q2OptionAtmosphere"),
+        ],
+        order: 1,
+        required: false,
+        hasBranching: false,
+        followUpRules: [],
+      },
+    ],
+  };
+}
 
 export function ThemesClient({ initialThemes }: ThemesClientProps) {
   const t = useTranslations("themes");
   const tCommon = useTranslations("common");
+  const tPreview = useTranslations("themes.preview");
+  const sampleForm = buildSampleForm(tPreview);
   const router = useRouter();
 
   const [themes, setThemes] = useState<Theme[]>(initialThemes);
@@ -311,7 +329,7 @@ export function ThemesClient({ initialThemes }: ThemesClientProps) {
           title={t("editor.editTitle")}
           initialName={editingTheme.name}
           initialConfig={editingTheme.config}
-          previewForm={SAMPLE_FORM}
+          previewForm={sampleForm}
           onSave={handleSaveEdit}
           saving={saving}
         />

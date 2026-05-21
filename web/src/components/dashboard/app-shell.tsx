@@ -19,6 +19,7 @@ interface AppShellProps {
 
 export function AppShell({ userEmail, plan, children }: AppShellProps) {
   const t = useTranslations("nav");
+  const tCommon = useTranslations("common");
   const pathname = usePathname();
   const [mobileOpen, setMobileOpen] = useState(false);
 
@@ -70,7 +71,7 @@ export function AppShell({ userEmail, plan, children }: AppShellProps) {
           <a href={getRootUrl()} className="text-lg font-bold text-primary">FeedScan</a>
           <Sheet open={mobileOpen} onOpenChange={setMobileOpen}>
             <SheetTrigger asChild><button className="p-2 rounded-md hover:bg-muted transition-colors"><MenuIcon className="h-5 w-5" /></button></SheetTrigger>
-            <SheetContent side="left" className="w-[260px] p-0 flex flex-col"><SheetTitle className="sr-only">Navigation</SheetTitle>{navContent}</SheetContent>
+            <SheetContent side="left" className="w-[260px] p-0 flex flex-col"><SheetTitle className="sr-only">{tCommon("navigation")}</SheetTitle>{navContent}</SheetContent>
           </Sheet>
         </header>
         <main className="flex-1 min-h-0 overflow-y-auto">{children}</main>

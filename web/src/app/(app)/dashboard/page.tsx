@@ -1,4 +1,5 @@
 import { redirect } from "next/navigation";
+import { getTranslations } from "next-intl/server";
 import { createClient } from "@/lib/supabase/server";
 import { prisma } from "@/lib/prisma";
 import { getRemainingResponses } from "@/lib/plan-limits";
@@ -11,6 +12,7 @@ interface DashboardPageProps {
 }
 
 export default async function DashboardPage({ searchParams }: DashboardPageProps) {
+  const t = await getTranslations("dashboard");
   const supabase = await createClient();
   const {
     data: { user },
@@ -38,7 +40,7 @@ export default async function DashboardPage({ searchParams }: DashboardPageProps
       {showBanner && (
         <FreePlanBanner used={responseUsage.used} limit={responseUsage.limit} />
       )}
-      <AnalyticsView userId={user.id} period={period} title="Dashboard" />
+      <AnalyticsView userId={user.id} period={period} title={t("title")} />
     </div>
   );
 }

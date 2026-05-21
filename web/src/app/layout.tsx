@@ -1,17 +1,19 @@
 import type { Metadata, Viewport } from "next";
 import { Inter } from "next/font/google";
-import { NextIntlClientProvider } from "next-intl";
-import { getMessages, getLocale } from "next-intl/server";
+import { getMessages, getLocale, getTranslations } from "next-intl/server";
+import { IntlProvider } from "@/i18n/IntlProvider";
 import { Toaster } from "@/components/ui/toaster";
 import "./globals.css";
 
 const inter = Inter({ subsets: ["latin"] });
 
-export const metadata: Metadata = {
-  title: "FeedScan - Collect Feedback with QR Codes",
-  description:
-    "Create smart feedback forms and collect responses via QR codes. Powered by AI.",
-};
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await getTranslations("landing.metadata");
+  return {
+    title: t("title"),
+    description: t("description"),
+  };
+}
 
 export const viewport: Viewport = {
   width: "device-width",
@@ -29,10 +31,10 @@ export default async function RootLayout({
   return (
     <html lang={locale}>
       <body className={inter.className}>
-        <NextIntlClientProvider messages={messages}>
+        <IntlProvider locale={locale} messages={messages}>
           {children}
           <Toaster />
-        </NextIntlClientProvider>
+        </IntlProvider>
       </body>
     </html>
   );
