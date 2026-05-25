@@ -1,0 +1,29 @@
+{
+  "titleFr": "Your feedback on your visit",
+  "titleEn": "Your feedback on your visit",
+  "descriptionFr": "Thanks for taking a minute to help us improve your experience.",
+  "descriptionEn": "Thanks for taking a minute to help us improve your experience.",
+  "questions": [
+    {
+      "type": "stars",
+      "labelFr": "How would you rate your overall experience?",
+      "labelEn": "How would you rate your overall experience?",
+      "required": true
+    },
+    {
+      "type": "emoji",
+      "labelFr": "How was the quality of our products?",
+      "labelEn": "How was the quality of our products?",
+      "required": true,
+      "emojiLevels": 5
+    },
+    {
+      "type": "choice",
+      "labelFr": "Will you come back?",
+      "labelEn": "Will you come back?",
+      "optionsFr": ["Definitely", "Maybe", "No"],
+      "optionsEn": ["Definitely", "Maybe", "No"],
+      "required": true
+    }
+  ]
+}

@@ -1,0 +1,56 @@
+{
+  "formId": "demo-form-id",
+  "titleFr": "Votre avis sur votre visite",
+  "titleEn": "Your feedback on your visit",
+  "descriptionFr": "Merci de prendre une minute pour nous aider à améliorer votre expérience.",
+  "descriptionEn": "Thanks for taking a minute to help us improve your experience.",
+  "questions": [
+    {
+      "type": "stars",
+      "labelFr": "Comment évaluez-vous votre expérience globale ?",
+      "labelEn": "How would you rate your overall experience?",
+      "required": true,
+      "branching": {
+        "low": {
+          "triggerMin": 1,
+          "triggerMax": 2,
+          "followUpLabelFr": "Qu'est-ce qui vous a déçu ?",
+          "followUpLabelEn": "What disappointed you?",
+          "followUpOptionsFr": ["Le service", "La qualité", "L'attente", "L'ambiance"],
+          "followUpOptionsEn": ["Service", "Quality", "Wait time", "Atmosphere"],
+          "allowFreeText": true
+        },
+        "high": {
+          "triggerMin": 4,
+          "triggerMax": 5,
+          "followUpLabelFr": "Qu'avez-vous particulièrement apprécié ?",
+          "followUpLabelEn": "What did you particularly enjoy?",
+          "followUpOptionsFr": ["Le service", "La qualité", "L'ambiance", "Le rapport qualité-prix"],
+          "followUpOptionsEn": ["Service", "Quality", "Atmosphere", "Value"],
+          "allowFreeText": true
+        }
+      }
+    },
+    {
+      "type": "emoji",
+      "labelFr": "Comment était la qualité de nos produits ?",
+      "labelEn": "How was the quality of our products?",
+      "required": true,
+      "emojiLevels": 5
+    },
+    {
+      "type": "choice",
+      "labelFr": "Reviendrez-vous nous voir ?",
+      "labelEn": "Will you come back?",
+      "optionsFr": ["Sûrement", "Peut-être", "Non"],
+      "optionsEn": ["Definitely", "Maybe", "No"],
+      "required": true
+    },
+    {
+      "type": "text",
+      "labelFr": "Un dernier commentaire à nous laisser ?",
+      "labelEn": "Any last comment for us?",
+      "required": false
+    }
+  ]
+}

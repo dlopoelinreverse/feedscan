@@ -1,0 +1,55 @@
+{
+  "formId": "demo-form-id",
+  "conversationId": "demo-conversation-id",
+  "angles": [
+    {
+      "id": "quality",
+      "labelFr": "Qualité des produits",
+      "labelEn": "Product quality",
+      "rationaleFr": "Comprendre comment les clients perçoivent la fraîcheur et la qualité de vos plats.",
+      "rationaleEn": "Understand how customers perceive the freshness and quality of your dishes."
+    },
+    {
+      "id": "service",
+      "labelFr": "Qualité du service",
+      "labelEn": "Service quality",
+      "rationaleFr": "Évaluer l'accueil et la rapidité du personnel pendant le service.",
+      "rationaleEn": "Assess the welcome and speed of staff during service."
+    },
+    {
+      "id": "ambiance",
+      "labelFr": "Ambiance et cadre",
+      "labelEn": "Atmosphere",
+      "rationaleFr": "Savoir si l'atmosphère et le décor correspondent à l'expérience que vous voulez offrir.",
+      "rationaleEn": "Know whether the atmosphere and decor match the experience you want to deliver."
+    },
+    {
+      "id": "value",
+      "labelFr": "Rapport qualité-prix",
+      "labelEn": "Value for money",
+      "rationaleFr": "Mesurer si les clients estiment que le prix correspond à ce qu'ils reçoivent.",
+      "rationaleEn": "Measure whether customers feel the price matches what they receive."
+    },
+    {
+      "id": "menu",
+      "labelFr": "Choix du menu",
+      "labelEn": "Menu variety",
+      "rationaleFr": "Identifier si l'offre actuelle répond aux attentes et envies de votre clientèle.",
+      "rationaleEn": "Identify whether the current offering meets your customers' expectations and cravings."
+    },
+    {
+      "id": "loyalty",
+      "labelFr": "Intention de revenir",
+      "labelEn": "Intent to return",
+      "rationaleFr": "Indicateur le plus fort de la satisfaction réelle et de la fidélité.",
+      "rationaleEn": "The strongest indicator of real satisfaction and loyalty."
+    },
+    {
+      "id": "recommendation",
+      "labelFr": "Recommandation",
+      "labelEn": "Recommendation",
+      "rationaleFr": "Mesurer le bouche-à-oreille potentiel autour de votre établissement.",
+      "rationaleEn": "Measure potential word-of-mouth around your venue."
+    }
+  ]
+}
