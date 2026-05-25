@@ -1,0 +1,37 @@
+{
+  "message": "J'ai ajusté votre formulaire selon votre demande. Voici la nouvelle version — dites-moi si vous voulez aller plus loin.",
+  "suggestions": [
+    "Ajouter une question sur le rapport qualité-prix",
+    "Rendre la question sur l'ambiance optionnelle",
+    "Traduire le formulaire en anglais"
+  ],
+  "form": {
+    "titleFr": "Votre avis sur votre visite",
+    "titleEn": "Your feedback on your visit",
+    "descriptionFr": "Merci de prendre une minute pour nous aider à améliorer votre expérience.",
+    "descriptionEn": "Thanks for taking a minute to help us improve your experience.",
+    "questions": [
+      {
+        "type": "stars",
+        "labelFr": "Comment évaluez-vous votre expérience globale ?",
+        "labelEn": "How would you rate your overall experience?",
+        "required": true
+      },
+      {
+        "type": "emoji",
+        "labelFr": "Comment était la qualité de nos produits ?",
+        "labelEn": "How was the quality of our products?",
+        "required": true,
+        "emojiLevels": 5
+      },
+      {
+        "type": "choice",
+        "labelFr": "Reviendrez-vous nous voir ?",
+        "labelEn": "Will you come back?",
+        "optionsFr": ["Sûrement", "Peut-être", "Non"],
+        "optionsEn": ["Definitely", "Maybe", "No"],
+        "required": true
+      }
+    ]
+  }
+}

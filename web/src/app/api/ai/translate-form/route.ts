@@ -6,8 +6,12 @@ import {
   aiFormResponseSchema,
 } from "@/lib/ai/schemas";
 import { buildTranslateSystemPrompt } from "@/lib/ai/prompts";
+import { aiGuard } from "@/lib/ai/guard";
 
 export async function POST(request: Request) {
+  const guard = await aiGuard(request, "translate-form");
+  if (!guard.allowed) return guard.response;
+
   const supabase = await createClient();
   const {
     data: { user },
